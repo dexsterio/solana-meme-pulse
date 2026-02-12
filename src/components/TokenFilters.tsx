@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Filter, LayoutList, LayoutGrid } from 'lucide-react';
+import { Filter, LayoutList, LayoutGrid, Clock, Flame, Trophy, TrendingUp, Sparkles, User, Rocket, Megaphone, Settings, ChevronDown } from 'lucide-react';
 
 export type TimeFilter = '5m' | '1h' | '6h' | '24h';
 export type Category = 'trending' | 'top' | 'gainers' | 'new';
@@ -26,118 +26,173 @@ const TokenFilters = ({
   const [showFilters, setShowFilters] = useState(false);
 
   const timeOptions: TimeFilter[] = ['5m', '1h', '6h', '24h'];
-  const categories: { key: Category; label: string }[] = [
-    { key: 'trending', label: 'Trending' },
-    { key: 'top', label: 'Top' },
-    { key: 'gainers', label: 'Gainers' },
-    { key: 'new', label: 'New Pairs' },
-  ];
+
+  const timeLabel = {
+    '5m': 'Last 5 minutes',
+    '1h': 'Last hour',
+    '6h': 'Last 6 hours',
+    '24h': 'Last 24 hours',
+  }[timeFilter];
 
   return (
-    <div className="px-4 py-2 border-b border-border space-y-2">
-      <div className="flex items-center gap-2 flex-wrap">
-        {/* Time filters */}
-        <div className="flex items-center bg-secondary rounded-md p-0.5">
-          {timeOptions.map((t) => (
-            <button
-              key={t}
-              onClick={() => setTimeFilter(t)}
-              className={`px-3 py-1.5 text-xs font-medium rounded-sm transition-colors ${
-                timeFilter === t
-                  ? 'bg-primary text-primary-foreground'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              {t.toUpperCase()}
-            </button>
-          ))}
+    <div className="px-3 py-1.5 border-b border-border space-y-2">
+      <div className="flex items-center gap-1.5 flex-wrap">
+        {/* Time period pill - green */}
+        <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-profit/15 text-profit text-[11px] font-medium">
+          <Clock className="w-3 h-3" />
+          <span>{timeLabel}</span>
         </div>
 
-        {/* Category tabs */}
-        <div className="flex items-center gap-1">
-          {categories.map((c) => (
-            <button
-              key={c.key}
-              onClick={() => setCategory(c.key)}
-              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
-                category === c.key
-                  ? 'bg-accent text-foreground'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              {c.label}
-            </button>
-          ))}
+        {/* Trending pill with embedded time toggles */}
+        <div className="flex items-center rounded-full overflow-hidden">
+          <button
+            onClick={() => setCategory('trending')}
+            className={`flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium transition-colors ${
+              category === 'trending'
+                ? 'bg-orange-500/20 text-orange-400'
+                : 'bg-secondary text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            <Flame className="w-3 h-3" />
+            Trending
+          </button>
+          <div className="flex items-center bg-secondary">
+            {timeOptions.map((t) => (
+              <button
+                key={t}
+                onClick={() => setTimeFilter(t)}
+                className={`px-2 py-1 text-[10px] font-medium transition-colors ${
+                  timeFilter === t
+                    ? 'text-foreground bg-accent'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                {t.toUpperCase()}
+              </button>
+            ))}
+          </div>
         </div>
+
+        {/* Category buttons */}
+        <button
+          onClick={() => setCategory('top')}
+          className={`flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-medium transition-colors ${
+            category === 'top' ? 'bg-accent text-foreground' : 'text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          <Trophy className="w-3 h-3" />
+          Top
+        </button>
+        <button
+          onClick={() => setCategory('gainers')}
+          className={`flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-medium transition-colors ${
+            category === 'gainers' ? 'bg-accent text-foreground' : 'text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          <TrendingUp className="w-3 h-3" />
+          Gainers
+        </button>
+        <button
+          onClick={() => setCategory('new')}
+          className={`flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-medium transition-colors ${
+            category === 'new' ? 'bg-accent text-foreground' : 'text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          <Sparkles className="w-3 h-3" />
+          New Pairs
+        </button>
+
+        {/* Decorative buttons */}
+        <button className="flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-medium text-muted-foreground hover:text-foreground">
+          <User className="w-3 h-3" />
+          Profile
+        </button>
+        <button className="flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-medium text-muted-foreground hover:text-foreground">
+          <Rocket className="w-3 h-3" />
+          Boosted
+        </button>
+        <button className="flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-medium text-muted-foreground hover:text-foreground">
+          <Megaphone className="w-3 h-3" />
+          Ads
+        </button>
 
         <div className="flex-1" />
 
-        {/* Rank by */}
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-muted-foreground">Rank by:</span>
-          <select
-            value={rankBy}
-            onChange={(e) => setRankBy(e.target.value as RankBy)}
-            className="bg-secondary text-foreground text-xs rounded-md border border-border px-2 py-1.5 outline-none"
-          >
-            <option value="trending">Trending {timeFilter.toUpperCase()}</option>
-            <option value="volume">Volume</option>
-            <option value="priceChange">Price Change</option>
-            <option value="txns">Transactions</option>
-            <option value="mcap">Market Cap</option>
-          </select>
+        {/* Rank by dropdown */}
+        <div className="flex items-center gap-1">
+          <span className="text-[11px] text-muted-foreground">Rank by:</span>
+          <div className="relative">
+            <select
+              value={rankBy}
+              onChange={(e) => setRankBy(e.target.value as RankBy)}
+              className="appearance-none bg-secondary text-foreground text-[11px] rounded border border-border px-2 py-1 pr-6 outline-none cursor-pointer"
+            >
+              <option value="trending">Trending {timeFilter.toUpperCase()}</option>
+              <option value="volume">Volume</option>
+              <option value="priceChange">Price Change</option>
+              <option value="txns">Transactions</option>
+              <option value="mcap">Market Cap</option>
+            </select>
+            <ChevronDown className="w-3 h-3 absolute right-1.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+          </div>
         </div>
 
-        {/* Filter button */}
+        {/* Filters */}
         <button
           onClick={() => setShowFilters(!showFilters)}
-          className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+          className={`flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium rounded transition-colors ${
             showFilters ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:text-foreground'
           }`}
         >
-          <Filter className="w-3.5 h-3.5" />
+          <Filter className="w-3 h-3" />
           Filters
         </button>
 
+        {/* Customize */}
+        <button className="flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium rounded bg-secondary text-muted-foreground hover:text-foreground">
+          <Settings className="w-3 h-3" />
+          Customize
+        </button>
+
         {/* View toggle */}
-        <div className="flex items-center bg-secondary rounded-md p-0.5">
+        <div className="flex items-center bg-secondary rounded p-0.5">
           <button
             onClick={() => setViewMode('list')}
-            className={`p-1.5 rounded-sm transition-colors ${
+            className={`p-1 rounded-sm transition-colors ${
               viewMode === 'list' ? 'bg-accent text-foreground' : 'text-muted-foreground'
             }`}
           >
-            <LayoutList className="w-4 h-4" />
+            <LayoutList className="w-3.5 h-3.5" />
           </button>
           <button
             onClick={() => setViewMode('grid')}
-            className={`p-1.5 rounded-sm transition-colors ${
+            className={`p-1 rounded-sm transition-colors ${
               viewMode === 'grid' ? 'bg-accent text-foreground' : 'text-muted-foreground'
             }`}
           >
-            <LayoutGrid className="w-4 h-4" />
+            <LayoutGrid className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
 
       {/* Advanced filters panel */}
       {showFilters && (
-        <div className="flex items-center gap-4 p-3 bg-secondary rounded-md text-xs">
+        <div className="flex items-center gap-4 p-2.5 bg-secondary rounded text-xs">
           <div className="flex items-center gap-2">
             <span className="text-muted-foreground">Min Volume:</span>
-            <input type="text" placeholder="$0" className="w-20 bg-background border border-border rounded px-2 py-1 text-foreground" />
+            <input type="text" placeholder="$0" className="w-20 bg-background border border-border rounded px-2 py-1 text-foreground text-[11px]" />
           </div>
           <div className="flex items-center gap-2">
             <span className="text-muted-foreground">Min Liquidity:</span>
-            <input type="text" placeholder="$0" className="w-20 bg-background border border-border rounded px-2 py-1 text-foreground" />
+            <input type="text" placeholder="$0" className="w-20 bg-background border border-border rounded px-2 py-1 text-foreground text-[11px]" />
           </div>
           <div className="flex items-center gap-2">
             <span className="text-muted-foreground">Min MCAP:</span>
-            <input type="text" placeholder="$0" className="w-20 bg-background border border-border rounded px-2 py-1 text-foreground" />
+            <input type="text" placeholder="$0" className="w-20 bg-background border border-border rounded px-2 py-1 text-foreground text-[11px]" />
           </div>
           <div className="flex items-center gap-2">
             <span className="text-muted-foreground">Max Age:</span>
-            <input type="text" placeholder="Any" className="w-20 bg-background border border-border rounded px-2 py-1 text-foreground" />
+            <input type="text" placeholder="Any" className="w-20 bg-background border border-border rounded px-2 py-1 text-foreground text-[11px]" />
           </div>
         </div>
       )}

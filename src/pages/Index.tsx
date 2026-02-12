@@ -1,6 +1,5 @@
 import { useState, useMemo } from 'react';
 import StatsBar from '@/components/StatsBar';
-import SearchBar from '@/components/SearchBar';
 import TokenFilters, { TimeFilter, Category, RankBy, ViewMode } from '@/components/TokenFilters';
 import TokenTable from '@/components/TokenTable';
 import TokenGrid from '@/components/TokenGrid';
@@ -51,8 +50,7 @@ const Index = () => {
   return (
     <div className="flex flex-col h-screen bg-background">
       <TrendingBar />
-      <StatsBar />
-      <SearchBar onSearch={(addr) => console.log('Search:', addr)} />
+      <StatsBar onSearch={(addr) => console.log('Search:', addr)} />
       <TokenFilters
         timeFilter={timeFilter}
         setTimeFilter={setTimeFilter}
