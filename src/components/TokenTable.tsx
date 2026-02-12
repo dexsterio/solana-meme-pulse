@@ -7,7 +7,7 @@ interface TokenTableProps {
 }
 
 const ChangeCell = ({ value }: { value: number }) => (
-  <td className={`px-2 py-1.5 text-right font-mono text-[11px] ${value >= 0 ? 'text-profit' : 'text-loss'}`}>
+  <td className={`px-3 py-2 text-right text-[13px] ${value >= 0 ? 'text-profit' : 'text-loss'}`}>
     {Math.abs(value) >= 1000
       ? `${value.toLocaleString(undefined, { maximumFractionDigits: 0 })}%`
       : `${Math.abs(value).toFixed(2)}%`
@@ -20,27 +20,27 @@ const TokenTable = ({ tokens }: TokenTableProps) => {
 
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-[11px]">
+      <table className="w-full">
         <thead>
-          <tr className="border-b border-border text-muted-foreground">
-            <th className="px-2 py-1.5 text-left font-normal italic text-[10px]">#</th>
-            <th className="px-2 py-1.5 text-left font-normal italic text-[10px]">TOKEN</th>
-            <th className="px-2 py-1.5 text-right font-normal italic text-[10px]">
-              <span className="inline-flex items-center gap-0.5">
+          <tr className="text-muted-foreground text-[11px] uppercase tracking-wider">
+            <th className="px-3 py-2 text-left font-normal">#</th>
+            <th className="px-3 py-2 text-left font-normal">TOKEN</th>
+            <th className="px-3 py-2 text-right font-normal">
+              <span className="inline-flex items-center gap-1">
                 PRICE
-                <Info className="w-2.5 h-2.5 text-muted-foreground/50" />
+                <Info className="w-3 h-3 text-muted-foreground/40" />
               </span>
             </th>
-            <th className="px-2 py-1.5 text-right font-normal italic text-[10px]">AGE</th>
-            <th className="px-2 py-1.5 text-right font-normal italic text-[10px]">TXNS</th>
-            <th className="px-2 py-1.5 text-right font-normal italic text-[10px]">VOLUME</th>
-            <th className="px-2 py-1.5 text-right font-normal italic text-[10px]">MAKERS</th>
-            <th className="px-2 py-1.5 text-right font-normal italic text-[10px]">5M</th>
-            <th className="px-2 py-1.5 text-right font-normal italic text-[10px]">1H</th>
-            <th className="px-2 py-1.5 text-right font-normal italic text-[10px]">6H</th>
-            <th className="px-2 py-1.5 text-right font-normal italic text-[10px]">24H</th>
-            <th className="px-2 py-1.5 text-right font-normal italic text-[10px]">LIQUIDITY</th>
-            <th className="px-2 py-1.5 text-right font-normal italic text-[10px]">MCAP</th>
+            <th className="px-3 py-2 text-right font-normal">AGE</th>
+            <th className="px-3 py-2 text-right font-normal">TXNS</th>
+            <th className="px-3 py-2 text-right font-normal">VOLUME</th>
+            <th className="px-3 py-2 text-right font-normal">MAKERS</th>
+            <th className="px-3 py-2 text-right font-normal">5M</th>
+            <th className="px-3 py-2 text-right font-normal">1H</th>
+            <th className="px-3 py-2 text-right font-normal">6H</th>
+            <th className="px-3 py-2 text-right font-normal">24H</th>
+            <th className="px-3 py-2 text-right font-normal">LIQUIDITY</th>
+            <th className="px-3 py-2 text-right font-normal">MCAP</th>
           </tr>
         </thead>
         <tbody>
@@ -48,40 +48,39 @@ const TokenTable = ({ tokens }: TokenTableProps) => {
             <tr
               key={token.id}
               onClick={() => navigate(`/token/${token.id}`)}
-              className="border-b border-border/30 hover:bg-accent/40 cursor-pointer transition-colors"
+              className="border-b border-border/30 hover:bg-accent/40 cursor-pointer transition-colors text-[13px]"
             >
-              <td className="px-2 py-1.5 text-muted-foreground font-mono">#{token.rank}</td>
-              <td className="px-2 py-1.5">
+              <td className="px-3 py-2 text-muted-foreground">#{token.rank}</td>
+              <td className="px-3 py-2">
                 <div className="flex items-center gap-2">
-                  {/* Chain/DEX icons placeholder */}
                   <div className="flex items-center gap-0.5">
-                    <div className="w-4 h-4 rounded-sm bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-[8px] text-foreground font-bold">S</div>
-                    <div className="w-4 h-4 rounded-sm bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-[8px] text-foreground font-bold">R</div>
+                    <div className="w-[18px] h-[18px] rounded bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-[8px] text-foreground font-bold shrink-0">S</div>
+                    <div className="w-[18px] h-[18px] rounded bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-[8px] text-foreground font-bold shrink-0">R</div>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <span className="font-bold text-foreground text-[12px]">{token.ticker}</span>
-                    <span className="text-muted-foreground text-[11px]">/SOL</span>
-                    <span className="text-muted-foreground text-[10px] max-w-[100px] truncate">{token.name}</span>
+                    <span className="font-semibold text-foreground">{token.name}</span>
+                    <span className="text-muted-foreground text-[12px]">/SOL</span>
+                    <span className="text-muted-foreground text-[12px]">{token.ticker}</span>
                     {token.boosts && (
-                      <span className="flex items-center gap-0.5 text-[10px] text-profit">
-                        <Zap className="w-2.5 h-2.5" />
+                      <span className="flex items-center gap-0.5 text-[11px] text-profit font-medium">
+                        <Zap className="w-3 h-3" />
                         {token.boosts}
                       </span>
                     )}
                   </div>
                 </div>
               </td>
-              <td className="px-2 py-1.5 text-right font-mono text-foreground">{formatPrice(token.price)}</td>
-              <td className="px-2 py-1.5 text-right text-muted-foreground">{token.age}</td>
-              <td className="px-2 py-1.5 text-right text-foreground font-mono">{token.txns.toLocaleString()}</td>
-              <td className="px-2 py-1.5 text-right text-foreground font-mono">{formatNumber(token.volume)}</td>
-              <td className="px-2 py-1.5 text-right text-muted-foreground font-mono">{token.makers.toLocaleString()}</td>
+              <td className="px-3 py-2 text-right text-foreground">{formatPrice(token.price)}</td>
+              <td className="px-3 py-2 text-right text-muted-foreground">{token.age}</td>
+              <td className="px-3 py-2 text-right text-foreground">{token.txns.toLocaleString()}</td>
+              <td className="px-3 py-2 text-right text-foreground">{formatNumber(token.volume)}</td>
+              <td className="px-3 py-2 text-right text-muted-foreground">{token.makers.toLocaleString()}</td>
               <ChangeCell value={token.change5m} />
               <ChangeCell value={token.change1h} />
               <ChangeCell value={token.change6h} />
               <ChangeCell value={token.change24h} />
-              <td className="px-2 py-1.5 text-right text-foreground font-mono">{formatNumber(token.liquidity)}</td>
-              <td className="px-2 py-1.5 text-right text-foreground font-mono">{formatNumber(token.mcap)}</td>
+              <td className="px-3 py-2 text-right text-foreground">{formatNumber(token.liquidity)}</td>
+              <td className="px-3 py-2 text-right text-foreground">{formatNumber(token.mcap)}</td>
             </tr>
           ))}
         </tbody>
