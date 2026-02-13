@@ -19,7 +19,7 @@ const TrendingBar = ({ tokens = [] }: TrendingBarProps) => {
       <div className="flex items-center border-b border-border overflow-hidden">
         <div className="flex items-center gap-1 text-[13px] text-muted-foreground shrink-0 px-2 md:px-3 py-1.5 border-r border-border bg-[hsl(0,0%,14%)]">
           <FlameFilledIcon className="w-3.5 h-3.5" />
-          {!isMobile && <span className="font-medium">Trending</span>}
+          <span className="font-medium">{isMobile ? 'Hot' : 'Trending'}</span>
         </div>
         <div className="flex-1 px-3 py-1.5">
           <span className="text-xs text-muted-foreground">Loading trending tokens...</span>
@@ -69,7 +69,7 @@ const TrendingBar = ({ tokens = [] }: TrendingBarProps) => {
       {/* Trending label */}
       <div className="flex items-center gap-1 text-[13px] shrink-0 px-2 md:px-3 py-1.5 border-r border-border bg-[hsl(0,0%,14%)]">
         <FlameFilledIcon className="w-3.5 h-3.5" />
-        {!isMobile && <span className="font-medium text-foreground">Trending</span>}
+        <span className="font-medium text-foreground">{isMobile ? 'Hot' : 'Trending'}</span>
       </div>
 
       <div className="overflow-hidden flex-1">

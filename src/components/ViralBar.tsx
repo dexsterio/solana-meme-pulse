@@ -32,7 +32,7 @@ const ViralBar = ({ clusters, selectedCluster, onSelect, onClear, viralSortBy = 
       <div className="flex items-center gap-2 md:gap-3 px-2 md:px-4 py-2 md:py-2.5 overflow-x-auto scrollbar-hide">
         <div className="flex items-center gap-1 md:gap-1.5 text-[11px] text-muted-foreground uppercase tracking-wider shrink-0 pr-1">
           <FlameFilledIcon className="w-4 h-4" />
-          {!isMobile && <span className="font-semibold">Viral Memes</span>}
+          <span className="font-semibold">{isMobile ? 'Viral' : 'Viral Memes'}</span>
         </div>
         <div className="w-px h-5 bg-border/50 shrink-0" />
         <div className="flex items-center gap-1.5 md:gap-2">
@@ -101,7 +101,7 @@ const ViralBar = ({ clusters, selectedCluster, onSelect, onClear, viralSortBy = 
                   }`}
                 >
                   {opt.icon}
-                  {!isMobile && opt.label}
+                  <span className="hidden min-[480px]:inline">{opt.label}</span>
                 </button>
               ))}
             </div>

@@ -154,21 +154,19 @@ const Index = () => {
         ) : isLoading && tokens.length === 0 ? (
           <div className="space-y-0">
             {Array.from({ length: 15 }).map((_, i) => (
-              <div key={i} className="flex items-center gap-3 px-3 py-2.5 border-b border-border/30">
+              <div key={i} className="flex items-center gap-2 md:gap-3 px-2 md:px-3 py-2.5 border-b border-border/30">
                 <Skeleton className="w-6 h-4" />
                 <Skeleton className="w-6 h-6 rounded-full" />
-                <Skeleton className="w-24 h-4" />
+                <Skeleton className="w-20 md:w-24 h-4" />
                 <div className="flex-1" />
-                <Skeleton className="w-16 h-4" />
+                <Skeleton className="w-14 md:w-16 h-4" />
                 <Skeleton className="w-12 h-4" />
-                <Skeleton className="w-16 h-4" />
-                <Skeleton className="w-16 h-4" />
-                <Skeleton className="w-12 h-4" />
-                <Skeleton className="w-12 h-4" />
-                <Skeleton className="w-12 h-4" />
-                <Skeleton className="w-12 h-4" />
-                <Skeleton className="w-16 h-4" />
-                <Skeleton className="w-16 h-4" />
+                <Skeleton className="w-12 md:w-16 h-4" />
+                <Skeleton className="hidden md:block w-16 h-4" />
+                <Skeleton className="hidden md:block w-12 h-4" />
+                <Skeleton className="hidden md:block w-12 h-4" />
+                <Skeleton className="hidden md:block w-12 h-4" />
+                <Skeleton className="w-14 md:w-16 h-4" />
               </div>
             ))}
           </div>

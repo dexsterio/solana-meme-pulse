@@ -61,7 +61,7 @@ const TokenFilters = ({
             'bg-[hsl(0,0%,16%)] text-muted-foreground hover:text-foreground'}`}
           >
             <FlameFilledIcon className="w-3.5 h-3.5" />
-            {!isMobile && 'Trending'}
+            {isMobile ? 'Hot' : 'Trending'}
           </button>
           <div className="flex items-center bg-[hsl(0,0%,14%)] border-l border-border">
             {timeOptions.map((t) =>
@@ -86,7 +86,7 @@ const TokenFilters = ({
           category === 'top' ? 'bg-accent text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
         >
           <Trophy className="w-3.5 h-3.5" />
-          {!isMobile && 'Top'}
+          {isMobile ? 'Top' : 'Top'}
         </button>
         <button
           onClick={() => setCategory('gainers')}
@@ -94,7 +94,7 @@ const TokenFilters = ({
           category === 'gainers' ? 'bg-accent text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
         >
           <TrendingUp className="w-3.5 h-3.5" />
-          {!isMobile && 'Gainers'}
+          {isMobile ? 'Gain' : 'Gainers'}
         </button>
         <button
           onClick={() => setCategory('new')}
@@ -102,7 +102,7 @@ const TokenFilters = ({
           category === 'new' ? 'bg-accent text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
         >
           <Sparkles className="w-3.5 h-3.5" />
-          {!isMobile && 'New Pairs'}
+          {isMobile ? 'New' : 'New Pairs'}
         </button>
 
         <div className="flex-1" />
@@ -137,7 +137,7 @@ const TokenFilters = ({
           showFilters ? 'bg-primary text-primary-foreground' : 'bg-[hsl(0,0%,16%)] text-muted-foreground hover:text-foreground border border-border'}`}
         >
           <Filter className="w-3.5 h-3.5" />
-          {!isMobile && 'Filters'}
+          Filters
         </button>
 
         {/* Customize - hidden on mobile */}
@@ -173,7 +173,7 @@ const TokenFilters = ({
       </div>
 
       {showFilters &&
-      <div className={`flex ${isMobile ? 'flex-wrap' : 'items-center'} gap-3 md:gap-4 p-3 bg-[hsl(0,0%,14%)] rounded border border-border mt-1.5 text-[13px]`}>
+      <div className={`grid ${isMobile ? 'grid-cols-2' : 'flex items-center'} gap-3 md:gap-4 p-3 bg-[hsl(0,0%,14%)] rounded border border-border mt-1.5 text-[13px]`}>
           <div className="flex items-center gap-2">
             <label htmlFor="filter-volume" className="text-muted-foreground text-[12px] md:text-[13px]">Min Vol:</label>
             <input
