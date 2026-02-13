@@ -24,7 +24,7 @@ const Index = () => {
 
   const { data: apiTokens = [], isLoading: apiLoading, isError: apiError, error: apiErrorObj } = useTokens(category);
   const { tokens: newPairTokens, isConnected: wsConnected } = usePumpPortalNewTokens();
-  const { clusters, selectedCluster, setSelectedCluster, clearSelection, selectedTokens } = useViralClusters();
+  const { clusters, selectedCluster, setSelectedCluster, clearSelection, selectedTokens, viralSortBy, setViralSortBy } = useViralClusters();
 
   const { data: cryptoTokens = [], isLoading: cryptoLoading, isError: cryptoError } = useQuery({
     queryKey: ['cryptoMarket'],
@@ -118,12 +118,14 @@ const Index = () => {
       )}
       {isCryptoMarket && <MarketSentimentBar data={globalData} isLoading={globalLoading} />}
       {!isCryptoMarket && (
-        <ViralBar
-          clusters={clusters}
-          selectedCluster={selectedCluster}
-          onSelect={setSelectedCluster}
-          onClear={clearSelection}
-        />
+         <ViralBar
+           clusters={clusters}
+           selectedCluster={selectedCluster}
+           onSelect={setSelectedCluster}
+           onClear={clearSelection}
+           viralSortBy={viralSortBy}
+           onViralSortChange={setViralSortBy}
+         />
       )}
       <div className="flex-1 overflow-auto">
         {!isCryptoMarket && isNewCategory && wsConnected && tokens.length === 0 ? (

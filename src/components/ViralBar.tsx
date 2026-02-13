@@ -1,15 +1,24 @@
 import { ViralCluster } from '@/services/viralDetectionService';
 import { formatNumber } from '@/data/mockTokens';
-import { Flame, X, Crown, TrendingUp } from 'lucide-react';
+import { Flame, X, Crown, TrendingUp, Clock, BarChart3 } from 'lucide-react';
+import { ViralSortBy } from '@/hooks/useViralClusters';
 
 interface ViralBarProps {
   clusters: ViralCluster[];
   selectedCluster: string | null;
   onSelect: (name: string) => void;
   onClear: () => void;
+  viralSortBy?: ViralSortBy;
+  onViralSortChange?: (sort: ViralSortBy) => void;
 }
 
-const ViralBar = ({ clusters, selectedCluster, onSelect, onClear }: ViralBarProps) => {
+const sortOptions: { value: ViralSortBy; label: string; icon: React.ReactNode }[] = [
+  { value: 'created', label: 'First Created', icon: <Clock className="w-3.5 h-3.5" /> },
+  { value: 'mcap', label: 'Highest MCap', icon: <TrendingUp className="w-3.5 h-3.5" /> },
+  { value: 'volume', label: 'Highest Volume', icon: <BarChart3 className="w-3.5 h-3.5" /> },
+];
+
+const ViralBar = ({ clusters, selectedCluster, onSelect, onClear, viralSortBy = 'created', onViralSortChange }: ViralBarProps) => {
   if (clusters.length === 0) return null;
 
   const selected = clusters.find((c) => c.name === selectedCluster);
@@ -36,7 +45,6 @@ const ViralBar = ({ clusters, selectedCluster, onSelect, onClear }: ViralBarProp
                   : 'bg-secondary/80 hover:bg-accent text-foreground border-border/30 hover:border-border/60'
               }`}
             >
-              {/* Pulsing dot */}
               <span className="relative flex h-2 w-2 shrink-0">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-60" />
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-400" />
@@ -53,7 +61,7 @@ const ViralBar = ({ clusters, selectedCluster, onSelect, onClear }: ViralBarProp
         </div>
       </div>
 
-      {/* Selected cluster detail header */}
+      {/* Selected cluster detail header + sort controls */}
       {selected && (
         <div className="flex items-center justify-between px-4 py-2.5 border-t border-border/30 bg-gradient-to-r from-orange-500/8 to-transparent">
           <div className="flex items-center gap-3 text-[13px]">
@@ -63,17 +71,26 @@ const ViralBar = ({ clusters, selectedCluster, onSelect, onClear }: ViralBarProp
             </div>
             <div className="w-px h-4 bg-border/40" />
             <span className="text-muted-foreground">
-              {selected.count} tokens found
+              {selected.count} tokens
             </span>
             <div className="w-px h-4 bg-border/40" />
-            <div className="flex items-center gap-1 text-muted-foreground">
-              <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Top MCap: <span className="text-foreground font-semibold">{formatNumber(selected.topToken.mcap)}</span></span>
-            </div>
-            <div className="w-px h-4 bg-border/40" />
-            <div className="flex items-center gap-1 text-muted-foreground">
-              <Crown className="w-3.5 h-3.5 text-yellow-400" />
-              <span>OG: <span className="text-foreground font-semibold">{selected.ogToken.name}</span></span>
+            {/* Sort buttons */}
+            <div className="flex items-center gap-1">
+              <span className="text-muted-foreground text-[11px] uppercase tracking-wider mr-1">Sort:</span>
+              {sortOptions.map((opt) => (
+                <button
+                  key={opt.value}
+                  onClick={() => onViralSortChange?.(opt.value)}
+                  className={`flex items-center gap-1 px-2 py-1 rounded text-[11px] font-medium transition-colors ${
+                    viralSortBy === opt.value
+                      ? 'bg-accent text-foreground'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
+                  }`}
+                >
+                  {opt.icon}
+                  {opt.label}
+                </button>
+              ))}
             </div>
           </div>
           <button
