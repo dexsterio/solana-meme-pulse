@@ -67,41 +67,46 @@ Deno.serve(async (req) => {
   // ── Check DB cache ──
   let cached: { body: string; status: number; cached_at: string } | null = null;
   try {
-    const { data } = await supabase
-      .from('api_cache')
-      .select('body, status, cached_at')
-      .eq('path', path)
-      .maybeSingle();
-    cached = data;
+    // Fetch both the main cache entry and the 429 marker in parallel
+    const [mainResult, markerResult] = await Promise.all([
+      supabase.from('api_cache').select('body, status, cached_at').eq('path', path).maybeSingle(),
+      supabase.from('api_cache').select('cached_at').eq('path', `__429__${path}`).maybeSingle(),
+    ]);
+    cached = mainResult.data;
+    const marker429 = markerResult.data;
 
-    if (cached) {
+    // Check if we're in a 429 cooldown period (120s)
+    if (marker429) {
+      const markerAge = (Date.now() - new Date(marker429.cached_at).getTime()) / 1000;
+      if (markerAge < 120) {
+        // In cooldown — serve stale good data if available
+        if (cached && cached.status >= 200 && cached.status < 300) {
+          console.log(`RATE LIMITED but serving STALE data for ${path} (cooldown ${Math.ceil(120 - markerAge)}s left)`);
+          return new Response(cached.body, {
+            status: 200,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json', 'X-Cache': 'STALE' },
+          });
+        }
+        console.log(`RATE LIMITED: ${path} — no stale data (cooldown ${Math.ceil(120 - markerAge)}s left)`);
+        return new Response(JSON.stringify({ error: 'Rate limited, please wait', retryAfter: Math.ceil(120 - markerAge) }), {
+          status: 429,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Retry-After': `${Math.ceil(120 - markerAge)}` },
+        });
+      }
+    }
+
+    // Fresh successful data → serve it
+    if (cached && cached.status >= 200 && cached.status < 300) {
       const age = (Date.now() - new Date(cached.cached_at).getTime()) / 1000;
-      // Fresh successful data → serve it
-      if (cached.status >= 200 && cached.status < 300 && age < ttlSeconds) {
+      if (age < ttlSeconds) {
         const remaining = Math.ceil(ttlSeconds - age);
         console.log(`CACHE HIT: ${path} (${remaining}s remaining)`);
         return new Response(cached.body, {
           status: cached.status,
           headers: {
-            ...corsHeaders,
-            'Content-Type': 'application/json',
-            'X-Cache': 'HIT',
-            'X-Cache-TTL': `${remaining}`,
+            ...corsHeaders, 'Content-Type': 'application/json',
+            'X-Cache': 'HIT', 'X-Cache-TTL': `${remaining}`,
             'Cache-Control': `public, max-age=${remaining}`,
-          },
-        });
-      }
-      // Cached 429 still within cooldown → serve stale good data if we have it, otherwise wait
-      if (cached.status === 429 && age < 120) {
-        // Don't hit DexTools again yet — just return a friendly error
-        console.log(`RATE LIMITED: ${path} — cooldown (${Math.ceil(120 - age)}s left)`);
-        return new Response(JSON.stringify({ error: 'Rate limited, please wait', retryAfter: Math.ceil(120 - age) }), {
-          status: 429,
-          headers: {
-            ...corsHeaders,
-            'Content-Type': 'application/json',
-            'X-Cache': 'THROTTLE',
-            'Retry-After': `${Math.ceil(120 - age)}`,
           },
         });
       }
