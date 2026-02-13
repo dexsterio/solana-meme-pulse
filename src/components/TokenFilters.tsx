@@ -58,7 +58,7 @@ const TokenFilters = ({
 
             <FlameFilledIcon className="w-3.5 h-3.5" />
             Trending
-            <InfoTooltip text="Tokens with the most activity and attention right now." iconSize={11} />
+            <InfoTooltip text="tokens med mest aktivitet och uppmärksamhet just nu." iconSize={11} />
           </button>
           <div className="flex items-center bg-secondary/80 border-l border-border">
             {timeOptions.map((t) =>
@@ -86,7 +86,7 @@ const TokenFilters = ({
 
           <Trophy className="w-3.5 h-3.5" />
           Top
-          <InfoTooltip text="Highest ranked tokens by market cap and volume." iconSize={11} />
+          <InfoTooltip text="högst rankade tokens efter market cap och volym." iconSize={11} />
         </button>
         <button
           onClick={() => setCategory('gainers')}
@@ -96,7 +96,7 @@ const TokenFilters = ({
 
           <TrendingUp className="w-3.5 h-3.5" />
           Gainers
-          <InfoTooltip text="Tokens with the biggest price increases." iconSize={11} />
+          <InfoTooltip text="tokens med störst prisökning." iconSize={11} />
         </button>
         <button
           onClick={() => setCategory('new')}
@@ -106,7 +106,7 @@ const TokenFilters = ({
 
           <Sparkles className="w-3.5 h-3.5" />
           New Pairs
-          <InfoTooltip text="Freshly created tokens streaming in real-time." iconSize={11} />
+          <InfoTooltip text="nyskapade tokens som strömmar in i realtid." iconSize={11} />
         </button>
 
         {/* Decorative buttons */}
