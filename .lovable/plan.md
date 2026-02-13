@@ -1,219 +1,125 @@
 
 
-# Enterprise-Level UI/UX Polish Plan
+# Mobile-First Responsive UI Overhaul
 
-A comprehensive audit of every component across the platform, identifying bugs, inconsistencies, and areas for improvement to bring the UI to production-ready quality.
-
----
-
-## 1. Main Token Table (Index page)
-
-**Issues found:**
-- Token names truncate with ellipsis ("Official Liza...", "OpenCl...") losing readability
-- "pumpswap" text badges shown instead of pump.fun logo (inconsistent with Token Info Panel which already uses the logo)
-- No hover tooltip on truncated names
-- Table header row lacks sticky positioning -- scrolling loses context
-- No empty state for zero search results
-- Token rank numbers (#1-#12) use muted color -- top 5 should use gold per established convention
-- Missing row alternation or subtle separation for dense data scanning
-- Table columns don't resize well on narrower screens
-- "TOKEN" column shows `{name} {ticker}` but reference convention is `{ticker} {name}` (inconsistent with memory)
-
-**Fixes:**
-- Make table header sticky with `sticky top-0 bg-background z-10`
-- Add gold color for rank #1-5 in table (matches Token Info Panel)
-- Add `title` attribute on truncated token names for hover tooltip
-- Improve token name display: show ticker first, then name (per convention)
-- Add "No tokens found" empty state for search with no results
-- Subtle row hover highlight improvement
-
-## 2. Trending Bar
-
-**Issues found:**
-- Trending label section (flame icon + "Trending" text) is missing from the bar -- the code removes it but the label helps users understand the section
-- Marquee animation has no pause control explanation
-- No separator between trending label and scrolling items
-- Rankings in trending bar don't use gold for top 3 consistently
-
-**Fixes:**
-- Restore "Trending" label with flame icon on the left side
-- Ensure gold styling for top 3 rank numbers in trending bar
-
-## 3. Stats Bar
-
-**Issues found:**
-- Search input has no clear (X) button when text is entered
-- "Market View" button label is confusing -- it says "Market View" when NOT in market view (should say the destination action)
-- Stats bar wraps on smaller screens without graceful handling
-
-**Fixes:**
-- Add clear button (X icon) in search input when query is non-empty
-- Fix the Market View toggle label logic for clarity
-
-## 4. Token Filters Bar
-
-**Issues found:**
-- Native `<select>` dropdown for "Rank by" has unstyled OS dropdown appearance on some browsers
-- Filter panel inputs (Min Volume, Min Liquidity, etc.) are non-functional -- they don't connect to any state
-- Filter inputs lack proper number validation
-- "Customize" and "Filters" buttons show toast "coming soon" but Filters does expand a panel
-
-**Fixes:**
-- Connect filter inputs to actual filtering state so they work
-- Add number formatting/validation to filter inputs
-- Style the select dropdown properly to avoid OS-native rendering issues
-
-## 5. Token Detail Page Header
-
-**Issues found:**
-- Token name shows `{ticker} {name}` in header but panel shows `{name} ({ticker})` -- inconsistent
-- Back button has no hover tooltip
-- Solana icon sits alone without context
-
-**Fixes:**
-- Unify name display format across header and panel
-- Add `title="Go back"` to back button
-
-## 6. Price Chart
-
-**Issues found:**
-- "Chart placeholder" text at bottom is unprofessional for production
-- Chart tooltip shows raw time index number (0-99) instead of meaningful time labels
-- No crosshair cursor on chart hover
-- Timeframe buttons (1s, 1m, etc.) are very small (10px) and hard to click
-- No loading state when switching timeframes
-- Chart area has no min-height constraint -- can collapse to unusable size
-
-**Fixes:**
-- Remove or restyle "Chart placeholder" text to be less prominent
-- Generate meaningful time labels for X axis tooltip
-- Increase timeframe button tap targets (min 24px height)
-- Add `cursor-crosshair` to chart area
-- Set min-height on chart container
-
-## 7. Transaction List
-
-**Issues found:**
-- "Top Traders" and "Holders" tabs show nothing when clicked (empty content, no empty state)
-- Transaction dates show only time, no date -- confusing for older transactions
-- Table has no loading skeleton
-- SOL column header shows only icon with no label -- accessibility issue
-- No pagination or "load more" for large transaction lists
-- Transaction amounts lack consistent formatting
-
-**Fixes:**
-- Add empty state UI for "Top Traders" and "Holders" tabs
-- Add aria-label to SOL column header
-- Add loading skeleton for initial load
-- Improve date formatting to include relative time
-
-## 8. Token Info Panel (Right Panel)
-
-**Issues found:**
-- Banner area: when no header image, the gradient placeholder feels generic
-- Social buttons overlap banner but the overlap doesn't look clean when there's no banner image
-- Description "Read more" button could be missed -- low contrast
-- Price SOL shows too many decimals (8) for large SOL values
-- Liquidity/FDV/MKT CAP boxes -- text can overflow on smaller panel widths
-- Watchlist and Alerts buttons show toast "coming soon" -- should be disabled with tooltip instead
-- Buy/Sell buttons have dot indicators that don't convey meaning
-- Audit section: "Info" icon (Lucide) used next to Mintable/Freezable should be removed per memory (no info icons)
-- Audit warning text has clickable "More" that does nothing
-- "Claim your token page" button has no destination
-
-**Fixes:**
-- Remove `Info` icons from Audit section rows (per established convention)
-- Disable "More" link in audit warning or link it properly
-- Improve price SOL formatting (adaptive decimal places)
-- Clean up Buy/Sell button dot indicators
-- Add proper disabled state + tooltip to Watchlist/Alerts
-
-## 9. Trading Panel
-
-**Issues found:**
-- Amount input allows negative numbers
-- Preset amounts don't highlight correctly when manually typing matching value
-- "Trading not yet connected" toast on main action button -- should be more prominent disabled state
-- Portfolio section shows all zeros with no context for new users
-- Settings row icons (Settings, AlertTriangle, DollarSign, ToggleLeft) have no labels/tooltips -- cryptic
-- "Preset 1/2/3" tabs have no explanation of what they do
-- Collapsible sections "Reused Image Tokens (0)" and "Similar Tokens" show hardcoded empty data
-- Wallet balance shows "0" with no "Connect Wallet" CTA
-- SOL balance indicator in header shows "0" -- should prompt wallet connection
-
-**Fixes:**
-- Add `min="0"` to amount input
-- Add tooltips to settings row icons (Slippage, Priority Fee, Tip, MEV Protection)
-- Add "Connect Wallet" prompt instead of showing "0" balance
-- Add empty state messaging for Reused/Similar sections
-
-## 10. Grid View
-
-**Issues found:**
-- Grid cards show MCap twice (once as main number, once in stats grid)
-- No exchange logo on grid cards (inconsistent with table view)
-- Change percentages don't show 24h in the main badge (only 5m, 1h, 6h in bottom)
-- Card hover effect could be more refined
-- No rank number shown on grid cards
-
-**Fixes:**
-- Replace duplicate MCap with Price as the main number
-- Add rank badge to grid cards
-- Show 24h change in bottom row too
-
-## 11. Global/Cross-cutting Issues
-
-**Issues found:**
-- No favicon or app title set (shows generic)
-- No loading/splash screen on initial app load
-- Console error logging in NotFound page (`console.error`) -- should be `console.warn`
-- No keyboard navigation support for table rows (can't arrow key through)
-- No responsive mobile layout -- entire app breaks on mobile
-- Scrollbar styles only work in WebKit browsers
-- No error boundary wrapping the app
-- Toast notifications lack consistent styling
-- Color inconsistency: some profit values use `text-profit` class, others use hardcoded `#26a269`
-- No `<title>` tag updates when navigating between pages
-- Marquee animation in TrendingBar never pauses on mobile (battery drain)
-
-**Fixes:**
-- Add React Error Boundary at app level
-- Add page title updates via `document.title` in each route
-- Standardize all green/red colors to use CSS variables consistently
-- Add basic mobile responsiveness (hide right panel, stack layout)
-- Add Firefox scrollbar styling (`scrollbar-width: thin`)
-
-## 12. Accessibility Issues
-
-**Issues found:**
-- Table rows lack keyboard interaction (Enter to navigate)
-- Color-only indicators (green/red) with no text alternative for colorblind users
-- Several buttons missing aria-labels
-- Focus styles exist but are rarely visible in the dark theme
-- Select dropdown lacks proper label association
-
-**Fixes:**
-- Add `tabIndex={0}` and `onKeyDown` handler for table rows
-- Ensure all interactive elements have proper aria attributes
-- Add `role="button"` where needed
+A comprehensive plan to make every screen fully usable on all mobile devices (320px-428px) and tablets (768px-1024px).
 
 ---
 
-## Technical Implementation Summary
+## Current Problems (Mobile)
 
-| Area | Files to modify | Priority |
-|------|----------------|----------|
-| Table sticky header + gold ranks + name format | TokenTable.tsx | High |
-| Trending bar label restoration | TrendingBar.tsx | Medium |
-| Search clear button | StatsBar.tsx | Medium |
-| Chart improvements | PriceChart.tsx | High |
-| Transaction empty states | TransactionList.tsx | Medium |
-| Info panel audit cleanup | TokenInfoPanel.tsx | High |
-| Trading panel UX | TradingPanel.tsx | Medium |
-| Grid view fixes | TokenGrid.tsx | Medium |
-| Filter functionality | TokenFilters.tsx, Index.tsx | Medium |
-| Global: error boundary, titles, mobile | App.tsx, Index.tsx, TokenDetail.tsx, index.css | High |
-| Accessibility pass | All components | Medium |
+Looking at the app on a 390px viewport, the following critical issues are visible:
 
-Total estimated file changes: ~12 files with focused, surgical edits to address all identified issues.
+1. **Index Page**: StatsBar pills wrap awkwardly across multiple lines. Filter bar overflows and "Rank by" dropdown + Customize/Filters/View toggle are cut off. Token table columns overflow horizontally with data cut off (PRICE column barely visible, all change columns hidden).
+2. **Token Detail Page**: The 3-panel layout shows chart + right panel side by side on mobile -- chart is ~70px wide and unusable. Right panel (TokenInfoPanel) overlaps the chart. Transaction list is hidden behind the panel. The header bar is fine.
+3. **Trending Bar**: Works OK due to marquee scroll, but items are slightly cramped.
+4. **Viral Bar**: Sort buttons and cluster pills overflow without wrapping.
+
+---
+
+## Plan
+
+### 1. Token Detail Page - Mobile Layout (`TokenDetail.tsx`)
+
+The most critical fix. On mobile, switch from horizontal 3-panel to vertical stacked layout:
+
+- Use `useIsMobile()` hook (already exists at 768px breakpoint)
+- Mobile: Stack chart (full width, fixed ~45vh height), then transaction list, then info/trading panel below
+- Add a floating bottom tab bar to switch between Chart, Txns, and Info views on mobile
+- Hide the right panel column entirely on mobile; show it as a full-width section or bottom sheet
+- Desktop: Keep current layout unchanged
+
+### 2. Index Page - Stats Bar (`StatsBar.tsx`)
+
+- On mobile: Hide "24H VOLUME" and "24H TXNS" stat pills (they take too much space)
+- Search input: Make it full-width on mobile
+- Market View button: Show as icon-only on mobile (just the globe icon)
+- Use `flex-wrap` with proper ordering so search is always first
+
+### 3. Index Page - Token Filters (`TokenFilters.tsx`)
+
+- On mobile: Show only the category buttons (Trending, Top, Gainers, New Pairs) in a horizontally scrollable row
+- Hide "Rank by" dropdown, "Customize" button on mobile (keep Filters + View toggle)
+- Filter expanded panel: Stack inputs vertically (2 per row instead of 4)
+- Time filter pills inside Trending button: Keep as-is (already compact)
+
+### 4. Token Table - Mobile Adaptation (`TokenTable.tsx`)
+
+- On mobile: Hide AGE, TXNS, MAKERS, LIQUIDITY, and individual change columns (5M, 1H, 6H)
+- Show only: Rank, Token (name+logo), Price, 24H change, MCap
+- Reduce padding from `px-3` to `px-2`
+- Make TOKEN column width auto-expand to use available space
+
+### 5. Token Grid - Mobile (`TokenGrid.tsx`)
+
+- Change grid from `grid-cols-2` to `grid-cols-1` on very small screens (< 375px)
+- Keep `grid-cols-2` for 375px+ mobile (already works OK)
+- Reduce card padding from `p-5` to `p-3` on mobile
+
+### 6. Token Info Panel - Mobile (`TokenInfoPanel.tsx`)
+
+- When displayed full-width on mobile (from TokenDetail changes), it works well already
+- Ensure social buttons don't overflow on narrow screens
+- Price USD/SOL grid: Keep 2-col (works at 390px)
+
+### 7. Trading Panel - Mobile (`TradingPanel.tsx`)
+
+- Ensure the panel works at full width on mobile (already scrollable)
+- Reduce horizontal padding slightly on mobile
+- 5m stats grid: Ensure text doesn't truncate (already has `truncate` + `min-w-0`)
+
+### 8. Trending Bar - Mobile (`TrendingBar.tsx`)
+
+- Hide the "Trending" label text on very small screens, keep only the flame icon
+- Reduce pill padding slightly
+
+### 9. Viral Bar - Mobile (`ViralBar.tsx`)
+
+- Sort buttons: Show only icons on mobile (hide labels)
+- Cluster pills: Allow horizontal scroll (already does)
+- Back button + cluster info: Stack vertically on mobile
+
+### 10. Market Sentiment Bar - Mobile (`MarketSentimentBar.tsx`)
+
+- Already horizontally scrollable -- OK
+- Reduce Fear & Greed gauge size slightly on mobile
+
+### 11. Global CSS (`index.css`)
+
+- Add touch-friendly tap targets: minimum 44px for all interactive elements on mobile
+- Add `safe-area-inset` padding for notched phones (iPhone X+)
+- Prevent horizontal page overflow with `overflow-x: hidden` on body for mobile
+
+### 12. Transaction List - Mobile (`TransactionList.tsx`)
+
+- Hide AMOUNT, SOL, PRICE columns on mobile
+- Show only: DATE, TYPE, USD, MAKER, TXN
+- Reduce font size and padding for compact mobile display
+
+---
+
+## Technical Approach
+
+All responsive changes will use:
+- The existing `useIsMobile()` hook for JS-driven layout changes
+- Tailwind responsive prefixes (`md:`, `lg:`) for CSS-only changes
+- No new dependencies needed
+
+### Files to modify:
+
+| File | Changes |
+|------|---------|
+| `src/pages/TokenDetail.tsx` | Mobile stacked layout with tab navigation |
+| `src/components/StatsBar.tsx` | Hide stats on mobile, full-width search |
+| `src/components/TokenFilters.tsx` | Compact mobile filter row |
+| `src/components/TokenTable.tsx` | Hide columns on mobile |
+| `src/components/TokenGrid.tsx` | Adjust grid and padding |
+| `src/components/TrendingBar.tsx` | Compact label on mobile |
+| `src/components/TransactionList.tsx` | Hide columns on mobile |
+| `src/components/ViralBar.tsx` | Icon-only sort on mobile |
+| `src/components/TokenInfoPanel.tsx` | Minor mobile tweaks |
+| `src/components/TradingPanel.tsx` | Minor mobile tweaks |
+| `src/index.css` | Safe area insets, overflow fix |
+
+Total: ~11 files with focused mobile responsive changes.
 
