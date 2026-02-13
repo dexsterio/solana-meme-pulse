@@ -18,6 +18,7 @@ const Index = () => {
   const [rankBy, setRankBy] = useState<RankBy>('trending');
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [isCryptoMarket, setIsCryptoMarket] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const { data: apiTokens = [], isLoading: apiLoading, isError: apiError, error: apiErrorObj } = useTokens(category);
   const { tokens: newPairTokens, isConnected: wsConnected } = usePumpPortalNewTokens();
@@ -54,6 +55,16 @@ const Index = () => {
   const sortedTokens = useMemo(() => {
     let list = [...tokens];
 
+    // Apply search filter
+    if (searchQuery.trim()) {
+      const q = searchQuery.trim().toLowerCase();
+      list = list.filter(t =>
+        t.name.toLowerCase().includes(q) ||
+        t.ticker.toLowerCase().includes(q) ||
+        t.address.toLowerCase().includes(q)
+      );
+    }
+
     switch (rankBy) {
       case 'volume':
         list.sort((a, b) => b.volume - a.volume);
@@ -72,14 +83,16 @@ const Index = () => {
     }
 
     return list;
-  }, [tokens, rankBy]);
+  }, [tokens, rankBy, searchQuery]);
 
   return (
     <div className="flex flex-col h-screen bg-background">
       <TrendingBar tokens={isCryptoMarket ? cryptoTokens : apiTokens} />
       <StatsBar
         tokens={tokens}
-        onSearch={(addr) => console.log('Search:', addr)}
+        onSearch={(q) => setSearchQuery(q)}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
         isCryptoMarket={isCryptoMarket}
         onCryptoMarketToggle={() => setIsCryptoMarket(!isCryptoMarket)}
       />
