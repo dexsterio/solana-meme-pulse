@@ -66,7 +66,7 @@ const StatsBar = ({ tokens = [], onSearch, searchQuery = '', onSearchChange, isC
         }`}
       >
         <WorldIcon className="w-3.5 h-3.5" />
-        {isMobile ? '' : (isCryptoMarket ? 'Back to Memes' : 'Market View')}
+        {isMobile ? 'Market' : (isCryptoMarket ? 'Back to Memes' : 'Market View')}
       </button>
     </div>
   );

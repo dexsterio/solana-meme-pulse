@@ -121,12 +121,26 @@ html, body {
 
 /* Touch-friendly tap targets on mobile */
 @media (max-width: 767px) {
+  /* Ensure interactive elements are tappable */
   button, a, [role="button"] {
     min-height: 36px;
+  }
+
+  /* Table cells exempt from min-height */
+  table button, table a, table [role="button"],
+  thead button, thead a, tbody button, tbody a {
+    min-height: unset;
   }
 
   /* Pause marquee on mobile to save battery */
   .animate-marquee {
     animation-duration: 40s;
+  }
+}
+
+/* Safe area padding for bottom fixed bars */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 }

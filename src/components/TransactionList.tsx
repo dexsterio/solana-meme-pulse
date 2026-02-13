@@ -57,7 +57,7 @@ const TransactionList = ({ tokenId }: TransactionListProps) => {
                     <span className="flex items-center justify-end gap-1"><SolanaIcon size={10} /></span>
                   </th>
                 )}
-                {!isMobile && <th className="px-2 py-1.5 text-right font-medium">PRICE</th>}
+                <th className="px-1.5 md:px-2 py-1.5 text-right font-medium">PRICE</th>
                 <th className="px-1.5 md:px-2 py-1.5 text-right font-medium">MAKER</th>
                 <th className="px-1.5 md:px-2 py-1.5 text-center font-medium">TXN</th>
               </tr>
@@ -78,7 +78,7 @@ const TransactionList = ({ tokenId }: TransactionListProps) => {
                       <span className="flex items-center justify-end gap-0.5"><SolanaIcon size={10} />{tx.sol.toFixed(3)}</span>
                     </td>
                   )}
-                  {!isMobile && <td className="px-2 py-1.5 text-right font-mono text-foreground">{formatPrice(tx.price)}</td>}
+                  <td className="px-1.5 md:px-2 py-1.5 text-right font-mono text-foreground">{formatPrice(tx.price)}</td>
                   <td className="px-1.5 md:px-2 py-1.5 text-right text-primary font-mono text-[9px] md:text-[11px]">{tx.maker}</td>
                   <td className="px-1.5 md:px-2 py-1.5 text-center">
                     <ExternalLink className="w-3 h-3 text-muted-foreground hover:text-primary inline cursor-pointer" />

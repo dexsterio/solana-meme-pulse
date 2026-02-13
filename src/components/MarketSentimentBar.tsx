@@ -1,6 +1,7 @@
 import { CryptoGlobalData } from '@/services/coingeckoApi';
 import { formatNumber } from '@/data/mockTokens';
 import { TrendingUp, TrendingDown, Minus, Activity, Fuel, BarChart3, Bitcoin, Gem, ChevronRight } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface MarketSentimentBarProps {
   data: CryptoGlobalData | undefined;
@@ -21,7 +22,7 @@ function getAltSeasonStatus(btcDominance: number): { label: string; color: strin
   return { label: 'BTC Season', color: 'text-orange-400', icon: Bitcoin };
 }
 
-const FearGreedGauge = ({ value, classification }: { value: number; classification: string }) => {
+const FearGreedGauge = ({ value, classification, compact }: { value: number; classification: string; compact?: boolean }) => {
   const cx = 50;
   const cy = 40;
   const radius = 32;
@@ -36,10 +37,13 @@ const FearGreedGauge = ({ value, classification }: { value: number; classificati
   const startX = cx - radius;
   const endX = cx + radius;
 
+  const svgW = compact ? 70 : 100;
+  const svgH = compact ? 34 : 48;
+
   return (
-    <div className="flex items-center gap-3 px-4 py-2 rounded-lg border border-border bg-card shrink-0">
+    <div className={`flex items-center ${compact ? 'gap-2 px-2 py-1.5' : 'gap-3 px-4 py-2'} rounded-lg border border-border bg-card shrink-0`}>
       <div className="flex flex-col items-center">
-        <svg width="100" height="48" viewBox="0 0 100 48">
+        <svg width={svgW} height={svgH} viewBox="0 0 100 48">
           <defs>
             <linearGradient id="gaugeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stopColor="#ea384c" />
@@ -71,9 +75,8 @@ const FearGreedGauge = ({ value, classification }: { value: number; classificati
       <div className="flex flex-col items-start gap-0.5">
         <div className="flex items-center gap-1">
           <span className="text-[10px] text-muted-foreground font-medium">Fear & Greed</span>
-          <ChevronRight className="w-3 h-3 text-muted-foreground" />
         </div>
-        <span className="text-xl font-bold leading-none" style={{ color: needleColor }}>
+        <span className={`${compact ? 'text-base' : 'text-xl'} font-bold leading-none`} style={{ color: needleColor }}>
           {value}
         </span>
         <span className="text-[10px] text-muted-foreground">{classification}</span>
@@ -83,11 +86,13 @@ const FearGreedGauge = ({ value, classification }: { value: number; classificati
 };
 
 const MarketSentimentBar = ({ data, isLoading }: MarketSentimentBarProps) => {
+  const isMobile = useIsMobile();
+
   if (isLoading || !data) {
     return (
       <div className="flex items-center gap-2 px-3 py-2 border-b border-border overflow-x-auto">
-        {Array.from({ length: 5 }).map((_, i) => (
-          <div key={i} className="h-9 w-32 rounded bg-[hsl(0,0%,16%)] animate-pulse shrink-0 border border-border" />
+        {Array.from({ length: isMobile ? 3 : 5 }).map((_, i) => (
+          <div key={i} className="h-9 w-24 md:w-32 rounded bg-[hsl(0,0%,16%)] animate-pulse shrink-0 border border-border" />
         ))}
       </div>
     );
@@ -97,42 +102,41 @@ const MarketSentimentBar = ({ data, isLoading }: MarketSentimentBarProps) => {
   const AltIcon = altSeason.icon;
 
   return (
-    <div className="flex items-center gap-2 px-3 py-2 border-b border-border overflow-x-auto">
+    <div className="flex items-center gap-1.5 md:gap-2 px-2 md:px-3 py-1.5 md:py-2 border-b border-border overflow-x-auto scrollbar-hide">
       {/* Total Market Cap */}
-      <div className="flex items-center gap-1.5 px-3 py-1.5 rounded border border-border bg-[hsl(0,0%,16%)] shrink-0">
-        <BarChart3 className="w-3.5 h-3.5 text-muted-foreground" />
-        <span className="text-[11px] text-muted-foreground">Market Cap</span>
-        <span className="text-[13px] font-bold text-foreground">{formatNumber(data.totalMarketCap)}</span>
-        <span className={`text-[11px] font-medium ${data.marketCapChange24h >= 0 ? 'text-profit' : 'text-loss'}`}>
-          {data.marketCapChange24h >= 0 ? '+' : ''}{data.marketCapChange24h.toFixed(2)}%
+      <div className="flex items-center gap-1 md:gap-1.5 px-2 md:px-3 py-1 md:py-1.5 rounded border border-border bg-[hsl(0,0%,16%)] shrink-0">
+        <BarChart3 className="w-3 h-3 md:w-3.5 md:h-3.5 text-muted-foreground" />
+        <span className="text-[10px] md:text-[11px] text-muted-foreground">{isMobile ? 'MCap' : 'Market Cap'}</span>
+        <span className="text-[11px] md:text-[13px] font-bold text-foreground">{formatNumber(data.totalMarketCap)}</span>
+        <span className={`text-[10px] md:text-[11px] font-medium ${data.marketCapChange24h >= 0 ? 'text-profit' : 'text-loss'}`}>
+          {data.marketCapChange24h >= 0 ? '+' : ''}{data.marketCapChange24h.toFixed(1)}%
         </span>
       </div>
 
       {/* BTC Dominance */}
-      <div className="flex items-center gap-1.5 px-3 py-1.5 rounded border border-border bg-[hsl(0,0%,16%)] shrink-0">
-        <Bitcoin className="w-3.5 h-3.5 text-orange-400" />
-        <span className="text-[11px] text-muted-foreground">BTC Dom</span>
-        <span className="text-[13px] font-bold text-foreground">{data.btcDominance.toFixed(1)}%</span>
+      <div className="flex items-center gap-1 md:gap-1.5 px-2 md:px-3 py-1 md:py-1.5 rounded border border-border bg-[hsl(0,0%,16%)] shrink-0">
+        <Bitcoin className="w-3 h-3 md:w-3.5 md:h-3.5 text-orange-400" />
+        <span className="text-[10px] md:text-[11px] text-muted-foreground">BTC</span>
+        <span className="text-[11px] md:text-[13px] font-bold text-foreground">{data.btcDominance.toFixed(1)}%</span>
       </div>
 
       {/* ETH Gas */}
-      <div className="flex items-center gap-1.5 px-3 py-1.5 rounded border border-border bg-[hsl(0,0%,16%)] shrink-0">
-        <Fuel className="w-3.5 h-3.5 text-muted-foreground" />
-        <span className="text-[11px] text-muted-foreground">ETH Gas</span>
-        <span className="text-[13px] font-bold text-foreground">
-          {data.ethGas > 0 ? `${data.ethGas} Gwei` : '—'}
+      <div className="flex items-center gap-1 md:gap-1.5 px-2 md:px-3 py-1 md:py-1.5 rounded border border-border bg-[hsl(0,0%,16%)] shrink-0">
+        <Fuel className="w-3 h-3 md:w-3.5 md:h-3.5 text-muted-foreground" />
+        <span className="text-[10px] md:text-[11px] text-muted-foreground">Gas</span>
+        <span className="text-[11px] md:text-[13px] font-bold text-foreground">
+          {data.ethGas > 0 ? `${data.ethGas}` : '—'}
         </span>
       </div>
 
       {/* Alt Season */}
-      <div className="flex items-center gap-1.5 px-3 py-1.5 rounded border border-border bg-[hsl(0,0%,16%)] shrink-0">
-        <AltIcon className={`w-3.5 h-3.5 ${altSeason.color}`} />
-        <span className="text-[11px] text-muted-foreground">Season</span>
-        <span className={`text-[13px] font-bold ${altSeason.color}`}>{altSeason.label}</span>
+      <div className="flex items-center gap-1 md:gap-1.5 px-2 md:px-3 py-1 md:py-1.5 rounded border border-border bg-[hsl(0,0%,16%)] shrink-0">
+        <AltIcon className={`w-3 h-3 md:w-3.5 md:h-3.5 ${altSeason.color}`} />
+        <span className={`text-[11px] md:text-[13px] font-bold ${altSeason.color}`}>{altSeason.label}</span>
       </div>
 
       {/* Fear & Greed Gauge */}
-      <FearGreedGauge value={data.fearGreed.value} classification={data.fearGreed.classification} />
+      <FearGreedGauge value={data.fearGreed.value} classification={data.fearGreed.classification} compact={isMobile} />
     </div>
   );
 };
