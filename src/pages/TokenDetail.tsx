@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { fetchTokenDetails } from '@/services/dextoolsApi';
@@ -5,6 +6,7 @@ import { fetchTokenDetailsDexScreener } from '@/services/dexscreenerApi';
 import PriceChart from '@/components/PriceChart';
 import TransactionList from '@/components/TransactionList';
 import TokenInfoPanel from '@/components/TokenInfoPanel';
+import TradingPanel from '@/components/TradingPanel';
 import TrendingBar from '@/components/TrendingBar';
 import { ArrowLeft } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -12,6 +14,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 const TokenDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [panelMode, setPanelMode] = useState<'info' | 'buy' | 'sell'>('info');
 
   const { data: token, isLoading, isError } = useQuery({
     queryKey: ['token-detail', id],
@@ -92,7 +95,19 @@ const TokenDetail = () => {
           </div>
         </div>
         <div className="w-[320px] shrink-0 p-2 pl-0">
-          <TokenInfoPanel token={token} />
+          {panelMode === 'info' ? (
+            <TokenInfoPanel
+              token={token}
+              onBuyClick={() => setPanelMode('buy')}
+              onSellClick={() => setPanelMode('sell')}
+            />
+          ) : (
+            <TradingPanel
+              token={token}
+              initialMode={panelMode}
+              onBack={() => setPanelMode('info')}
+            />
+          )}
         </div>
       </div>
     </div>
