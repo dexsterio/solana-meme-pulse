@@ -68,7 +68,7 @@ const ViralBar = ({ clusters, selectedCluster, onSelect, onClear, viralSortBy = 
           <div className="flex items-center gap-3 px-4 py-2">
             <button
               onClick={onClear}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold bg-foreground text-background hover:opacity-90 transition-opacity shrink-0"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12px] font-semibold bg-secondary hover:bg-accent text-muted-foreground hover:text-foreground transition-colors border border-border/30 shrink-0"
             >
               ← Back
             </button>
