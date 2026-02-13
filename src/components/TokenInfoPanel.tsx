@@ -1,7 +1,8 @@
 import { Token, formatPrice, formatNumber, formatCompact } from '@/data/mockTokens';
-import { Globe, Twitter, MessageCircle, Star, Bell, ExternalLink, Zap, Copy, Shield } from 'lucide-react';
+import { Globe, Twitter, MessageCircle, Star, Bell, ExternalLink, Zap, Copy, Shield, ChevronDown } from 'lucide-react';
 import SolanaIcon from '@/components/SolanaIcon';
 import { toast } from 'sonner';
+import { useState } from 'react';
 
 interface TokenInfoPanelProps {
   token: Token;
@@ -9,7 +10,27 @@ interface TokenInfoPanelProps {
   onSellClick?: () => void;
 }
 
+function formatPercent(val: number): string {
+  const abs = Math.abs(val);
+  const prefix = val >= 0 ? '+' : '';
+  if (abs >= 100) return prefix + Math.round(val) + '%';
+  if (abs >= 10) return prefix + val.toFixed(1) + '%';
+  return prefix + val.toFixed(2) + '%';
+}
+
+function RatioBar({ buyValue, sellValue }: { buyValue: number; sellValue: number }) {
+  const total = buyValue + sellValue;
+  const buyPercent = total > 0 ? (buyValue / total) * 100 : 50;
+  return (
+    <div className="h-1 w-full flex rounded-full overflow-hidden bg-muted/20 my-1">
+      <div className="bg-profit" style={{ width: `${buyPercent}%` }} />
+      <div className="bg-loss" style={{ width: `${100 - buyPercent}%` }} />
+    </div>
+  );
+}
+
 const TokenInfoPanel = ({ token, onBuyClick, onSellClick }: TokenInfoPanelProps) => {
+  const [descExpanded, setDescExpanded] = useState(false);
   const buys = token.buys24h ?? Math.round(token.txns * 0.55);
   const sells = token.sells24h ?? (token.txns - buys);
   const buyVolume = token.buyVolume24h ?? token.volume * 0.58;
@@ -27,50 +48,80 @@ const TokenInfoPanel = ({ token, onBuyClick, onSellClick }: TokenInfoPanelProps)
 
   return (
     <div className="flex flex-col h-full bg-card rounded-lg border border-border overflow-y-auto text-xs">
-      {/* Token name row */}
-      <div className="flex items-center justify-between px-4 py-2.5 border-b border-border">
-        <div className="flex items-center gap-2">
+      {/* Token identity header - left aligned */}
+      <div className="px-4 py-3 border-b border-border">
+        <div className="flex items-center gap-2.5">
           {token.logoUrl ? (
-            <img src={token.logoUrl} alt={token.name} className="w-7 h-7 rounded-full" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+            <img src={token.logoUrl} alt={token.name} className="w-10 h-10 rounded-full shrink-0" onError={(e) => { e.currentTarget.style.display = 'none'; const fb = e.currentTarget.nextElementSibling; if (fb) (fb as HTMLElement).style.display = 'flex'; }} />
+          ) : null}
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary/60 to-accent items-center justify-center text-sm text-foreground font-bold shrink-0" style={{ display: token.logoUrl ? 'none' : 'flex' }}>
+            {token.ticker?.charAt(0) || '?'}
+          </div>
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5">
+              <span className="font-bold text-foreground text-sm truncate">{token.name}</span>
+              <span className="text-muted-foreground text-xs">({token.ticker})</span>
+              <button
+                onClick={() => copyToClipboard(token.id || '', 'Token address')}
+                className="p-0.5 rounded hover:bg-accent text-muted-foreground shrink-0"
+                aria-label="Copy token address"
+              >
+                <Copy className="w-3 h-3" />
+              </button>
+            </div>
+            <div className="flex items-center gap-1.5 mt-0.5 text-[10px] text-muted-foreground flex-wrap">
+              <SolanaIcon size={10} />
+              <span>Solana</span>
+              <span className="text-muted-foreground/50">&gt;</span>
+              <span>{token.exchangeName || 'Raydium'}</span>
+              {token.age && (
+                <span className="px-1.5 py-0 rounded bg-muted/30 text-muted-foreground border border-border">{token.age}</span>
+              )}
+              {token.rank > 0 && (
+                <span className="px-1.5 py-0 rounded bg-muted/30 text-muted-foreground border border-border">#{token.rank}</span>
+              )}
+              {token.boosts && token.boosts > 0 && (
+                <span className="px-1.5 py-0 rounded bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 flex items-center gap-0.5">
+                  <Zap className="w-2.5 h-2.5" /> {token.boosts}
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Banner / Header Image */}
+      <div className="px-4 pt-3 pb-1">
+        <div className="w-full rounded-lg overflow-hidden" style={{ aspectRatio: '2 / 1' }}>
+          {token.headerImage ? (
+            <img src={token.headerImage} alt={`${token.name} banner`} className="w-full h-full object-cover" />
+          ) : token.logoUrl ? (
+            <div className="w-full h-full bg-gradient-to-br from-[hsl(0,0%,14%)] to-[hsl(0,0%,10%)] flex items-center justify-center">
+              <img src={token.logoUrl} alt={token.name} className="w-16 h-16 rounded-full opacity-60" />
+            </div>
           ) : (
-            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-primary/60 to-accent flex items-center justify-center text-[10px] text-foreground font-bold">
-              {token.ticker?.charAt(0) || '?'}
+            <div className="w-full h-full bg-gradient-to-br from-[hsl(0,0%,14%)] to-[hsl(0,0%,10%)] flex items-center justify-center">
+              <span className="text-3xl font-bold text-muted-foreground/30">{token.ticker?.charAt(0) || '?'}</span>
             </div>
           )}
-          <span className="font-bold text-foreground text-sm">{token.name}</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <button
-            onClick={() => copyToClipboard(token.id || '', 'Token address')}
-            className="p-1 rounded hover:bg-accent text-muted-foreground"
-            aria-label="Copy token address"
-          >
-            <Copy className="w-3.5 h-3.5" />
-          </button>
         </div>
       </div>
 
-      {/* Ticker / badges */}
-      <div className="px-4 py-2 border-b border-border text-center">
-        <div className="flex items-center justify-center gap-1.5">
-          <span className="font-semibold text-foreground">{token.ticker}</span>
-          <button onClick={() => copyToClipboard(token.ticker || '', 'Ticker')} aria-label="Copy ticker">
-            <Copy className="w-3 h-3 text-muted-foreground cursor-pointer hover:text-foreground transition-colors" />
-          </button>
-          {token.boosts && (
-            <span className="text-yellow-500 text-[10px] flex items-center gap-0.5">
-              <Zap className="w-3 h-3" /> {token.boosts}
-            </span>
+      {/* Token description */}
+      {token.description && (
+        <div className="px-4 py-1.5">
+          <p className={`text-[11px] text-muted-foreground leading-relaxed ${!descExpanded ? 'line-clamp-2' : ''}`}>
+            {token.description}
+          </p>
+          {token.description.length > 80 && (
+            <button onClick={() => setDescExpanded(!descExpanded)} className="text-[10px] text-primary hover:underline mt-0.5">
+              {descExpanded ? 'Show less' : 'Read more'}
+            </button>
           )}
         </div>
-        <div className="flex items-center justify-center gap-2 mt-1 text-[10px] text-muted-foreground">
-          <span className="flex items-center gap-1">🟣 Solana</span>
-          <span>&gt;</span>
-          <span>{token.exchangeName || 'Raydium'}</span>
-        </div>
-      </div>
+      )}
 
-      {/* Social buttons - only show if socials exist */}
+      {/* Social buttons */}
       {hasSocials && (
         <div className="px-4 py-2 border-b border-border">
           <div className="flex gap-2">
@@ -89,6 +140,9 @@ const TokenInfoPanel = ({ token, onBuyClick, onSellClick }: TokenInfoPanelProps)
                 <Globe className="w-3.5 h-3.5" /> Website
               </a>
             )}
+            <button className="p-2 rounded-md bg-[hsl(0,0%,16%)] text-muted-foreground hover:bg-accent transition-colors border border-border shrink-0">
+              <ChevronDown className="w-3.5 h-3.5" />
+            </button>
           </div>
         </div>
       )}
@@ -101,7 +155,7 @@ const TokenInfoPanel = ({ token, onBuyClick, onSellClick }: TokenInfoPanelProps)
             <div className="text-sm font-bold tracking-tight text-foreground">{formatPrice(token.price)}</div>
           </div>
           <div className="bg-[hsl(0,0%,16%)] rounded-md p-2.5 text-center border border-border">
-            <div className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1">Price</div>
+            <div className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1">Price SOL</div>
             <div className="text-sm font-bold tracking-tight text-foreground flex items-center justify-center gap-1">
               {(token.priceSOL ?? 0).toFixed(8)} <SolanaIcon size={12} />
             </div>
@@ -144,67 +198,75 @@ const TokenInfoPanel = ({ token, onBuyClick, onSellClick }: TokenInfoPanelProps)
               }`}
             >
               <div className="text-[10px] text-muted-foreground mb-1">{label}</div>
-              <div className={`text-sm font-bold tracking-tight ${(val ?? 0) >= 0 ? 'text-profit' : 'text-loss'}`}>
-                {(val ?? 0) >= 0 ? '+' : ''}{(val ?? 0).toFixed(2)}%
+              <div className={`text-xs font-bold tracking-tight ${(val ?? 0) >= 0 ? 'text-profit' : 'text-loss'}`}>
+                {formatPercent(val ?? 0)}
               </div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* TXNS / BUYS / SELLS row */}
+      {/* TXNS / Volume / Makers with ratio bars */}
       <div className="px-4 py-3 border-b border-border space-y-3">
-        <div className="grid grid-cols-3 gap-2 items-end">
-          <div>
-            <div className="text-[10px] text-muted-foreground uppercase">TXNS</div>
-            <div className="text-sm font-bold text-foreground">{formatCompact(token.txns)}</div>
+        {/* TXNS row */}
+        <div>
+          <div className="grid grid-cols-3 gap-2 items-end">
+            <div>
+              <div className="text-[10px] text-muted-foreground uppercase">TXNS</div>
+              <div className="text-sm font-bold text-foreground">{formatCompact(token.txns)}</div>
+            </div>
+            <div>
+              <div className="text-[10px] text-muted-foreground uppercase">BUYS</div>
+              <div className="text-sm font-bold text-profit">{formatCompact(buys)}</div>
+            </div>
+            <div className="text-right">
+              <div className="text-[10px] text-muted-foreground uppercase">SELLS</div>
+              <div className="text-sm font-bold text-loss">{formatCompact(sells)}</div>
+            </div>
           </div>
-          <div>
-            <div className="text-[10px] text-muted-foreground uppercase">BUYS</div>
-            <div className="text-sm font-bold text-foreground">{formatCompact(buys)}</div>
-            <div className="h-1 rounded bg-profit/60 mt-1" />
-          </div>
-          <div className="text-right">
-            <div className="text-[10px] text-muted-foreground uppercase">SELLS</div>
-            <div className="text-sm font-bold text-foreground">{formatCompact(sells)}</div>
-            <div className="h-1 rounded bg-loss/60 mt-1" />
-          </div>
+          <RatioBar buyValue={buys} sellValue={sells} />
         </div>
 
-        <div className="grid grid-cols-3 gap-2 items-end">
-          <div>
-            <div className="text-[10px] text-muted-foreground uppercase">VOLUME</div>
-            <div className="text-sm font-bold text-foreground">{formatNumber(token.volume)}</div>
+        {/* Volume row */}
+        <div>
+          <div className="grid grid-cols-3 gap-2 items-end">
+            <div>
+              <div className="text-[10px] text-muted-foreground uppercase">VOLUME</div>
+              <div className="text-sm font-bold text-foreground">{formatNumber(token.volume)}</div>
+            </div>
+            <div>
+              <div className="text-[10px] text-muted-foreground uppercase">BUY VOL</div>
+              <div className="text-sm font-bold text-profit">{formatNumber(buyVolume)}</div>
+            </div>
+            <div className="text-right">
+              <div className="text-[10px] text-muted-foreground uppercase">SELL VOL</div>
+              <div className="text-sm font-bold text-loss">{formatNumber(sellVolume)}</div>
+            </div>
           </div>
-          <div>
-            <div className="text-[10px] text-muted-foreground uppercase">BUY VOL</div>
-            <div className="text-sm font-bold text-foreground">{formatNumber(buyVolume)}</div>
-            <div className="h-1 rounded bg-profit/60 mt-1" />
-          </div>
-          <div className="text-right">
-            <div className="text-[10px] text-muted-foreground uppercase">SELL VOL</div>
-            <div className="text-sm font-bold text-foreground">{formatNumber(sellVolume)}</div>
-            <div className="h-1 rounded bg-loss/60 mt-1" />
-          </div>
+          <RatioBar buyValue={buyVolume} sellValue={sellVolume} />
         </div>
 
-        <div className="grid grid-cols-3 gap-2 items-end">
-          <div>
-            <div className="text-[10px] text-muted-foreground uppercase">MAKERS</div>
-            <div className="text-sm font-bold text-foreground">{formatCompact(token.makers)}</div>
+        {/* Makers row */}
+        <div>
+          <div className="grid grid-cols-3 gap-2 items-end">
+            <div>
+              <div className="text-[10px] text-muted-foreground uppercase">MAKERS</div>
+              <div className="text-sm font-bold text-foreground">{formatCompact(token.makers)}</div>
+            </div>
+            <div>
+              <div className="text-[10px] text-muted-foreground uppercase">BUYERS</div>
+              <div className="text-sm font-bold text-profit">{formatCompact(buyers)}</div>
+            </div>
+            <div className="text-right">
+              <div className="text-[10px] text-muted-foreground uppercase">SELLERS</div>
+              <div className="text-sm font-bold text-loss">{formatCompact(sellers)}</div>
+            </div>
           </div>
-          <div>
-            <div className="text-[10px] text-muted-foreground uppercase">BUYERS</div>
-            <div className="text-sm font-bold text-foreground">{formatCompact(buyers)}</div>
-          </div>
-          <div className="text-right">
-            <div className="text-[10px] text-muted-foreground uppercase">SELLERS</div>
-            <div className="text-sm font-bold text-foreground">{formatCompact(sellers)}</div>
-          </div>
+          <RatioBar buyValue={buyers} sellValue={sellers} />
         </div>
       </div>
 
-      {/* Watchlist + Alerts */}
+      {/* Watchlist + Alerts + Buy/Sell */}
       <div className="px-4 py-3 space-y-2">
         <div className="flex gap-2">
           <button
@@ -224,10 +286,10 @@ const TokenInfoPanel = ({ token, onBuyClick, onSellClick }: TokenInfoPanelProps)
         </div>
         <div className="flex gap-2">
           <button onClick={onBuyClick} className="flex-1 flex items-center justify-center gap-1.5 px-3 py-3 text-sm font-semibold bg-profit/20 text-profit rounded-md border border-profit/30 hover:bg-profit/30 transition-colors">
-            🟢 Buy
+            <div className="w-2 h-2 rounded-full bg-profit" /> Buy
           </button>
           <button onClick={onSellClick} className="flex-1 flex items-center justify-center gap-1.5 px-3 py-3 text-sm font-semibold bg-loss/20 text-loss rounded-md border border-loss/30 hover:bg-loss/30 transition-colors">
-            🔴 Sell
+            <div className="w-2 h-2 rounded-full bg-loss" /> Sell
           </button>
         </div>
       </div>
