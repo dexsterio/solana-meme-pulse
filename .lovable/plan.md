@@ -1,134 +1,159 @@
 
 
-# Implementeringsplan: Trending Ticker, Cryptomarket-knapp och Filterfixar
+# Plan: Market View-forbattringar, sentimentdata och 7d/30d-fix
 
 ## Sammanfattning
 
-Tre huvudfunktioner ska implementeras:
-1. Reparera saknade tidsfilter-knappar (5M, 1H, 6H, 24H) i filter-raden
-2. Omdesigna trending-raden till en rullande/tågande ticker med guld-text, marketcap och procent
-3. Lägga till en "Cryptomarket"-knapp som hämtar top 500 krypto via CoinGecko API
+Sex andringar behovs:
+1. Fixa 7d/30d prisdata (visar 0% just nu)
+2. Byta namn: "MemeMarket" till "Meme Zone", "CryptoMarket" till "Market View"
+3. Lagga till marknadssentiment-panel (Fear & Greed Index, BTC Dominance, Total Market Cap, ETH Gas, Alt Season)
+4. Uppdatera Token-interfacet med nya falt
+5. Uppdatera edge function for att hamta mer data
+6. Skapa ny edge function for global marknadsdata
 
 ---
 
-## 1. Trending-raden -- Rullande ticker med guld och marketcap
+## 1. Fixa edge function -- hamta 7d och 30d data
 
-**Fil: `src/components/TrendingBar.tsx`** -- Omskriven helt
+**Fil: `supabase/functions/coingecko-proxy/index.ts`**
 
-Andringar:
-- CSS-animation (`@keyframes marquee`) som scrollar innehållet horisontellt i en oandlig loop
-- Duplicerat innehåll (renderas 2x) for somlös loop-effekt
-- Varje token visar: ranking, logo (storre, 20px), ticker-namn, foerkortad marketcap (t.ex. "$4.2M"), procentforandring
-- Top 3 tokens far guldfargatd text pa ticker-namnet (gradient gold: `#FFD700` till `#FFA500`)
-- Logoer ar storre (20px istället for 16px) for battre synlighet
-- `formatCompact` fran mockTokens anvands for marketcap-forkortning
+Problemet: API-anropet begarer bara `price_change_percentage=1h,24h`. Behover lagga till `7d,30d`.
 
-**Fil: `src/index.css`** -- Ny keyframe-animation
-
-Lagg till:
-```css
-@keyframes marquee {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
+Andring pa rad 18:
+```
+price_change_percentage=1h,24h,7d,30d
 ```
 
-## 2. Filter-raden -- Aterstall saknade tidsfilter
+Dessutom lagga till en ny route `/global` som hamtar:
+- CoinGecko `/api/v3/global` -- BTC dominance, total market cap
+- Alternative.me Fear & Greed Index -- `https://api.alternative.me/fng/`
 
-**Fil: `src/components/TokenFilters.tsx`**
+## 2. Ny edge function for marknadsdata
 
-Tidsfilter-knapparna (5M, 1H, 6H, 24H) finns redan i koden (rad 60-74 inuti Trending-pill). De ser ut att fungera. Det som saknas ar den grona tidsperiod-pillen som togs bort (rad 40-45 ar tom). Denna lamnades tom medvetet -- den behovs inte da tidsknapparna redan finns inbaddade i trending-knappen.
+**Ny fil: `supabase/functions/crypto-global/index.ts`**
 
-Inga andringar behovs har -- filtren fungerar redan.
+Hamtar tre datakallor parallellt:
+- **CoinGecko Global**: `https://api.coingecko.com/api/v3/global` -- ger `total_market_cap.usd`, `market_cap_percentage.btc`, `market_cap_percentage.eth`
+- **Fear & Greed**: `https://api.alternative.me/fng/` -- ger `value` (0-100) och `value_classification` ("Extreme Fear", "Fear", "Neutral", "Greed", "Extreme Greed")
+- **ETH Gas**: `https://api.etherscan.io/api?module=gastracker&action=gasoracle` (fri utan nyckel, eller alternativt approximerat fran CoinGecko-data)
 
-## 3. Cryptomarket-knapp -- CoinGecko-integration
+Returnerar ett JSON-objekt med all global data.
 
-### 3a. Ny edge function for CoinGecko API
+## 3. Uppdatera Token-interface
 
-**Ny fil: `supabase/functions/coingecko-proxy/index.ts`**
+**Fil: `src/data/mockTokens.ts`**
 
-- Anropar CoinGeckos fria API: `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1`
-- Ingen API-nyckel behovs for det fria lagret
-- Mappar data till Token-interfacet
-- Paginering: hamtar 5 sidor (500 tokens)
-- CORS-headers for frontend-anrop
+Lagg till tva nya falt i Token-interfacet:
+```typescript
+change7d: number;
+change30d: number;
+```
 
-### 3b. Ny service-fil
+## 4. Uppdatera coingeckoApi.ts
 
-**Ny fil: `src/services/coingeckoApi.ts`**
+**Fil: `src/services/coingeckoApi.ts`**
 
-- `fetchCryptoMarket()` -- anropar edge function, returnerar `Token[]`
-- Mappar CoinGecko-falt (`current_price`, `market_cap`, `price_change_percentage_24h`, etc.) till Token-interfacet
+- Lagg till `price_change_percentage_7d_in_currency` och `price_change_percentage_30d_in_currency` i CoinGeckoToken-interfacet
+- Mappa dessa till `change7d` och `change30d` i mapToToken
+- Lagg till ny funktion `fetchCryptoGlobal()` som anropar `crypto-global` edge function
 
-### 3c. Uppdatera StatsBar med Cryptomarket-knapp
+## 5. Uppdatera TokenTable -- anvand ratt falt
+
+**Fil: `src/components/TokenTable.tsx`**
+
+Rad 134-137 anvander felaktiga falt. Andras till:
+```tsx
+<ChangeCell value={token.change1h} />
+<ChangeCell value={token.change24h} />
+<ChangeCell value={token.change7d} />
+<ChangeCell value={token.change30d} />
+```
+
+## 6. Byta namn pa knappen
 
 **Fil: `src/components/StatsBar.tsx`**
 
-- Ny prop: `onCryptoMarketToggle` och `isCryptoMarket`
-- Ny knapp "Cryptomarket" med ikon (Globe) bredvid 24H TXNS-rutan
-- Aktiv state: knappen far primarkfarg nar Cryptomarket ar valt
-- Toggle-beteende: klick byter mellan meme tokens och cryptomarket
+Rad 50: Andra fran `'MemeMarket' : 'CryptoMarket'` till `'Meme Zone' : 'Market View'`
 
-### 3d. Uppdatera Index.tsx
+## 7. Ny komponent: MarketSentimentBar
+
+**Ny fil: `src/components/MarketSentimentBar.tsx`**
+
+Visas ovanfor tabellen nar Market View ar aktivt. Innehaller:
+
+| Indikator | Visning | Kalla |
+|-----------|---------|-------|
+| Fear & Greed Index | Siffra (0-100) + fargkodad etikett | alternative.me |
+| BTC Dominance | Procent (t.ex. "52.3%") | CoinGecko Global |
+| Total Market Cap | Forkortad (t.ex. "$2.45T") | CoinGecko Global |
+| ETH Gas | Gwei-varde | Etherscan/approximerat |
+| Alt Season | Indikator baserad pa BTC dominance-trend | Beraknat lokalt |
+
+Layout: horisontell rad med kompakta "kort" (likt StatsBar-stilen), varje indikator i en `bg-secondary` ruta med etikett och varde.
+
+Fear & Greed fargkodning:
+- 0-25: Rod (Extreme Fear)
+- 26-45: Orange (Fear)
+- 46-55: Gul (Neutral)
+- 56-75: Ljusgron (Greed)
+- 76-100: Gron (Extreme Greed)
+
+Alt Season-logik: Om BTC dominance ar under 40% = Alt Season, 40-50% = Neutral, over 50% = BTC Season.
+
+## 8. Uppdatera Index.tsx
 
 **Fil: `src/pages/Index.tsx`**
 
-- Ny state: `const [isCryptoMarket, setIsCryptoMarket] = useState(false)`
-- Ny hook: `useCryptoMarket()` med React Query
-- Nar `isCryptoMarket` ar true, visas CoinGecko-data istallet for meme tokens
-- Filter-raden doljs eller anpassas i cryptomarket-lage (kategorier ar inte relevanta)
+- Importera och rendera `MarketSentimentBar` ovanfor tabellen nar `isCryptoMarket === true`
+- Anvand React Query for att hamta global data fran `crypto-global` edge function
+- Skicka global data som props till MarketSentimentBar
 
-### 3e. Uppdatera Category-typ
+## 9. Uppdatera alla filer som skapar Token-objekt
 
-**Fil: `src/components/TokenFilters.tsx`**
-
-- Lagg till `'cryptomarket'` som Category-alternativ (eller hantera via separat boolean)
+Filer som skapar Token-objekt behover default-varden for `change7d` och `change30d`:
+- `src/hooks/useTokens.ts` -- lagg till `change7d: 0, change30d: 0`
+- `src/hooks/usePumpPortalNewTokens.ts` -- lagg till `change7d: 0, change30d: 0`
+- `src/services/dexscreenerApi.ts` -- lagg till `change7d: 0, change30d: 0`
+- `src/services/dextoolsApi.ts` -- lagg till `change7d: 0, change30d: 0`
 
 ---
 
 ## Tekniska detaljer
 
-### Guld-gradient for top 3
-
-```css
-background: linear-gradient(135deg, #FFD700, #FFA500);
--webkit-background-clip: text;
--webkit-text-fill-color: transparent;
-```
-
-### Marquee-animation
-
-- Container med `overflow: hidden`
-- Inre div med `display: flex` och `animation: marquee 30s linear infinite`
-- Innehallet dupliceras for somlost loopande
-- Pausar vid hover (`animation-play-state: paused`)
-
-### CoinGecko API-mappning
-
-CoinGecko returnerar:
+### CoinGecko Global API-respons
 ```json
 {
-  "id": "bitcoin",
-  "symbol": "btc",
-  "name": "Bitcoin",
-  "image": "https://...",
-  "current_price": 67000,
-  "market_cap": 1300000000000,
-  "price_change_percentage_24h": 2.5,
-  "total_volume": 35000000000
+  "data": {
+    "total_market_cap": { "usd": 2450000000000 },
+    "market_cap_percentage": { "btc": 52.3, "eth": 17.8 },
+    "market_cap_change_percentage_24h_usd": 1.5
+  }
 }
 ```
 
-Mappas till Token-interfacet med rimliga defaults for Solana-specifika falt.
+### Fear & Greed API-respons
+```json
+{
+  "data": [{ "value": "72", "value_classification": "Greed" }]
+}
+```
 
 ### Filer som andras/skapas
 
 | Fil | Aktion |
 |-----|--------|
-| `src/components/TrendingBar.tsx` | Omskriven -- rullande ticker med guld |
-| `src/index.css` | Ny marquee keyframe |
-| `src/components/StatsBar.tsx` | Ny Cryptomarket-knapp |
-| `src/pages/Index.tsx` | Ny state och CoinGecko-integration |
-| `src/services/coingeckoApi.ts` | Ny fil -- CoinGecko API-anrop |
-| `supabase/functions/coingecko-proxy/index.ts` | Ny edge function |
+| `supabase/functions/coingecko-proxy/index.ts` | Uppdatera -- lagg till 7d,30d |
+| `supabase/functions/crypto-global/index.ts` | Ny fil -- global marknadsdata |
+| `src/data/mockTokens.ts` | Lagg till change7d, change30d |
+| `src/services/coingeckoApi.ts` | Mappa 7d/30d, ny fetchCryptoGlobal |
+| `src/components/TokenTable.tsx` | Fixa 7d/30d kolumner |
+| `src/components/StatsBar.tsx` | Byt namn till Meme Zone / Market View |
+| `src/components/MarketSentimentBar.tsx` | Ny komponent |
+| `src/pages/Index.tsx` | Integrera sentiment-panel |
+| `src/hooks/useTokens.ts` | Default change7d/30d |
+| `src/hooks/usePumpPortalNewTokens.ts` | Default change7d/30d |
+| `src/services/dexscreenerApi.ts` | Default change7d/30d |
+| `src/services/dextoolsApi.ts` | Default change7d/30d |
+| `supabase/config.toml` | Registrera crypto-global |
 
