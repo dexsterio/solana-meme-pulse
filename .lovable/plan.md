@@ -1,56 +1,160 @@
 
+# Översätt hela plattformen till svenska
 
-# Replace Icons with Custom Tabler SVGs
+## Sammanfattning
+All synlig text i gränssnittet ska bytas ut från engelska till svenska. Inga engelskspråkiga ord kvar i UI:t (förutom kryptovaluta-termer som är universella, t.ex. "Token", "SOL", "MCap", "FDV").
 
-## Overview
-Replace 5 Lucide icons with custom Tabler icon SVGs throughout the platform, each with specific colors matching the provided designs.
+---
 
-## Icon Mapping
+## Alla ändringar per fil
 
-| Icon | Replaces | Color | Used In |
-|------|----------|-------|---------|
-| Filled Flame | `Flame` (lucide) | #e5a50a (gold) | ViralBar, TrendingBar, TokenFilters |
-| Info Octagon | `Info` (lucide) | #e5a50a stroke | InfoTooltip (used everywhere) |
-| World | `Globe` (lucide) | #e5a50a stroke | StatsBar (Market View button) |
-| Filled Crown | `Crown` (lucide) | #e5a50a (gold) | ViralBar, TokenTable (OG badge, STATUS column) |
-| Filled Caret Up | `TrendingUp` (lucide) | #26a269 (green) | ViralBar sort, TokenTable (TOP badge, Highest MCap status) |
+### 1. `src/components/TokenFilters.tsx`
+| Engelska | Svenska |
+|----------|---------|
+| `Trending` | `Trendande` |
+| `Top` | `Topp` |
+| `Gainers` | `Vinnare` |
+| `New Pairs` | `Nya Par` |
+| `Rank by:` | `Sortera:` |
+| `Trending 24H` (option) | `Trendande 24H` |
+| `Volume` (option) | `Volym` |
+| `Price Change` (option) | `Prisförändring` |
+| `Transactions` (option) | `Transaktioner` |
+| `Market Cap` (option) | `Market Cap` |
+| `Filters` | `Filter` |
+| `Customize` | `Anpassa` |
+| `Min Volume:` | `Min Volym:` |
+| `Min Liquidity:` | `Min Likviditet:` |
+| `Max Age:` | `Max Ålder:` |
+| `Any` (placeholder) | `Alla` |
+| `Last 5 minutes` etc. (timeLabel) | `Senaste 5 minuterna` osv. |
 
-## Changes
+### 2. `src/components/StatsBar.tsx`
+| Engelska | Svenska |
+|----------|---------|
+| `Search token...` | `Sök token...` |
+| `Market View` | `Marknadsvy` |
+| `Meme Zone` | `Meme-zon` |
 
-### 1. New file: `src/components/icons/TablerIcons.tsx`
-Create reusable React SVG icon components for all 5 icons, accepting `className` and `style` props for sizing. Each renders the exact SVG path provided.
+### 3. `src/components/TrendingBar.tsx`
+| Engelska | Svenska |
+|----------|---------|
+| `Trending` | `Trendande` |
 
-### 2. `src/components/InfoTooltip.tsx`
-- Remove `Info` from lucide-react import
-- Import `InfoOctagonIcon` from TablerIcons
-- Replace `<Info>` with `<InfoOctagonIcon>`
+### 4. `src/components/ViralBar.tsx`
+| Engelska | Svenska |
+|----------|---------|
+| `Viral Memes` | `Virala Memes` |
+| `tokens` (i "X tokens") | `tokens` (behåll) |
+| `Back` | `Tillbaka` |
+| `Sort:` | `Sortera:` |
+| `First Created` | `Först skapad` |
+| `Highest MCap` | `Högst MCap` |
+| `Highest Volume` | `Högst Volym` |
 
-### 3. `src/components/ViralBar.tsx`
-- Remove `Flame`, `Crown`, `TrendingUp` from lucide-react import
-- Import `FlameFilledIcon`, `CrownFilledIcon`, `CaretUpFilledIcon` from TablerIcons
-- Replace all 3 icons in: header label, selected cluster crown, sort option for "Highest MCap"
+### 5. `src/components/TokenTable.tsx`
+| Engelska | Svenska |
+|----------|---------|
+| `TOKEN` | `TOKEN` (behåll) |
+| `PRICE` | `PRIS` |
+| `AGE` | `ÅLDER` |
+| `TXNS` | `TXNS` (behåll) |
+| `VOLUME` | `VOLYM` |
+| `MAKERS` | `MAKERS` (behåll) |
+| `LIQUIDITY` | `LIKVIDITET` |
+| `STATUS` | `STATUS` (behåll) |
+| `First Created` (status) | `Först skapad` |
+| `Highest MCap` (status) | `Högst MCap` |
+| `Clone` (status) | `Kopia` |
+| OgBadge title: `The first token...` | `Den första token med detta namn` |
+| TopBadge title: `The token with...` | `Token med högst market cap i klustret` |
 
-### 4. `src/components/TrendingBar.tsx`
-- Remove `Flame` from lucide-react
-- Import `FlameFilledIcon` from TablerIcons
-- Replace the trending label flame icon
+### 6. `src/components/TokenGrid.tsx`
+- Inga synliga engelska etiketter kvar (Vol, MCap, Liq, Age behålls som förkortningar)
 
-### 5. `src/components/TokenFilters.tsx`
-- Remove `Flame` from lucide-react
-- Import `FlameFilledIcon` from TablerIcons
-- Replace in Trending category button
+### 7. `src/components/MarketSentimentBar.tsx`
+| Engelska | Svenska |
+|----------|---------|
+| `Market Cap` | `Market Cap` (behåll, universell term) |
+| `BTC Dom` | `BTC Dom` (behåll) |
+| `ETH Gas` | `ETH Gas` (behåll) |
+| `Season` | `Säsong` |
+| `Alt Season` | `Alt-säsong` |
+| `BTC Season` | `BTC-säsong` |
+| `Neutral` | `Neutral` (behåll) |
+| `Fear & Greed` | `Rädsla & Girighet` |
 
-### 6. `src/components/StatsBar.tsx`
-- Remove `Globe` from lucide-react
-- Import `WorldIcon` from TablerIcons
-- Replace in Market View button
+### 8. `src/pages/Index.tsx`
+| Engelska | Svenska |
+|----------|---------|
+| `Listening for new tokens...` | `Lyssnar efter nya tokens...` |
+| `Only tokens with logos are shown` | `Bara tokens med logotyp visas` |
+| `DexTools API rate limited...` | `DexTools API-gräns nådd — prova igen.` |
+| `Failed to load data.` | `Kunde inte ladda data.` |
+| `Retry now` | `Försök igen` |
 
-### 7. `src/components/TokenTable.tsx`
-- Remove `Crown`, `TrendingUp` from lucide-react
-- Import `CrownFilledIcon`, `CaretUpFilledIcon` from TablerIcons
-- Replace in: OgBadge, TopBadge, and STATUS column (First Created / Highest MCap rows)
+### 9. `src/pages/TokenDetail.tsx`
+| Engelska | Svenska |
+|----------|---------|
+| `Token not found` | `Token hittades inte` |
+| `Go back` | `Gå tillbaka` |
 
-## Technical Details
-- All custom icons accept `className` and `style` props for consistent sizing with the rest of the UI
-- Colors are baked into the SVG fills/strokes as provided, but can be overridden via `className` if needed
-- No new dependencies required
+### 10. `src/pages/NotFound.tsx`
+| Engelska | Svenska |
+|----------|---------|
+| `Oops! Page not found` | `Sidan hittades inte` |
+| `Return to Home` | `Tillbaka till startsidan` |
+
+### 11. `src/components/TokenInfoPanel.tsx`
+| Engelska | Svenska |
+|----------|---------|
+| `Price USD` | `Pris USD` |
+| `Price` (SOL) | `Pris` |
+| `LIQUIDITY` | `LIKVIDITET` |
+| `TXNS` | `TXNS` (behåll) |
+| `BUYS` | `KÖP` |
+| `SELLS` | `SÄLJ` |
+| `VOLUME` | `VOLYM` |
+| `BUY VOL` | `KÖPVOLYM` |
+| `SELL VOL` | `SÄLJVOLYM` |
+| `MAKERS` | `MAKERS` (behåll) |
+| `BUYERS` | `KÖPARE` |
+| `SELLERS` | `SÄLJARE` |
+| `Watchlist` | `Bevakningslista` |
+| `Alerts` | `Aviseringar` |
+| `Buy` | `Köp` |
+| `Sell` | `Sälj` |
+| Twitter/Telegram/Website buttons | Behåll engelska (brand names) |
+
+### 12. `src/components/TransactionList.tsx`
+| Engelska | Svenska |
+|----------|---------|
+| `Transactions` | `Transaktioner` |
+| `Top Traders` | `Topphandlare` |
+| `Holders` | `Innehavare` |
+| `DATE` | `DATUM` |
+| `TYPE` | `TYP` |
+| `AMOUNT` | `ANTAL` |
+| `PRICE` | `PRIS` |
+| `Buy` / `Sell` | `Köp` / `Sälj` |
+| Time format `en-US` | `sv-SE` |
+
+### 13. `src/components/PriceChart.tsx`
+| Engelska | Svenska |
+|----------|---------|
+| `Price` (toggle) | `Pris` |
+| `Chart placeholder — OHLCV data will be connected later` | `Diagramplacering — OHLCV-data kopplas senare` |
+
+### 14. `src/components/SearchBar.tsx`
+| Engelska | Svenska |
+|----------|---------|
+| `Paste token address to search...` | `Klistra in tokenadress för att söka...` |
+| `Go` | `Sök` |
+
+---
+
+## Tekniska detaljer
+- Totalt 14 filer ändras
+- Inga nya beroenden krävs
+- Inga strukturella kodändringar, bara textsträngar
+- Kryptovaluta-specifika termer (Token, SOL, MCap, FDV, MCAP, TXNS, MAKERS) behålls på engelska då de är branschstandard
