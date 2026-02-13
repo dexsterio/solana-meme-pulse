@@ -18,6 +18,19 @@ interface PumpPortalTokenEvent {
   name: string;
   symbol: string;
   uri: string;
+  pool?: string; // 'pump' | 'bonk' — platform identifier
+}
+
+// Known pump.fun program ID
+const PUMP_PROGRAM = '6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P';
+
+function detectPlatform(event: PumpPortalTokenEvent): string {
+  // PumpPortal may include a 'pool' field
+  if (event.pool === 'bonk' || event.pool === 'letsbonk') return 'letsbonk.fun';
+  if (event.pool === 'pump') return 'pump.fun';
+  // Fallback: check URI patterns
+  if (event.uri?.includes('bonk') || event.uri?.includes('letsbonk')) return 'letsbonk.fun';
+  return 'pump.fun';
 }
 
 // Fetch metadata (logo) from token URI with timeout
@@ -93,7 +106,7 @@ function mapEventToToken(event: PumpPortalTokenEvent, logoUrl: string, index: nu
     fdv: mcapUsd,
     buys24h: 1,
     sells24h: 0,
-    exchangeName: 'pump.fun',
+    exchangeName: detectPlatform(event),
   } as Token;
 }
 
