@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Filter, LayoutList, LayoutGrid, Clock, Trophy, TrendingUp, Sparkles, User, Rocket, Megaphone, Settings, ChevronDown } from 'lucide-react';
 import { FlameFilledIcon } from '@/components/icons/TablerIcons';
-import InfoTooltip from '@/components/InfoTooltip';
+
 
 export type TimeFilter = '5m' | '1h' | '6h' | '24h';
 export type Category = 'trending' | 'top' | 'gainers' | 'new';
@@ -58,7 +58,6 @@ const TokenFilters = ({
 
             <FlameFilledIcon className="w-3.5 h-3.5" />
             Trending
-            <InfoTooltip text="tokens with the most activity and attention right now." iconSize={11} />
           </button>
           <div className="flex items-center bg-secondary/80 border-l border-border">
             {timeOptions.map((t) =>
@@ -86,7 +85,6 @@ const TokenFilters = ({
 
           <Trophy className="w-3.5 h-3.5" />
           Top
-          <InfoTooltip text="highest ranked tokens by market cap and volume." iconSize={11} />
         </button>
         <button
           onClick={() => setCategory('gainers')}
@@ -96,7 +94,6 @@ const TokenFilters = ({
 
           <TrendingUp className="w-3.5 h-3.5" />
           Gainers
-          <InfoTooltip text="tokens with the biggest price increase." iconSize={11} />
         </button>
         <button
           onClick={() => setCategory('new')}
@@ -106,7 +103,6 @@ const TokenFilters = ({
 
           <Sparkles className="w-3.5 h-3.5" />
           New Pairs
-          <InfoTooltip text="newly created tokens streaming in real-time." iconSize={11} />
         </button>
 
         {/* Decorative buttons */}

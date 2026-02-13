@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { Token, formatPrice, formatNumber } from '@/data/mockTokens';
 import { Zap } from 'lucide-react';
 import { CrownFilledIcon, CaretUpFilledIcon } from '@/components/icons/TablerIcons';
-import InfoTooltip from '@/components/InfoTooltip';
+
 import pumpfunLogo from '@/assets/pumpfun-logo.png';
 import bonkLogo from '@/assets/bonk-logo.png';
 import raydiumLogo from '@/assets/raydium-logo.png';
@@ -72,10 +72,10 @@ const TokenTable = ({ tokens, isCryptoMarket = false, ogTokenId, topTokenId, sho
             <th className="w-10 px-3 py-2 text-left font-normal">#</th>
             <th className={`${showCreatedColumn ? 'w-[280px]' : isCryptoMarket ? 'w-[200px]' : 'w-[260px]'} px-3 py-2 text-left font-normal`}>TOKEN</th>
             <th className="px-3 py-2 text-right font-normal">PRICE</th>
-            {!isCryptoMarket && <th className="px-3 py-2 text-right font-normal"><span className="inline-flex items-center gap-1">AGE <InfoTooltip text="time since token was created." iconSize={10} /></span></th>}
-            {!isCryptoMarket && <th className="px-3 py-2 text-right font-normal"><span className="inline-flex items-center gap-1">TXNS <InfoTooltip text="number of buy and sell transactions." iconSize={10} /></span></th>}
-            <th className="px-3 py-2 text-right font-normal"><span className="inline-flex items-center gap-1">VOLUME <InfoTooltip text="total traded value in USD." iconSize={10} /></span></th>
-            {!isCryptoMarket && <th className="px-3 py-2 text-right font-normal"><span className="inline-flex items-center gap-1">MAKERS <InfoTooltip text="unique wallets that traded this token." iconSize={10} /></span></th>}
+            {!isCryptoMarket && <th className="px-3 py-2 text-right font-normal">AGE</th>}
+            {!isCryptoMarket && <th className="px-3 py-2 text-right font-normal">TXNS</th>}
+            <th className="px-3 py-2 text-right font-normal">VOLUME</th>
+            {!isCryptoMarket && <th className="px-3 py-2 text-right font-normal">MAKERS</th>}
             {isCryptoMarket ? (
               <>
                 <th className="px-3 py-2 text-right font-normal">1H</th>
@@ -91,9 +91,9 @@ const TokenTable = ({ tokens, isCryptoMarket = false, ogTokenId, topTokenId, sho
                 <th className="px-3 py-2 text-right font-normal">24H</th>
               </>
             )}
-            {!isCryptoMarket && <th className="px-3 py-2 text-right font-normal"><span className="inline-flex items-center gap-1">LIQUIDITY <InfoTooltip text="available liquidity in the trading pool." iconSize={10} /></span></th>}
-            <th className="px-3 py-2 text-right font-normal"><span className="inline-flex items-center gap-1">MCAP <InfoTooltip text="market cap = price × total supply." iconSize={10} /></span></th>
-            {showCreatedColumn && <th className="w-[120px] px-3 py-2 text-right font-normal"><span className="inline-flex items-center gap-1">STATUS <InfoTooltip text="OG = first created. TOP = highest market cap. Clone = copy." iconSize={10} /></span></th>}
+            {!isCryptoMarket && <th className="px-3 py-2 text-right font-normal">LIQUIDITY</th>}
+            <th className="px-3 py-2 text-right font-normal">MCAP</th>
+            {showCreatedColumn && <th className="w-[120px] px-3 py-2 text-right font-normal">STATUS</th>}
           </tr>
         </thead>
         <tbody>
@@ -114,7 +114,7 @@ const TokenTable = ({ tokens, isCryptoMarket = false, ogTokenId, topTokenId, sho
                   <TokenLogo token={token} />
                   <div className="flex items-center gap-1.5 min-w-0 overflow-hidden">
                     <span className="font-semibold text-foreground truncate max-w-[100px]">{token.name}</span>
-                    {!isCryptoMarket && <span className="text-muted-foreground text-[12px] shrink-0">/SOL</span>}
+                    
                     <span className="text-muted-foreground text-[12px] shrink-0">{token.ticker}</span>
                     {ogTokenId === token.id && <OgBadge />}
                     {topTokenId === token.id && topTokenId !== ogTokenId && <TopBadge />}

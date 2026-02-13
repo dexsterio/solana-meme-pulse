@@ -1,7 +1,7 @@
 import { Search } from 'lucide-react';
 import { WorldIcon } from '@/components/icons/TablerIcons';
 import { Token, formatNumber } from '@/data/mockTokens';
-import InfoTooltip from '@/components/InfoTooltip';
+
 
 interface StatsBarProps {
   tokens?: Token[];
@@ -34,13 +34,11 @@ const StatsBar = ({ tokens = [], onSearch, searchQuery = '', onSearchChange, isC
 
       <div className="flex items-center gap-2 px-4 py-1.5 border border-border rounded bg-secondary">
         <span className="text-[13px] text-muted-foreground">24H VOLUME:</span>
-        <InfoTooltip text="total trading volume for all listed tokens in the last 24 hours." />
         <span className="text-[15px] text-profit font-bold">{formatNumber(totalVolume)}</span>
       </div>
 
       <div className="flex items-center gap-2 px-4 py-1.5 border border-border rounded bg-secondary">
         <span className="text-[13px] text-muted-foreground">24H TXNS:</span>
-        <InfoTooltip text="total number of buy/sell transactions for all tokens in the last 24 hours." />
         <span className="text-[15px] text-foreground font-bold">{totalTxns.toLocaleString()}</span>
       </div>
 
