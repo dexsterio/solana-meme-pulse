@@ -52,6 +52,8 @@ function dedupeByToken(pairs: any[], limit: number): any[] {
   const result: any[] = [];
   for (const pair of pairs) {
     if (pair.chainId !== 'solana') continue;
+    // Skip tokens without logo/metadata
+    if (!pair.info?.imageUrl) continue;
     const addr = pair.baseToken?.address;
     if (addr && !seen.has(addr)) {
       seen.add(addr);
