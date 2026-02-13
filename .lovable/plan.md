@@ -1,42 +1,38 @@
 
-# Upgrade Percentage Typography Across Entire Project
+
+# Remove Trend Icons and Match Reference Colors
 
 ## Overview
-Upgrade all percentage number styling across every component in the project to use bold, tight-tracked, professional typography -- consistent everywhere, no thin or generic-looking numbers.
+Two main changes: (1) remove the TrendingUp/TrendingDown arrow icons from all percentage displays, and (2) adjust the entire color palette to match the DexScreener reference image more precisely.
 
-## Components to Update
+## Changes
 
-### 1. `src/components/TokenGrid.tsx` (Grid Cards)
-**24h change badge (lines 73-81):**
-- Font: `text-[11px] font-medium` --> `text-[13px] font-bold tracking-tight`
-- Padding: `px-2 py-0.5` --> `px-2.5 py-1`
-- Icon: `w-3 h-3` --> `w-3.5 h-3.5`
-- Background opacity: `0.12` --> `0.18`
+### 1. Remove Trend Icons from Percentages
 
-**Timeframe pills 5m/1h/6h (lines 100-114):**
-- Labels: `text-[10px]` --> `text-[11px] font-semibold uppercase tracking-wider`
-- Values: `text-[11px] font-medium` --> `text-[13px] font-bold tracking-tight`
-- Padding: `px-1.5 py-0.5` --> `px-2 py-1`
-- Background opacity: `0.1` --> `0.15`
-- Shape: `rounded-md` --> `rounded-lg`
+**File: `src/components/TokenGrid.tsx`**
+- Remove `TrendingUp` and `TrendingDown` imports from lucide-react
+- Remove the icon elements from the 24h change badge (line 79) -- keep only the text percentage
 
-### 2. `src/components/TokenTable.tsx` (Table View)
-**ChangeCell component (lines 36-43):**
-- Font: `text-[13px]` --> `text-[13px] font-bold tracking-tight`
-- Add `+` prefix for positive values (currently missing)
+### 2. Color Palette Update to Match Reference
 
-### 3. `src/components/TrendingBar.tsx` (Trending Strip)
-**Percentage span (line 36-38):**
-- Font: `text-[11px]` (no weight) --> `text-[12px] font-bold tracking-tight`
+**File: `src/index.css`** -- Update CSS custom properties
 
-### 4. `src/components/TokenInfoPanel.tsx` (Token Detail Page)
-**Price change boxes (line 123):**
-- Remove `font-mono` (violates project style rule -- Inter only)
-- Font: `text-xs font-bold font-mono` --> `text-sm font-bold tracking-tight`
+Analyzing the reference image carefully, the DexScreener background is noticeably lighter and more blue-tinted than our current `#0d0e14`. The reference shows approximately:
 
-## Consistency Rules Applied
-- All percentage numbers: `font-bold tracking-tight`
-- No `font-mono` anywhere (project rule: Inter only)
-- Positive values always prefixed with `+`
-- Colored backgrounds with sufficient opacity for readability
-- Minimum `text-[12px]` for any percentage display
+| Element | Current HSL | New HSL | Approx Hex |
+|---------|-------------|---------|------------|
+| Background (body) | 228 16% 6% | 225 20% 11% | #171b26 |
+| Card / Surface-1 | 228 14% 8% | 225 18% 13% | #1b1f2c |
+| Secondary / Input | 228 14% 11% | 225 16% 15% | #212535 |
+| Surface-2 / Popover | 228 14% 10% | 225 18% 14% | #1d2230 |
+| Accent / Surface-3 | 228 14% 13% | 225 16% 17% | #262a3a |
+| Border | 228 12% 14% | 225 14% 18% | #292d3d |
+| Muted | 228 14% 11% | 225 16% 15% | #212535 |
+| Muted foreground | 220 10% 45% | 220 12% 50% | slightly brighter labels |
+
+These values shift the entire platform from near-black to the slightly blue-grey tone visible in the reference, matching the DexScreener aesthetic precisely.
+
+### Files Modified
+1. **`src/components/TokenGrid.tsx`** -- Remove TrendingUp/TrendingDown icons from 24h badge
+2. **`src/index.css`** -- Update all color CSS custom properties to match reference
+
