@@ -78,7 +78,7 @@ const TokenInfoPanel = ({ token, onBuyClick, onSellClick }: TokenInfoPanelProps)
                 const ageStr = token.age;
                 const isYoung = ageStr.endsWith('h') || ageStr.endsWith('m') || ageStr.endsWith('s');
                 return (
-                  <span className={`px-1.5 py-0 rounded border border-border flex items-center gap-0.5 ${isYoung ? 'bg-[#26a269]/10 border-[#26a269]/30' : 'bg-muted/30'}`}>
+                  <span className="flex items-center gap-0.5">
                     {isYoung && (
                       <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#26a269" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
                         <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
@@ -91,7 +91,7 @@ const TokenInfoPanel = ({ token, onBuyClick, onSellClick }: TokenInfoPanelProps)
                 );
               })()}
               {token.rank > 0 && (
-                <span className={`px-1.5 py-0 rounded border border-border font-bold text-[11px] ${token.rank <= 5 ? 'bg-[#e5a50a]/10 text-[#e5a50a] border-[#e5a50a]/30' : 'bg-muted/30 text-foreground'}`}>#{token.rank}</span>
+                <span className={`font-bold text-[11px] ${token.rank <= 5 ? 'text-[#e5a50a]' : 'text-foreground'}`}>#{token.rank}</span>
               )}
               {token.boosts && token.boosts > 0 && (
                 <span className="px-1.5 py-0 rounded bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 flex items-center gap-0.5">
