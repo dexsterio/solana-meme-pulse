@@ -3,9 +3,11 @@ import { Globe, Twitter, MessageCircle, Star, Bell, ExternalLink, Zap, Copy, Shi
 
 interface TokenInfoPanelProps {
   token: Token;
+  onBuyClick?: () => void;
+  onSellClick?: () => void;
 }
 
-const TokenInfoPanel = ({ token }: TokenInfoPanelProps) => {
+const TokenInfoPanel = ({ token, onBuyClick, onSellClick }: TokenInfoPanelProps) => {
   const buys = token.buys24h ?? Math.round(token.txns * 0.55);
   const sells = token.sells24h ?? (token.txns - buys);
   const buyVolume = token.buyVolume24h ?? token.volume * 0.58;
@@ -191,10 +193,10 @@ const TokenInfoPanel = ({ token }: TokenInfoPanelProps) => {
           </button>
         </div>
         <div className="flex gap-2">
-          <button className="flex-1 flex items-center justify-center gap-1.5 px-3 py-3 text-sm font-semibold bg-profit/20 text-profit rounded-md border border-profit/30 hover:bg-profit/30 transition-colors">
+          <button onClick={onBuyClick} className="flex-1 flex items-center justify-center gap-1.5 px-3 py-3 text-sm font-semibold bg-profit/20 text-profit rounded-md border border-profit/30 hover:bg-profit/30 transition-colors">
             🟢 Buy
           </button>
-          <button className="flex-1 flex items-center justify-center gap-1.5 px-3 py-3 text-sm font-semibold bg-loss/20 text-loss rounded-md border border-loss/30 hover:bg-loss/30 transition-colors">
+          <button onClick={onSellClick} className="flex-1 flex items-center justify-center gap-1.5 px-3 py-3 text-sm font-semibold bg-loss/20 text-loss rounded-md border border-loss/30 hover:bg-loss/30 transition-colors">
             🔴 Sell
           </button>
         </div>
