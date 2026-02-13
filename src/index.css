@@ -108,3 +108,25 @@
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
+
+/* Prevent horizontal overflow on mobile */
+html, body {
+  overflow-x: hidden;
+}
+
+/* Safe area insets for notched phones */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Touch-friendly tap targets on mobile */
+@media (max-width: 767px) {
+  button, a, [role="button"] {
+    min-height: 36px;
+  }
+
+  /* Pause marquee on mobile to save battery */
+  .animate-marquee {
+    animation-duration: 40s;
+  }
+}

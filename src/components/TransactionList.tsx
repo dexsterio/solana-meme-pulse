@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { generateMockTransactions, formatPrice, formatCompact } from '@/data/mockTokens';
 import { ExternalLink, Users, BarChart3 } from 'lucide-react';
 import SolanaIcon from '@/components/SolanaIcon';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface TransactionListProps {
   tokenId: string;
@@ -24,15 +25,16 @@ function formatRelativeTime(dateStr: string): string {
 const TransactionList = ({ tokenId }: TransactionListProps) => {
   const [activeTab, setActiveTab] = useState<typeof tabs[number]>('Transactions');
   const transactions = useMemo(() => generateMockTransactions(tokenId), [tokenId]);
+  const isMobile = useIsMobile();
 
   return (
     <div className="flex flex-col h-full bg-card rounded-lg border border-border">
-      <div className="flex items-center gap-1 px-3 py-2 border-b border-border">
+      <div className="flex items-center gap-1 px-2 md:px-3 py-2 border-b border-border">
         {tabs.map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
+            className={`px-2 md:px-3 py-1 text-[11px] md:text-xs font-medium rounded transition-colors ${
               activeTab === tab ? 'bg-accent text-foreground' : 'text-muted-foreground hover:text-foreground'
             }`}
           >
@@ -43,36 +45,42 @@ const TransactionList = ({ tokenId }: TransactionListProps) => {
 
       <div className="flex-1 overflow-auto">
         {activeTab === 'Transactions' ? (
-          <table className="w-full text-[11px]">
+          <table className="w-full text-[10px] md:text-[11px]">
             <thead className="sticky top-0 bg-card border-b border-border z-10">
               <tr className="text-muted-foreground">
-                <th className="px-2 py-1.5 text-left font-medium">DATE</th>
-                <th className="px-2 py-1.5 text-left font-medium">TYPE</th>
-                <th className="px-2 py-1.5 text-right font-medium">USD</th>
-                <th className="px-2 py-1.5 text-right font-medium">AMOUNT</th>
-                <th className="px-2 py-1.5 text-right font-medium" aria-label="SOL amount"><span className="flex items-center justify-end gap-1"><SolanaIcon size={10} /></span></th>
-                <th className="px-2 py-1.5 text-right font-medium">PRICE</th>
-                <th className="px-2 py-1.5 text-right font-medium">MAKER</th>
-                <th className="px-2 py-1.5 text-center font-medium">TXN</th>
+                <th className="px-1.5 md:px-2 py-1.5 text-left font-medium">DATE</th>
+                <th className="px-1.5 md:px-2 py-1.5 text-left font-medium">TYPE</th>
+                <th className="px-1.5 md:px-2 py-1.5 text-right font-medium">USD</th>
+                {!isMobile && <th className="px-2 py-1.5 text-right font-medium">AMOUNT</th>}
+                {!isMobile && (
+                  <th className="px-2 py-1.5 text-right font-medium" aria-label="SOL amount">
+                    <span className="flex items-center justify-end gap-1"><SolanaIcon size={10} /></span>
+                  </th>
+                )}
+                {!isMobile && <th className="px-2 py-1.5 text-right font-medium">PRICE</th>}
+                <th className="px-1.5 md:px-2 py-1.5 text-right font-medium">MAKER</th>
+                <th className="px-1.5 md:px-2 py-1.5 text-center font-medium">TXN</th>
               </tr>
             </thead>
             <tbody>
               {transactions.map((tx) => (
                 <tr key={tx.id} className="border-b border-border/30 hover:bg-accent/30">
-                  <td className="px-2 py-1.5 text-muted-foreground" title={new Date(tx.date).toLocaleString()}>
+                  <td className="px-1.5 md:px-2 py-1.5 text-muted-foreground" title={new Date(tx.date).toLocaleString()}>
                     {formatRelativeTime(tx.date)}
                   </td>
-                  <td className={`px-2 py-1.5 font-medium ${tx.type === 'buy' ? 'text-profit' : 'text-loss'}`}>
+                  <td className={`px-1.5 md:px-2 py-1.5 font-medium ${tx.type === 'buy' ? 'text-profit' : 'text-loss'}`}>
                     {tx.type === 'buy' ? 'Buy' : 'Sell'}
                   </td>
-                  <td className="px-2 py-1.5 text-right text-foreground">${tx.usd.toFixed(2)}</td>
-                  <td className="px-2 py-1.5 text-right text-foreground">{formatCompact(tx.tokenAmount)}</td>
-                  <td className="px-2 py-1.5 text-right text-muted-foreground">
-                    <span className="flex items-center justify-end gap-0.5"><SolanaIcon size={10} />{tx.sol.toFixed(3)}</span>
-                  </td>
-                  <td className="px-2 py-1.5 text-right font-mono text-foreground">{formatPrice(tx.price)}</td>
-                  <td className="px-2 py-1.5 text-right text-primary font-mono">{tx.maker}</td>
-                  <td className="px-2 py-1.5 text-center">
+                  <td className="px-1.5 md:px-2 py-1.5 text-right text-foreground">${tx.usd.toFixed(2)}</td>
+                  {!isMobile && <td className="px-2 py-1.5 text-right text-foreground">{formatCompact(tx.tokenAmount)}</td>}
+                  {!isMobile && (
+                    <td className="px-2 py-1.5 text-right text-muted-foreground">
+                      <span className="flex items-center justify-end gap-0.5"><SolanaIcon size={10} />{tx.sol.toFixed(3)}</span>
+                    </td>
+                  )}
+                  {!isMobile && <td className="px-2 py-1.5 text-right font-mono text-foreground">{formatPrice(tx.price)}</td>}
+                  <td className="px-1.5 md:px-2 py-1.5 text-right text-primary font-mono text-[9px] md:text-[11px]">{tx.maker}</td>
+                  <td className="px-1.5 md:px-2 py-1.5 text-center">
                     <ExternalLink className="w-3 h-3 text-muted-foreground hover:text-primary inline cursor-pointer" />
                   </td>
                 </tr>
