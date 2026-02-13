@@ -1,160 +1,159 @@
 
-# Översätt hela plattformen till svenska
 
-## Sammanfattning
-All synlig text i gränssnittet ska bytas ut från engelska till svenska. Inga engelskspråkiga ord kvar i UI:t (förutom kryptovaluta-termer som är universella, t.ex. "Token", "SOL", "MCap", "FDV").
+# Translate Entire Platform to English
+
+## Summary
+All Swedish text in the UI will be replaced with English. Every visible label, tooltip, button, status text, placeholder, and error message across all components will be changed to English.
 
 ---
 
-## Alla ändringar per fil
+## Changes Per File
 
 ### 1. `src/components/TokenFilters.tsx`
-| Engelska | Svenska |
-|----------|---------|
-| `Trending` | `Trendande` |
-| `Top` | `Topp` |
-| `Gainers` | `Vinnare` |
-| `New Pairs` | `Nya Par` |
-| `Rank by:` | `Sortera:` |
-| `Trending 24H` (option) | `Trendande 24H` |
-| `Volume` (option) | `Volym` |
-| `Price Change` (option) | `Prisförändring` |
-| `Transactions` (option) | `Transaktioner` |
-| `Market Cap` (option) | `Market Cap` |
-| `Filters` | `Filter` |
-| `Customize` | `Anpassa` |
-| `Min Volume:` | `Min Volym:` |
-| `Min Liquidity:` | `Min Likviditet:` |
-| `Max Age:` | `Max Ålder:` |
-| `Any` (placeholder) | `Alla` |
-| `Last 5 minutes` etc. (timeLabel) | `Senaste 5 minuterna` osv. |
+| Swedish | English |
+|---------|---------|
+| `Senaste 5 minuterna` | `Last 5 minutes` |
+| `Senaste timmen` | `Last hour` |
+| `Senaste 6 timmarna` | `Last 6 hours` |
+| `Senaste 24 timmarna` | `Last 24 hours` |
+| `Trendande` | `Trending` |
+| `Topp` | `Top` |
+| `Vinnare` | `Gainers` |
+| `Nya Par` | `New Pairs` |
+| `Sortera:` | `Rank by:` |
+| `Trendande {time}` (option) | `Trending {time}` |
+| `Volym` | `Volume` |
+| `Prisförändring` | `Price Change` |
+| `Transaktioner` | `Transactions` |
+| `Filter` | `Filters` |
+| `Anpassa` | `Customize` |
+| `Min Volym:` | `Min Volume:` |
+| `Min Likviditet:` | `Min Liquidity:` |
+| `Max Ålder:` | `Max Age:` |
+| `Alla` (placeholder) | `Any` |
+| All tooltip texts | English equivalents |
 
 ### 2. `src/components/StatsBar.tsx`
-| Engelska | Svenska |
-|----------|---------|
-| `Search token...` | `Sök token...` |
-| `Market View` | `Marknadsvy` |
-| `Meme Zone` | `Meme-zon` |
+| Swedish | English |
+|---------|---------|
+| `Sök token...` | `Search token...` |
+| `Meme-zon` | `Meme Zone` |
+| `Marknadsvy` | `Market View` |
+| Tooltip texts | English equivalents |
 
 ### 3. `src/components/TrendingBar.tsx`
-| Engelska | Svenska |
-|----------|---------|
-| `Trending` | `Trendande` |
+| Swedish | English |
+|---------|---------|
+| `Trendande` | `Trending` |
+| Tooltip text | `top 10 tokens by 24h price change, scrolling live.` |
 
 ### 4. `src/components/ViralBar.tsx`
-| Engelska | Svenska |
-|----------|---------|
-| `Viral Memes` | `Virala Memes` |
-| `tokens` (i "X tokens") | `tokens` (behåll) |
-| `Back` | `Tillbaka` |
-| `Sort:` | `Sortera:` |
-| `First Created` | `Först skapad` |
-| `Highest MCap` | `Högst MCap` |
-| `Highest Volume` | `Högst Volym` |
+| Swedish | English |
+|---------|---------|
+| `Virala Memes` | `Viral Memes` |
+| `Tillbaka` | `Back` |
+| `Sortera:` | `Sort:` |
+| `Först skapad` | `First Created` |
+| `Högst MCap` | `Highest MCap` |
+| `Högst Volym` | `Highest Volume` |
+| All tooltip texts | English equivalents |
 
 ### 5. `src/components/TokenTable.tsx`
-| Engelska | Svenska |
-|----------|---------|
-| `TOKEN` | `TOKEN` (behåll) |
-| `PRICE` | `PRIS` |
-| `AGE` | `ÅLDER` |
-| `TXNS` | `TXNS` (behåll) |
-| `VOLUME` | `VOLYM` |
-| `MAKERS` | `MAKERS` (behåll) |
-| `LIQUIDITY` | `LIKVIDITET` |
-| `STATUS` | `STATUS` (behåll) |
-| `First Created` (status) | `Först skapad` |
-| `Highest MCap` (status) | `Högst MCap` |
-| `Clone` (status) | `Kopia` |
-| OgBadge title: `The first token...` | `Den första token med detta namn` |
-| TopBadge title: `The token with...` | `Token med högst market cap i klustret` |
+| Swedish | English |
+|---------|---------|
+| `PRIS` | `PRICE` |
+| `ÅLDER` | `AGE` |
+| `VOLYM` | `VOLUME` |
+| `LIKVIDITET` | `LIQUIDITY` |
+| `Först skapad` (status) | `First Created` |
+| `Högst MCap` (status) | `Highest MCap` |
+| `Kopia` (status) | `Clone` |
+| OgBadge title | `The first token with this name` |
+| TopBadge title | `The token with the highest market cap in the cluster` |
+| All tooltip texts | English equivalents |
 
 ### 6. `src/components/TokenGrid.tsx`
-- Inga synliga engelska etiketter kvar (Vol, MCap, Liq, Age behålls som förkortningar)
+| Swedish | English |
+|---------|---------|
+| Tooltip texts (totalt handlat, market cap, likviditet, tid sedan) | English equivalents |
 
 ### 7. `src/components/MarketSentimentBar.tsx`
-| Engelska | Svenska |
-|----------|---------|
-| `Market Cap` | `Market Cap` (behåll, universell term) |
-| `BTC Dom` | `BTC Dom` (behåll) |
-| `ETH Gas` | `ETH Gas` (behåll) |
-| `Season` | `Säsong` |
-| `Alt Season` | `Alt-säsong` |
-| `BTC Season` | `BTC-säsong` |
-| `Neutral` | `Neutral` (behåll) |
-| `Fear & Greed` | `Rädsla & Girighet` |
+| Swedish | English |
+|---------|---------|
+| `Alt-säsong` | `Alt Season` |
+| `BTC-säsong` | `BTC Season` |
+| `Säsong` | `Season` |
+| `Rädsla & Girighet` | `Fear & Greed` |
+| All tooltip texts | English equivalents |
 
 ### 8. `src/pages/Index.tsx`
-| Engelska | Svenska |
-|----------|---------|
-| `Listening for new tokens...` | `Lyssnar efter nya tokens...` |
-| `Only tokens with logos are shown` | `Bara tokens med logotyp visas` |
-| `DexTools API rate limited...` | `DexTools API-gräns nådd — prova igen.` |
-| `Failed to load data.` | `Kunde inte ladda data.` |
-| `Retry now` | `Försök igen` |
+| Swedish | English |
+|---------|---------|
+| `Lyssnar efter nya tokens...` | `Listening for new tokens...` |
+| `Bara tokens med logotyp visas` | `Only tokens with logos are shown` |
+| `DexTools API-gräns nådd — prova igen.` | `DexTools API rate limited — try again.` |
+| `Kunde inte ladda data.` | `Failed to load data.` |
+| `Försök igen` | `Retry now` |
 
 ### 9. `src/pages/TokenDetail.tsx`
-| Engelska | Svenska |
-|----------|---------|
-| `Token not found` | `Token hittades inte` |
-| `Go back` | `Gå tillbaka` |
+| Swedish | English |
+|---------|---------|
+| `Token hittades inte` | `Token not found` |
+| `Gå tillbaka` | `Go back` |
 
 ### 10. `src/pages/NotFound.tsx`
-| Engelska | Svenska |
-|----------|---------|
-| `Oops! Page not found` | `Sidan hittades inte` |
-| `Return to Home` | `Tillbaka till startsidan` |
+| Swedish | English |
+|---------|---------|
+| `Sidan hittades inte` | `Page not found` |
+| `Tillbaka till startsidan` | `Return to Home` |
 
 ### 11. `src/components/TokenInfoPanel.tsx`
-| Engelska | Svenska |
-|----------|---------|
-| `Price USD` | `Pris USD` |
-| `Price` (SOL) | `Pris` |
-| `LIQUIDITY` | `LIKVIDITET` |
-| `TXNS` | `TXNS` (behåll) |
-| `BUYS` | `KÖP` |
-| `SELLS` | `SÄLJ` |
-| `VOLUME` | `VOLYM` |
-| `BUY VOL` | `KÖPVOLYM` |
-| `SELL VOL` | `SÄLJVOLYM` |
-| `MAKERS` | `MAKERS` (behåll) |
-| `BUYERS` | `KÖPARE` |
-| `SELLERS` | `SÄLJARE` |
-| `Watchlist` | `Bevakningslista` |
-| `Alerts` | `Aviseringar` |
-| `Buy` | `Köp` |
-| `Sell` | `Sälj` |
-| Twitter/Telegram/Website buttons | Behåll engelska (brand names) |
+| Swedish | English |
+|---------|---------|
+| `Pris USD` | `Price USD` |
+| `Pris` | `Price` |
+| `LIKVIDITET` | `LIQUIDITY` |
+| `KÖP` | `BUYS` |
+| `SÄLJ` | `SELLS` |
+| `VOLYM` | `VOLUME` |
+| `KÖPVOLYM` | `BUY VOL` |
+| `SÄLJVOLYM` | `SELL VOL` |
+| `KÖPARE` | `BUYERS` |
+| `SÄLJARE` | `SELLERS` |
+| `Bevakningslista` | `Watchlist` |
+| `Aviseringar` | `Alerts` |
+| `Köp` | `Buy` |
+| `Sälj` | `Sell` |
 
 ### 12. `src/components/TransactionList.tsx`
-| Engelska | Svenska |
-|----------|---------|
-| `Transactions` | `Transaktioner` |
-| `Top Traders` | `Topphandlare` |
-| `Holders` | `Innehavare` |
-| `DATE` | `DATUM` |
-| `TYPE` | `TYP` |
-| `AMOUNT` | `ANTAL` |
-| `PRICE` | `PRIS` |
-| `Buy` / `Sell` | `Köp` / `Sälj` |
-| Time format `en-US` | `sv-SE` |
+| Swedish | English |
+|---------|---------|
+| `Transaktioner` | `Transactions` |
+| `Topphandlare` | `Top Traders` |
+| `Innehavare` | `Holders` |
+| `DATUM` | `DATE` |
+| `TYP` | `TYPE` |
+| `ANTAL` | `AMOUNT` |
+| `PRIS` | `PRICE` |
+| `Köp` / `Sälj` | `Buy` / `Sell` |
+| `sv-SE` locale | `en-US` |
 
 ### 13. `src/components/PriceChart.tsx`
-| Engelska | Svenska |
-|----------|---------|
-| `Price` (toggle) | `Pris` |
-| `Chart placeholder — OHLCV data will be connected later` | `Diagramplacering — OHLCV-data kopplas senare` |
+| Swedish | English |
+|---------|---------|
+| `Pris` | `Price` |
+| `Diagramplacering — OHLCV-data kopplas senare` | `Chart placeholder — OHLCV data will be connected later` |
 
 ### 14. `src/components/SearchBar.tsx`
-| Engelska | Svenska |
-|----------|---------|
-| `Paste token address to search...` | `Klistra in tokenadress för att söka...` |
-| `Go` | `Sök` |
+| Swedish | English |
+|---------|---------|
+| `Klistra in tokenadress för att söka...` | `Paste token address to search...` |
+| `Sök` | `Go` |
 
 ---
 
-## Tekniska detaljer
-- Totalt 14 filer ändras
-- Inga nya beroenden krävs
-- Inga strukturella kodändringar, bara textsträngar
-- Kryptovaluta-specifika termer (Token, SOL, MCap, FDV, MCAP, TXNS, MAKERS) behålls på engelska då de är branschstandard
+## Technical Details
+- 14 files modified
+- No new dependencies needed
+- No structural code changes, only text strings
+- Crypto-specific terms (Token, SOL, MCap, FDV, TXNS, MAKERS) remain as-is (already in English)
