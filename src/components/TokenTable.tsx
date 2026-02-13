@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { Token, formatPrice, formatNumber } from '@/data/mockTokens';
-import { Zap, Info } from 'lucide-react';
+import { Zap, Info, Crown, TrendingUp } from 'lucide-react';
 import pumpfunLogo from '@/assets/pumpfun-logo.png';
 import bonkLogo from '@/assets/bonk-logo.png';
 import raydiumLogo from '@/assets/raydium-logo.png';
@@ -10,6 +10,9 @@ import orcaLogo from '@/assets/orca-logo.png';
 interface TokenTableProps {
   tokens: Token[];
   isCryptoMarket?: boolean;
+  ogTokenId?: string | null;
+  topTokenId?: string | null;
+  showCreatedColumn?: boolean;
 }
 
 const TokenLogo = ({ token }: { token: Token }) => {
@@ -44,7 +47,7 @@ const ChangeCell = ({ value }: { value: number }) => (
   </td>
 );
 
-const TokenTable = ({ tokens, isCryptoMarket = false }: TokenTableProps) => {
+const TokenTable = ({ tokens, isCryptoMarket = false, ogTokenId, topTokenId, showCreatedColumn }: TokenTableProps) => {
   const navigate = useNavigate();
 
   return (
@@ -81,6 +84,7 @@ const TokenTable = ({ tokens, isCryptoMarket = false }: TokenTableProps) => {
             )}
             {!isCryptoMarket && <th className="px-3 py-2 text-right font-normal">LIQUIDITY</th>}
             <th className="px-3 py-2 text-right font-normal">MCAP</th>
+            {showCreatedColumn && <th className="px-3 py-2 text-right font-normal">STATUS</th>}
           </tr>
         </thead>
         <tbody>
@@ -90,7 +94,21 @@ const TokenTable = ({ tokens, isCryptoMarket = false }: TokenTableProps) => {
               onClick={() => navigate(`/token/${token.id}`)}
               className="border-b border-border/30 hover:bg-accent/40 cursor-pointer transition-colors text-[13px]"
             >
-              <td className="px-3 py-2 text-muted-foreground">#{token.rank}</td>
+              <td className="px-3 py-2 text-muted-foreground">
+                <div className="flex items-center gap-1">
+                  <span>#{token.rank}</span>
+                  {ogTokenId === token.id && (
+                    <span className="inline-flex items-center gap-0.5 text-[10px] px-1 py-0.5 rounded bg-yellow-500/20 text-yellow-300 font-bold">
+                      <Crown className="w-3 h-3" /> OG
+                    </span>
+                  )}
+                  {topTokenId === token.id && topTokenId !== ogTokenId && (
+                    <span className="inline-flex items-center gap-0.5 text-[10px] px-1 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold">
+                      <TrendingUp className="w-3 h-3" /> TOP
+                    </span>
+                  )}
+                </div>
+              </td>
               <td className="px-3 py-2">
                 <div className="flex items-center gap-2">
                   <TokenLogo token={token} />
@@ -146,6 +164,17 @@ const TokenTable = ({ tokens, isCryptoMarket = false }: TokenTableProps) => {
               )}
               {!isCryptoMarket && <td className="px-3 py-2 text-right text-foreground">{formatNumber(token.liquidity)}</td>}
               <td className="px-3 py-2 text-right text-foreground">{formatNumber(token.mcap)}</td>
+              {showCreatedColumn && (
+                <td className="px-3 py-2 text-right">
+                  {ogTokenId === token.id ? (
+                    <span className="text-yellow-300 text-[11px] font-bold">First Created</span>
+                  ) : topTokenId === token.id ? (
+                    <span className="text-emerald-300 text-[11px] font-bold">Highest MCap</span>
+                  ) : (
+                    <span className="text-muted-foreground text-[11px]">Clone</span>
+                  )}
+                </td>
+              )}
             </tr>
           ))}
         </tbody>
