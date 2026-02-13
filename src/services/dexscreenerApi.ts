@@ -46,106 +46,88 @@ function mapPairToToken(pair: any, i: number): Token {
   } as Token;
 }
 
-export async function fetchTrendingTokens(): Promise<Token[]> {
-  // Use token-boosts/top for trending tokens, filter to Solana
-  const res = await fetch(`${BASE}/token-boosts/top/v1`);
-  if (!res.ok) throw new Error(`DexScreener error ${res.status}`);
-  const boosts: any[] = await res.json();
-
-  // Filter Solana tokens and get their addresses
-  const solanaTokens = boosts.filter((b: any) => b.chainId === 'solana').slice(0, 15);
-  if (solanaTokens.length === 0) throw new Error('No Solana trending tokens');
-
-  // Fetch pair data for these tokens
-  const addresses = solanaTokens.map((b: any) => b.tokenAddress).join(',');
-  const pairsRes = await fetch(`${BASE}/latest/dex/tokens/${addresses}`);
-  if (!pairsRes.ok) throw new Error(`DexScreener pairs error ${pairsRes.status}`);
-  const pairsData = await pairsRes.json();
-
-  // Get best Solana pair per token
-  const pairs: any[] = pairsData.pairs || [];
+// Deduplicate pairs by base token address, keeping highest volume
+function dedupeByToken(pairs: any[], limit: number): any[] {
   const seen = new Set<string>();
-  const uniquePairs: any[] = [];
+  const result: any[] = [];
   for (const pair of pairs) {
     if (pair.chainId !== 'solana') continue;
     const addr = pair.baseToken?.address;
     if (addr && !seen.has(addr)) {
       seen.add(addr);
-      uniquePairs.push(pair);
+      result.push(pair);
+      if (result.length >= limit) break;
+    }
+  }
+  return result;
+}
+
+export async function fetchTrendingTokens(): Promise<Token[]> {
+  const res = await fetch(`${BASE}/token-boosts/top/v1`);
+  if (!res.ok) throw new Error(`DexScreener error ${res.status}`);
+  const boosts: any[] = await res.json();
+
+  const solanaTokens = boosts.filter((b: any) => b.chainId === 'solana').slice(0, 60);
+  if (solanaTokens.length === 0) throw new Error('No Solana trending tokens');
+
+  // Batch addresses in groups of 30 (API limit)
+  const allPairs: any[] = [];
+  for (let i = 0; i < solanaTokens.length; i += 30) {
+    const batch = solanaTokens.slice(i, i + 30);
+    const addresses = batch.map((b: any) => b.tokenAddress).join(',');
+    const pairsRes = await fetch(`${BASE}/latest/dex/tokens/${addresses}`);
+    if (pairsRes.ok) {
+      const pairsData = await pairsRes.json();
+      allPairs.push(...(pairsData.pairs || []));
     }
   }
 
-  return uniquePairs.slice(0, 10).map((p, i) => mapPairToToken(p, i));
+  return dedupeByToken(allPairs, 50).map((p, i) => mapPairToToken(p, i));
 }
 
 export async function fetchTopByVolume(): Promise<Token[]> {
-  // Search for popular Solana tokens by volume
-  const res = await fetch(`${BASE}/latest/dex/search?q=SOL`);
-  if (!res.ok) throw new Error(`DexScreener search error ${res.status}`);
-  const data = await res.json();
-  const pairs: any[] = (data.pairs || []).filter((p: any) => p.chainId === 'solana');
+  const queries = ['SOL', 'USDC SOL', 'meme solana', 'pump solana'];
+  const allPairs: any[] = [];
 
-  // Sort by volume descending
-  pairs.sort((a: any, b: any) => (b.volume?.h24 ?? 0) - (a.volume?.h24 ?? 0));
-
-  const seen = new Set<string>();
-  const uniquePairs: any[] = [];
-  for (const pair of pairs) {
-    const addr = pair.baseToken?.address;
-    if (addr && !seen.has(addr)) {
-      seen.add(addr);
-      uniquePairs.push(pair);
-    }
+  const results = await Promise.all(
+    queries.map(q => fetch(`${BASE}/latest/dex/search?q=${encodeURIComponent(q)}`).then(r => r.ok ? r.json() : { pairs: [] }))
+  );
+  for (const data of results) {
+    allPairs.push(...(data.pairs || []).filter((p: any) => p.chainId === 'solana'));
   }
 
-  return uniquePairs.slice(0, 10).map((p, i) => mapPairToToken(p, i));
+  allPairs.sort((a: any, b: any) => (b.volume?.h24 ?? 0) - (a.volume?.h24 ?? 0));
+  return dedupeByToken(allPairs, 50).map((p, i) => mapPairToToken(p, i));
 }
 
 export async function fetchGainersDexScreener(): Promise<Token[]> {
-  // Search and sort by 24h price change
-  const res = await fetch(`${BASE}/latest/dex/search?q=SOL`);
-  if (!res.ok) throw new Error(`DexScreener error ${res.status}`);
-  const data = await res.json();
-  const pairs: any[] = (data.pairs || []).filter(
-    (p: any) => p.chainId === 'solana' && (p.priceChange?.h24 ?? 0) > 0
+  const queries = ['SOL', 'USDC SOL', 'meme solana', 'pump solana'];
+  const allPairs: any[] = [];
+
+  const results = await Promise.all(
+    queries.map(q => fetch(`${BASE}/latest/dex/search?q=${encodeURIComponent(q)}`).then(r => r.ok ? r.json() : { pairs: [] }))
   );
-
-  pairs.sort((a: any, b: any) => (b.priceChange?.h24 ?? 0) - (a.priceChange?.h24 ?? 0));
-
-  const seen = new Set<string>();
-  const uniquePairs: any[] = [];
-  for (const pair of pairs) {
-    const addr = pair.baseToken?.address;
-    if (addr && !seen.has(addr)) {
-      seen.add(addr);
-      uniquePairs.push(pair);
-    }
+  for (const data of results) {
+    allPairs.push(...(data.pairs || []).filter((p: any) => p.chainId === 'solana' && (p.priceChange?.h24 ?? 0) > 0));
   }
 
-  return uniquePairs.slice(0, 10).map((p, i) => mapPairToToken(p, i));
+  allPairs.sort((a: any, b: any) => (b.priceChange?.h24 ?? 0) - (a.priceChange?.h24 ?? 0));
+  return dedupeByToken(allPairs, 50).map((p, i) => mapPairToToken(p, i));
 }
 
 export async function fetchNewPairsDexScreener(): Promise<Token[]> {
-  // Search for recent Solana pairs
-  const res = await fetch(`${BASE}/latest/dex/search?q=SOL`);
-  if (!res.ok) throw new Error(`DexScreener error ${res.status}`);
-  const data = await res.json();
-  const pairs: any[] = (data.pairs || []).filter((p: any) => p.chainId === 'solana');
+  const queries = ['SOL', 'USDC SOL', 'meme solana', 'pump solana'];
+  const allPairs: any[] = [];
 
-  // Sort by creation time descending
-  pairs.sort((a: any, b: any) => (b.pairCreatedAt ?? 0) - (a.pairCreatedAt ?? 0));
-
-  const seen = new Set<string>();
-  const uniquePairs: any[] = [];
-  for (const pair of pairs) {
-    const addr = pair.baseToken?.address;
-    if (addr && !seen.has(addr)) {
-      seen.add(addr);
-      uniquePairs.push(pair);
-    }
+  const results = await Promise.all(
+    queries.map(q => fetch(`${BASE}/latest/dex/search?q=${encodeURIComponent(q)}`).then(r => r.ok ? r.json() : { pairs: [] }))
+  );
+  for (const data of results) {
+    allPairs.push(...(data.pairs || []).filter((p: any) => p.chainId === 'solana'));
   }
 
-  return uniquePairs.slice(0, 10).map((p, i) => mapPairToToken(p, i));
+  allPairs.sort((a: any, b: any) => (b.pairCreatedAt ?? 0) - (a.pairCreatedAt ?? 0));
+  return dedupeByToken(allPairs, 50).map((p, i) => mapPairToToken(p, i));
 }
 
 export async function fetchTokenDetailsDexScreener(tokenAddress: string): Promise<Token | null> {
