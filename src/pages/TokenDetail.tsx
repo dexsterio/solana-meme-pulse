@@ -9,6 +9,7 @@ import TokenInfoPanel from '@/components/TokenInfoPanel';
 import TradingPanel from '@/components/TradingPanel';
 import TrendingBar from '@/components/TrendingBar';
 import { ArrowLeft } from 'lucide-react';
+import SolanaIcon from '@/components/SolanaIcon';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const TokenDetail = () => {
@@ -81,7 +82,7 @@ const TokenDetail = () => {
           <span className="font-semibold text-foreground">{token.name}</span>
           <span className="text-muted-foreground ml-1.5 text-sm">/ {token.ticker}</span>
         </div>
-        <span className="text-[10px] px-1.5 py-0.5 rounded bg-secondary text-muted-foreground">SOL</span>
+        <SolanaIcon size={16} />
       </div>
 
       {/* 3-panel layout */}
