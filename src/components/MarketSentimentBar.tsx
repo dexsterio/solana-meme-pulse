@@ -22,62 +22,64 @@ function getAltSeasonStatus(btcDominance: number): { label: string; color: strin
 }
 
 const FearGreedGauge = ({ value, classification }: { value: number; classification: string }) => {
-  const cx = 60;
-  const cy = 48;
-  const radius = 38;
-  const strokeWidth = 8;
+  const cx = 50;
+  const cy = 40;
+  const radius = 32;
+  const strokeWidth = 7;
   const needleAngle = 180 - (value / 100) * 180;
   const needleRad = (needleAngle * Math.PI) / 180;
-  const needleX = cx + radius * Math.cos(needleRad);
-  const needleY = cy - radius * Math.sin(needleRad);
+  const needleLen = radius - 4;
+  const needleX = cx + needleLen * Math.cos(needleRad);
+  const needleY = cy - needleLen * Math.sin(needleRad);
   const needleColor = getFearGreedColor(value);
 
-  // Arc path (semicircle from left to right)
   const startX = cx - radius;
   const endX = cx + radius;
 
   return (
-    <div className="flex flex-col items-center px-3 py-2 rounded-lg border border-border bg-card shrink-0 min-w-[140px]">
-      <div className="flex items-center gap-1 mb-1">
-        <span className="text-[10px] text-muted-foreground font-medium">Fear & Greed</span>
-        <ChevronRight className="w-3 h-3 text-muted-foreground" />
+    <div className="flex items-center gap-3 px-4 py-2 rounded-lg border border-border bg-card shrink-0">
+      {/* Gauge SVG */}
+      <div className="flex flex-col items-center">
+        <svg width="100" height="48" viewBox="0 0 100 48">
+          <defs>
+            <linearGradient id="gaugeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#ea384c" />
+              <stop offset="33%" stopColor="#f97316" />
+              <stop offset="50%" stopColor="#eab308" />
+              <stop offset="100%" stopColor="#22c55e" />
+            </linearGradient>
+          </defs>
+          <path
+            d={`M ${startX} ${cy} A ${radius} ${radius} 0 0 1 ${endX} ${cy}`}
+            fill="none"
+            stroke="url(#gaugeGradient)"
+            strokeWidth={strokeWidth}
+            strokeLinecap="round"
+          />
+          <line
+            x1={cx}
+            y1={cy}
+            x2={needleX}
+            y2={needleY}
+            stroke={needleColor}
+            strokeWidth="2"
+            strokeLinecap="round"
+          />
+          <circle cx={needleX} cy={needleY} r="2.5" fill={needleColor} />
+          <circle cx={cx} cy={cy} r="2.5" fill="hsl(var(--foreground))" />
+        </svg>
       </div>
-      <svg width="120" height="58" viewBox="0 0 120 58">
-        <defs>
-          <linearGradient id="gaugeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#ea384c" />
-            <stop offset="33%" stopColor="#f97316" />
-            <stop offset="50%" stopColor="#eab308" />
-            <stop offset="100%" stopColor="#22c55e" />
-          </linearGradient>
-        </defs>
-        {/* Arc */}
-        <path
-          d={`M ${startX} ${cy} A ${radius} ${radius} 0 0 1 ${endX} ${cy}`}
-          fill="none"
-          stroke="url(#gaugeGradient)"
-          strokeWidth={strokeWidth}
-          strokeLinecap="round"
-        />
-        {/* Needle */}
-        <line
-          x1={cx}
-          y1={cy}
-          x2={needleX}
-          y2={needleY}
-          stroke={needleColor}
-          strokeWidth="2"
-          strokeLinecap="round"
-        />
-        {/* Needle dot */}
-        <circle cx={needleX} cy={needleY} r="3" fill={needleColor} />
-        {/* Center dot */}
-        <circle cx={cx} cy={cy} r="3" fill="hsl(var(--foreground))" />
-      </svg>
-      <span className="text-lg font-bold leading-none" style={{ color: needleColor }}>
-        {value}
-      </span>
-      <span className="text-[10px] text-muted-foreground mt-0.5">{classification}</span>
+      {/* Text side */}
+      <div className="flex flex-col items-start gap-0.5">
+        <div className="flex items-center gap-1">
+          <span className="text-[10px] text-muted-foreground font-medium">Fear & Greed</span>
+          <ChevronRight className="w-3 h-3 text-muted-foreground" />
+        </div>
+        <span className="text-xl font-bold leading-none" style={{ color: needleColor }}>
+          {value}
+        </span>
+        <span className="text-[10px] text-muted-foreground">{classification}</span>
+      </div>
     </div>
   );
 };
@@ -98,9 +100,6 @@ const MarketSentimentBar = ({ data, isLoading }: MarketSentimentBarProps) => {
 
   return (
     <div className="flex items-center gap-2 px-3 py-2 border-b border-border overflow-x-auto">
-      {/* Fear & Greed Gauge */}
-      <FearGreedGauge value={data.fearGreed.value} classification={data.fearGreed.classification} />
-
       {/* Total Market Cap */}
       <div className="flex items-center gap-1.5 px-3 py-1.5 rounded border border-border bg-secondary shrink-0">
         <BarChart3 className="w-3.5 h-3.5 text-muted-foreground" />
@@ -133,6 +132,9 @@ const MarketSentimentBar = ({ data, isLoading }: MarketSentimentBarProps) => {
         <span className="text-[11px] text-muted-foreground">Season</span>
         <span className={`text-[13px] font-bold ${altSeason.color}`}>{altSeason.label}</span>
       </div>
+
+      {/* Fear & Greed Gauge - rectangular, beside Alt Season */}
+      <FearGreedGauge value={data.fearGreed.value} classification={data.fearGreed.classification} />
     </div>
   );
 };
