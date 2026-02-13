@@ -11,15 +11,37 @@ serve(async (req) => {
   }
 
   try {
-    const [globalRes, fngRes] = await Promise.all([
+    const [globalRes, fngRes, gasRes] = await Promise.allSettled([
       fetch('https://api.coingecko.com/api/v3/global', {
         headers: { 'Accept': 'application/json' },
       }),
       fetch('https://api.alternative.me/fng/?limit=1'),
+      fetch('https://api.blocknative.com/gasprices/blockprices', {
+        headers: { 'Accept': 'application/json' },
+      }),
     ]);
 
-    const globalData = await globalRes.json();
-    const fngData = await fngRes.json();
+    const globalData = globalRes.status === 'fulfilled' ? await globalRes.value.json() : {};
+    const fngData = fngRes.status === 'fulfilled' ? await fngRes.value.json() : {};
+
+    let ethGas = 0;
+    if (gasRes.status === 'fulfilled' && gasRes.value.ok) {
+      try {
+        const gasData = await gasRes.value.json();
+        ethGas = gasData?.blockPrices?.[0]?.estimatedPrices?.[0]?.price ?? 0;
+      } catch { /* ignore */ }
+    }
+
+    // Fallback: try etherscan free endpoint
+    if (ethGas === 0) {
+      try {
+        const ethRes = await fetch('https://api.etherscan.io/api?module=gastracker&action=gasoracle');
+        if (ethRes.ok) {
+          const ethData = await ethRes.json();
+          ethGas = parseFloat(ethData?.result?.ProposeGasPrice || '0');
+        }
+      } catch { /* ignore */ }
+    }
 
     const g = globalData?.data || {};
     const fng = fngData?.data?.[0] || { value: '50', value_classification: 'Neutral' };
@@ -33,7 +55,7 @@ serve(async (req) => {
       ethDominance: g.market_cap_percentage?.eth ?? 0,
       totalMarketCap: g.total_market_cap?.usd ?? 0,
       marketCapChange24h: g.market_cap_change_percentage_24h_usd ?? 0,
-      ethGas: 0, // CoinGecko doesn't provide gas; we approximate or skip
+      ethGas,
     };
 
     return new Response(JSON.stringify(result), {

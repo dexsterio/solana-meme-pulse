@@ -1,16 +1,16 @@
-import { useState } from 'react';
 import { Search, Globe } from 'lucide-react';
 import { Token, formatNumber } from '@/data/mockTokens';
 
 interface StatsBarProps {
   tokens?: Token[];
-  onSearch?: (address: string) => void;
+  onSearch?: (query: string) => void;
+  searchQuery?: string;
+  onSearchChange?: (query: string) => void;
   isCryptoMarket?: boolean;
   onCryptoMarketToggle?: () => void;
 }
 
-const StatsBar = ({ tokens = [], onSearch, isCryptoMarket = false, onCryptoMarketToggle }: StatsBarProps) => {
-  const [searchValue, setSearchValue] = useState('');
+const StatsBar = ({ tokens = [], onSearch, searchQuery = '', onSearchChange, isCryptoMarket = false, onCryptoMarketToggle }: StatsBarProps) => {
   const totalVolume = tokens.reduce((sum, t) => sum + t.volume, 0);
   const totalTxns = tokens.reduce((sum, t) => sum + t.txns, 0);
 
@@ -20,10 +20,12 @@ const StatsBar = ({ tokens = [], onSearch, isCryptoMarket = false, onCryptoMarke
         <Search className="w-3.5 h-3.5 text-muted-foreground ml-2.5" />
         <input
           type="text"
-          placeholder="Search"
-          value={searchValue}
-          onChange={(e) => setSearchValue(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && onSearch?.(searchValue)}
+          placeholder="Search token..."
+          value={searchQuery}
+          onChange={(e) => {
+            onSearchChange?.(e.target.value);
+          }}
+          onKeyDown={(e) => e.key === 'Enter' && onSearch?.(searchQuery)}
           className="bg-transparent px-2 py-1.5 text-[13px] text-foreground placeholder:text-muted-foreground outline-none w-full"
         />
       </div>

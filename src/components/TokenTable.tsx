@@ -49,11 +49,11 @@ const TokenTable = ({ tokens, isCryptoMarket = false }: TokenTableProps) => {
 
   return (
     <div className="overflow-x-auto">
-      <table className="w-full">
+      <table className="w-full table-fixed">
         <thead>
           <tr className="text-muted-foreground text-[11px] uppercase tracking-wider">
-            <th className="px-3 py-2 text-left font-normal">#</th>
-            <th className="px-3 py-2 text-left font-normal">TOKEN</th>
+            <th className="w-12 px-3 py-2 text-left font-normal">#</th>
+            <th className={`${isCryptoMarket ? 'w-[200px]' : 'w-[220px]'} px-3 py-2 text-left font-normal`}>TOKEN</th>
             <th className="px-3 py-2 text-right font-normal">
               <span className="inline-flex items-center gap-1">
                 PRICE
