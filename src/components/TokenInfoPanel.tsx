@@ -75,11 +75,11 @@ const TokenInfoPanel = ({ token }: TokenInfoPanelProps) => {
       <div className="px-4 py-3 border-b border-border">
         <div className="grid grid-cols-2 gap-2">
           <div className="bg-secondary rounded-md p-2.5 text-center border border-border">
-            <div className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1">Pris USD</div>
+            <div className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1">Price USD</div>
             <div className="text-sm font-bold tracking-tight text-foreground">{formatPrice(token.price)}</div>
           </div>
           <div className="bg-secondary rounded-md p-2.5 text-center border border-border">
-            <div className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1">Pris</div>
+            <div className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1">Price</div>
             <div className="text-sm font-bold tracking-tight text-foreground">{token.priceSOL.toFixed(8)} SOL</div>
           </div>
         </div>
@@ -89,7 +89,7 @@ const TokenInfoPanel = ({ token }: TokenInfoPanelProps) => {
       <div className="px-4 py-3 border-b border-border">
         <div className="grid grid-cols-3 gap-2">
           {[
-            { label: 'LIKVIDITET', value: formatNumber(token.liquidity), icon: true },
+            { label: 'LIQUIDITY', value: formatNumber(token.liquidity), icon: true },
             { label: 'FDV', value: formatNumber(token.fdv) },
             { label: 'MKT CAP', value: formatNumber(token.mcap) },
           ].map(({ label, value, icon }) => (
@@ -136,12 +136,12 @@ const TokenInfoPanel = ({ token }: TokenInfoPanelProps) => {
             <div className="text-sm font-bold text-foreground">{formatCompact(token.txns)}</div>
           </div>
           <div>
-            <div className="text-[10px] text-muted-foreground uppercase">KÖP</div>
+            <div className="text-[10px] text-muted-foreground uppercase">BUYS</div>
             <div className="text-sm font-bold text-foreground">{formatCompact(buys)}</div>
             <div className="h-1 rounded bg-profit/60 mt-1" />
           </div>
           <div className="text-right">
-            <div className="text-[10px] text-muted-foreground uppercase">SÄLJ</div>
+            <div className="text-[10px] text-muted-foreground uppercase">SELLS</div>
             <div className="text-sm font-bold text-foreground">{formatCompact(sells)}</div>
             <div className="h-1 rounded bg-loss/60 mt-1" />
           </div>
@@ -149,16 +149,16 @@ const TokenInfoPanel = ({ token }: TokenInfoPanelProps) => {
 
         <div className="grid grid-cols-3 gap-2 items-end">
           <div>
-            <div className="text-[10px] text-muted-foreground uppercase">VOLYM</div>
+            <div className="text-[10px] text-muted-foreground uppercase">VOLUME</div>
             <div className="text-sm font-bold text-foreground">{formatNumber(token.volume)}</div>
           </div>
           <div>
-            <div className="text-[10px] text-muted-foreground uppercase">KÖPVOLYM</div>
+            <div className="text-[10px] text-muted-foreground uppercase">BUY VOL</div>
             <div className="text-sm font-bold text-foreground">{formatNumber(buyVolume)}</div>
             <div className="h-1 rounded bg-profit/60 mt-1" />
           </div>
           <div className="text-right">
-            <div className="text-[10px] text-muted-foreground uppercase">SÄLJVOLYM</div>
+            <div className="text-[10px] text-muted-foreground uppercase">SELL VOL</div>
             <div className="text-sm font-bold text-foreground">{formatNumber(sellVolume)}</div>
             <div className="h-1 rounded bg-loss/60 mt-1" />
           </div>
@@ -170,11 +170,11 @@ const TokenInfoPanel = ({ token }: TokenInfoPanelProps) => {
             <div className="text-sm font-bold text-foreground">{formatCompact(token.makers)}</div>
           </div>
           <div>
-            <div className="text-[10px] text-muted-foreground uppercase">KÖPARE</div>
+            <div className="text-[10px] text-muted-foreground uppercase">BUYERS</div>
             <div className="text-sm font-bold text-foreground">{formatCompact(buyers)}</div>
           </div>
           <div className="text-right">
-            <div className="text-[10px] text-muted-foreground uppercase">SÄLJARE</div>
+            <div className="text-[10px] text-muted-foreground uppercase">SELLERS</div>
             <div className="text-sm font-bold text-foreground">{formatCompact(sellers)}</div>
           </div>
         </div>
@@ -184,18 +184,18 @@ const TokenInfoPanel = ({ token }: TokenInfoPanelProps) => {
       <div className="px-4 py-3 space-y-2">
         <div className="flex gap-2">
           <button className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 text-xs font-medium bg-secondary text-foreground rounded-md border border-border hover:bg-accent transition-colors">
-            <Star className="w-3.5 h-3.5" /> Bevakningslista
+            <Star className="w-3.5 h-3.5" /> Watchlist
           </button>
           <button className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 text-xs font-medium bg-secondary text-foreground rounded-md border border-border hover:bg-accent transition-colors">
-            <Bell className="w-3.5 h-3.5" /> Aviseringar
+            <Bell className="w-3.5 h-3.5" /> Alerts
           </button>
         </div>
         <div className="flex gap-2">
           <button className="flex-1 flex items-center justify-center gap-1.5 px-3 py-3 text-sm font-semibold bg-profit/20 text-profit rounded-md border border-profit/30 hover:bg-profit/30 transition-colors">
-            🟢 Köp
+            🟢 Buy
           </button>
           <button className="flex-1 flex items-center justify-center gap-1.5 px-3 py-3 text-sm font-semibold bg-loss/20 text-loss rounded-md border border-loss/30 hover:bg-loss/30 transition-colors">
-            🔴 Sälj
+            🔴 Sell
           </button>
         </div>
       </div>

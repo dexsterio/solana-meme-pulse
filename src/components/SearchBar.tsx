@@ -14,7 +14,7 @@ const SearchBar = ({ onSearch }: SearchBarProps) => {
         <Search className="w-4 h-4 text-muted-foreground ml-3" />
         <input
           type="text"
-          placeholder="Klistra in tokenadress för att söka..."
+          placeholder="Paste token address to search..."
           value={value}
           onChange={(e) => setValue(e.target.value)}
           className="flex-1 bg-transparent px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground outline-none"
@@ -24,7 +24,7 @@ const SearchBar = ({ onSearch }: SearchBarProps) => {
         onClick={() => onSearch(value)}
         className="px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
       >
-        Sök
+        Go
       </button>
     </div>
   );
