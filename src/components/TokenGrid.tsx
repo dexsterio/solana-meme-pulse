@@ -84,10 +84,10 @@ const TokenGrid = ({ tokens }: TokenGridProps) => {
             {/* Stats grid */}
             <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 mb-3">
               {[
-                { label: 'Vol', value: formatNumber(token.volume), tip: 'Total USD value traded' },
-                { label: 'MCap', value: formatNumber(token.mcap), tip: 'Market cap = price × total supply' },
-                { label: 'Liq', value: formatNumber(token.liquidity), tip: 'Available liquidity in the pool' },
-                { label: 'Age', value: token.age, tip: 'Time since the token was created' },
+                { label: 'Vol', value: formatNumber(token.volume), tip: 'totalt handlat värde i USD' },
+                { label: 'MCap', value: formatNumber(token.mcap), tip: 'market cap = pris × totalt utbud' },
+                { label: 'Liq', value: formatNumber(token.liquidity), tip: 'tillgänglig likviditet i poolen' },
+                { label: 'Age', value: token.age, tip: 'tid sedan token skapades' },
               ].map(({ label, value, tip }) => (
                 <div key={label} className="flex justify-between">
                   <span className="text-[12px] text-muted-foreground inline-flex items-center gap-0.5">{label} <InfoTooltip text={tip} iconSize={10} /></span>

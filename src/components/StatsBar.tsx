@@ -34,13 +34,13 @@ const StatsBar = ({ tokens = [], onSearch, searchQuery = '', onSearchChange, isC
 
       <div className="flex items-center gap-2 px-4 py-1.5 border border-border rounded bg-secondary">
         <span className="text-[13px] text-muted-foreground">24H VOLUME:</span>
-        <InfoTooltip text="Total trading volume across all listed tokens in the last 24 hours." />
+        <InfoTooltip text="total handelsvolym för alla listade tokens senaste 24 timmarna." />
         <span className="text-[15px] text-profit font-bold">{formatNumber(totalVolume)}</span>
       </div>
 
       <div className="flex items-center gap-2 px-4 py-1.5 border border-border rounded bg-secondary">
         <span className="text-[13px] text-muted-foreground">24H TXNS:</span>
-        <InfoTooltip text="Total number of buy/sell transactions across all tokens in the last 24 hours." />
+        <InfoTooltip text="totalt antal köp/sälj-transaktioner för alla tokens senaste 24 timmarna." />
         <span className="text-[15px] text-foreground font-bold">{totalTxns.toLocaleString()}</span>
       </div>
 
