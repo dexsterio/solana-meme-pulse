@@ -1,4 +1,5 @@
 import { Token, formatPrice, formatNumber, formatCompact } from '@/data/mockTokens';
+import pumpfunLogo from '@/assets/pumpfun-logo.png';
 import { Globe, Twitter, MessageCircle, Star, Bell, ExternalLink, Zap, Copy, ChevronDown } from 'lucide-react';
 import SolanaIcon from '@/components/SolanaIcon';
 import { toast } from 'sonner';
@@ -73,7 +74,11 @@ const TokenInfoPanel = ({ token, onBuyClick, onSellClick }: TokenInfoPanelProps)
               <SolanaIcon size={10} />
               <span>Solana</span>
               <span className="text-muted-foreground/50">&gt;</span>
-              <span>{token.exchangeName || 'Raydium'}</span>
+              {(token.exchangeName || 'Raydium').toLowerCase().includes('pump') ? (
+                <img src={pumpfunLogo} alt="PumpSwap" className="w-3.5 h-3.5 rounded-sm" />
+              ) : (
+                <span>{token.exchangeName || 'Raydium'}</span>
+              )}
               {token.age && (() => {
                 const ageStr = token.age;
                 const isYoung = ageStr.endsWith('h') || ageStr.endsWith('m') || ageStr.endsWith('s');
