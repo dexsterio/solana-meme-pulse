@@ -1,91 +1,80 @@
 
-# Plan: Viral View UI/UX Polish -- Fixa overlappning, padding och tydlighet
+# Comprehensive UX and Information Improvements
 
-## Sammanfattning
+## Problem
+The platform lacks explanatory context for users. Key concepts like "Viral Memes", "OG", "TOP", filter categories, and market data are not explained anywhere, making the platform confusing for new users.
 
-Atgarda alla UI/UX-problem i Viral-vyn: OG/TOP-badges som overlappar med logotyper, trang layout, dalig lasbarhet och bristande visuell hierarki. Uppgradera till varldsklassig UX med korrekt spacing, tydliga badges och professionell layout.
-
-## Problem som atgardas
-
-### 1. OG/TOP badges overlappar med rank-nummer och logo
-Badgarna renderas inne i rank-kolumnen (#) som bara ar 48px bred (`w-12`). Nar OG-badge med Crown-ikon laggs till pa samma rad som rank-numret, overlappar allt.
-
-### 2. Token-kolumnen ar for trang for alla element
-Namn + ticker + exchange-logo + boosts trycks ihop pa en rad utan overflow-hantering.
-
-### 3. STATUS-kolumnen ("First Created", "Clone") ar otydlig
-Texten ar liten och saknar visuell vikt.
-
-### 4. ViralBar saknar tydlig visuell separation
-Nar en viral cluster ar vald saknas tydlig feedback om vilka tokens man tittar pa.
+## Solution Overview
+Add tooltips, section headers with descriptions, onboarding hints, and contextual information throughout the entire platform so users always understand what they're looking at.
 
 ---
 
-## Andringar
+## Changes
 
-### Fil 1: `src/components/TokenTable.tsx`
+### 1. Reusable InfoTooltip Component
+Create a new `src/components/InfoTooltip.tsx` component that wraps any label with a hover tooltip (using Radix Tooltip). Shows a small `(i)` icon that reveals an explanation on hover.
 
-**A. Flytta OG/TOP badges fran rank-kolumnen till token-namn-kolumnen**
-- Ta bort badges fran `<td>` for rank (#) -- rad 98-110
-- Rank-kolumnen ska bara visa `#{token.rank}` rent
-- Flytta OG/TOP badges till token-namn-raden (rad 112-143), placerade EFTER ticker-texten
-- Badges far `ml-1.5` margin och mindre storlek for att inte krocka med logotypen
+### 2. ViralBar -- Explain "Viral Memes"
+- Add a short description text below/beside the "Viral Memes" label: *"Tokens with the same name appearing 3+ times in the last hour -- a sign of viral meme activity"*
+- When a cluster is selected, add explanatory labels:
+  - Next to "OG" badge: tooltip explaining *"The first token created with this name"*
+  - Next to "TOP" badge: tooltip explaining *"The token with the highest market cap in this cluster"*
+  - Add a subtitle under the cluster header: *"These tokens share the same meme name. The OG was created first, TOP has the highest market cap."*
 
-**B. Fixa token-namn overflow**
-- Lagg till `truncate` och `max-w` pa namn-texten sa den inte breder ut sig
-- Se till att raden har `min-w-0` och `overflow-hidden`
+### 3. StatsBar -- Label Explanations
+- Add tooltips to "24H VOLUME" explaining *"Total trading volume across all listed tokens in the last 24 hours"*
+- Add tooltip to "24H TXNS" explaining *"Total number of buy/sell transactions in the last 24 hours"*
+- Add tooltip to "Market View" button explaining *"Switch to a broader crypto market overview with BTC, ETH and top coins"*
 
-**C. Forbattra STATUS-kolumnen**
-- Ersatt ren text med tydliga pill-badges med bakgrundsfarg
-- "First Created" -> gul pill med Crown-ikon
-- "Highest MCap" -> gron pill med TrendingUp-ikon  
-- "Clone" -> neutral gra pill
+### 4. TokenFilters -- Category Explanations
+- Add tooltips to each category button:
+  - Trending: *"Tokens with the most activity and attention right now"*
+  - Top: *"Highest ranked tokens by market cap and volume"*
+  - Gainers: *"Tokens with the biggest price increases"*
+  - New Pairs: *"Freshly created tokens streaming in real-time via WebSocket"*
+- Add tooltips to Rank By options explaining each sorting method
 
-**D. Oка rank-kolumn bredd**
-- Andring fran `w-12` till `w-10` (smalare, bara siffror nu)
-- Token-kolumnen far `w-[260px]` for att ge plats at badges
+### 5. TrendingBar -- Small Label
+- Add a tooltip to "Trending" label: *"Top 10 tokens by 24h price change, scrolling live"*
 
-### Fil 2: `src/components/ViralBar.tsx`
+### 6. TokenTable -- Column Header Tooltips
+- Add tooltips to column headers:
+  - TXNS: *"Number of buy and sell transactions"*
+  - MAKERS: *"Unique wallets that traded this token"*
+  - LIQUIDITY: *"Available liquidity in the trading pool"*
+  - MCAP: *"Market capitalization = price x total supply"*
+  - AGE: *"Time since the token was first created"*
+  - VOLUME: *"Total USD value traded"*
+- Add tooltips to the STATUS column values (First Created, Highest MCap, Clone)
 
-**A. Forbattra vald-cluster header**
-- Storre typsnitt och tydligare bakgrund
-- Lagg till token-antal och OG-token info i headern
-- Tydligare stang-knapp med text "Back to all"
+### 7. MarketSentimentBar -- Explanations
+- Add tooltips to each market indicator:
+  - Market Cap: *"Total value of all cryptocurrencies combined"*
+  - BTC Dom: *"Bitcoin's share of the total crypto market cap"*
+  - ETH Gas: *"Current Ethereum network transaction fee"*
+  - Season: *"When BTC dominance is low, altcoins tend to outperform (Alt Season)"*
+  - Fear and Greed: *"Market sentiment index from 0 (extreme fear) to 100 (extreme greed)"*
 
-**B. Forbattra pill-design**
-- Battre padding (`px-3 py-1.5`) och tydligare hover-effekt
-- Lagg till `gap-2` istallet for `gap-1.5` mellan element i pillen
-- Visuellt tydligare avskiljning mellan cluster-namn och metadata
+### 8. TokenGrid -- Info Labels
+- Add small labels/tooltips for Vol, MCap, Liq, Age abbreviations so users understand what each stat means on hover.
 
-**C. Responsiv scrollbar**
-- Lagg till `scrollbar-hide` for att gomma scrollbar pa horisontell scroll
+### 9. Welcome/Empty State Enhancement
+- When the token list is empty or loading for the first time, show a brief platform description: *"Solana Meme Token Scanner -- Track trending tokens, spot viral memes, and discover new pairs in real-time."*
 
 ---
 
-## Tekniska detaljer
+## Technical Details
 
-### Badge-placering (fore och efter)
-
-FORE (overlappar):
-```text
-| #1 [OG] | [LOGO] DUFFY /SOL DUFFY [pump] |
-  ^--- rank + badge krockar     ^--- allt tryckt ihop
-```
-
-EFTER (rent):
-```text
-| #1 | [LOGO]  DUFFY /SOL DUFFY [OG] [pump] |
-  ^---rank    ^---logo  ^---namn    ^---badge har plats
-```
-
-### Nya badge-stilar
-- OG: `bg-yellow-500/15 text-yellow-400 border border-yellow-500/30 rounded-md px-1.5 py-0.5 text-[10px] font-bold`
-- TOP: `bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 rounded-md px-1.5 py-0.5 text-[10px] font-bold`
-- Clone: `bg-secondary text-muted-foreground rounded-md px-1.5 py-0.5 text-[10px]`
-
-### Filer som andras
-
-| Fil | Andring |
-|-----|---------|
-| `src/components/TokenTable.tsx` | Flytta badges, fixa overflow, forbattra STATUS-kolumn, justera kolumnbredder |
-| `src/components/ViralBar.tsx` | Forbattra spacing, pill-design, vald-cluster header |
+- **InfoTooltip component**: Uses `@radix-ui/react-tooltip` (already installed). Renders an `Info` icon (from lucide) with configurable tooltip text. Compact styling matching the platform theme.
+- **Files to create**: `src/components/InfoTooltip.tsx`
+- **Files to modify**:
+  - `src/components/ViralBar.tsx` -- add descriptions and tooltips for viral concepts
+  - `src/components/StatsBar.tsx` -- add tooltips to stat labels
+  - `src/components/TokenFilters.tsx` -- add tooltips to category buttons and rank options
+  - `src/components/TrendingBar.tsx` -- add tooltip to trending label
+  - `src/components/TokenTable.tsx` -- add tooltips to column headers, OG/TOP badges, and status labels
+  - `src/components/TokenGrid.tsx` -- add tooltips to abbreviated stat labels
+  - `src/components/MarketSentimentBar.tsx` -- add tooltips to all market indicators
+  - `src/pages/Index.tsx` -- add welcome subtitle text
+- **No new dependencies needed** -- all using existing Radix Tooltip
+- **Design approach**: Small `(i)` icons in `text-muted-foreground/50` that don't clutter the UI but are discoverable on hover. Tooltip max-width ~250px with `text-[12px]` body text.
