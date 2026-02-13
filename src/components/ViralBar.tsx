@@ -61,16 +61,23 @@ const ViralBar = ({ clusters, selectedCluster, onSelect, onClear, viralSortBy = 
         </div>
       </div>
 
-      {/* Selected cluster detail header + sort controls */}
+      {/* Selected cluster: BACK button top-left + info + sort */}
       {selected && (
-        <div className="flex items-center justify-between px-4 py-2.5 border-t border-border/30 bg-gradient-to-r from-orange-500/8 to-transparent">
-          <div className="flex items-center gap-3 text-[13px]">
+        <div className="border-t border-border/30 bg-gradient-to-r from-orange-500/8 to-transparent">
+          {/* Row 1: Back button prominent top-left */}
+          <div className="flex items-center gap-3 px-4 py-2">
+            <button
+              onClick={onClear}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold bg-foreground text-background hover:opacity-90 transition-opacity shrink-0"
+            >
+              ← Back
+            </button>
+            <div className="w-px h-5 bg-border/40" />
             <div className="flex items-center gap-1.5">
               <Crown className="w-4 h-4 text-yellow-400" />
               <span className="text-foreground font-bold text-sm">{selected.displayName}</span>
             </div>
-            <div className="w-px h-4 bg-border/40" />
-            <span className="text-muted-foreground">
+            <span className="text-muted-foreground text-[13px]">
               {selected.count} tokens
             </span>
             <div className="w-px h-4 bg-border/40" />
@@ -93,13 +100,6 @@ const ViralBar = ({ clusters, selectedCluster, onSelect, onClear, viralSortBy = 
               ))}
             </div>
           </div>
-          <button
-            onClick={onClear}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12px] font-medium bg-secondary hover:bg-accent text-foreground transition-colors border border-border/40"
-          >
-            <X className="w-4 h-4" />
-            <span>Back</span>
-          </button>
         </div>
       )}
     </div>
