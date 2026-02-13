@@ -73,9 +73,9 @@ const TradingPanel = ({ token, initialMode, onBack }: TradingPanelProps) => {
 
           Sell
         </button>
-        <button className="px-3 py-3 text-muted-foreground hover:text-foreground border-l border-border">
-          <ChevronDown className="w-4 h-4" />
-        </button>
+        
+
+
       </div>
 
       {/* Market / Limit / Adv tabs */}
@@ -227,17 +227,17 @@ const TradingPanel = ({ token, initialMode, onBack }: TradingPanelProps) => {
             {/* 2x3 grid - icon + colored value on top, label below */}
             <div className="grid grid-cols-3 gap-2">
               {(() => {
-                const top10 = 32.5, dev = 0, snipers = 4.2, insiders = 2.1, bundlers = 0.8;
+                const top10 = 32.5,dev = 0,snipers = 4.2,insiders = 2.1,bundlers = 0.8;
                 const lpBurned = true;
                 const getColor = (val: number, threshold: number) => val === 0 ? 'text-foreground' : val > threshold ? 'text-loss' : 'text-profit';
                 return [
-                  { label: 'Top 10 H.', value: `${top10}%`, icon: <Users className="w-3.5 h-3.5" />, color: getColor(top10, 20) },
-                  { label: 'Dev H.', value: `${dev}%`, icon: <Crown className="w-3.5 h-3.5" />, color: dev === 0 ? 'text-foreground' : dev > 6 ? 'text-loss' : 'text-profit' },
-                  { label: 'Snipers H.', value: `${snipers}%`, icon: <Target className="w-3.5 h-3.5" />, color: getColor(snipers, 6) },
-                  { label: 'Insiders', value: `${insiders}%`, icon: <Lock className="w-3.5 h-3.5" />, color: getColor(insiders, 6) },
-                  { label: 'Bundlers', value: `${bundlers}%`, icon: <Link2 className="w-3.5 h-3.5" />, color: getColor(bundlers, 10) },
-                  { label: 'LP Burned', value: lpBurned ? '100%' : 'No', icon: <Flame className="w-3.5 h-3.5" />, color: lpBurned ? 'text-profit' : 'text-loss' },
-                ];
+                { label: 'Top 10 H.', value: `${top10}%`, icon: <Users className="w-3.5 h-3.5" />, color: getColor(top10, 20) },
+                { label: 'Dev H.', value: `${dev}%`, icon: <Crown className="w-3.5 h-3.5" />, color: dev === 0 ? 'text-foreground' : dev > 6 ? 'text-loss' : 'text-profit' },
+                { label: 'Snipers H.', value: `${snipers}%`, icon: <Target className="w-3.5 h-3.5" />, color: getColor(snipers, 6) },
+                { label: 'Insiders', value: `${insiders}%`, icon: <Lock className="w-3.5 h-3.5" />, color: getColor(insiders, 6) },
+                { label: 'Bundlers', value: `${bundlers}%`, icon: <Link2 className="w-3.5 h-3.5" />, color: getColor(bundlers, 10) },
+                { label: 'LP Burned', value: lpBurned ? '100%' : 'No', icon: <Flame className="w-3.5 h-3.5" />, color: lpBurned ? 'text-profit' : 'text-loss' }];
+
               })().map(({ label, value, icon, color }) =>
               <div key={label} className="text-center py-1.5">
                   <div className={`flex items-center justify-center gap-1 ${color} mb-0.5`}>
