@@ -27,7 +27,8 @@ function fetchByCategory(category: Category): Promise<Token[]> {
     case 'gainers':
       return fetchWithFallback(fetchGainersDexScreener, fetchGainers);
     case 'new':
-      return fetchWithFallback(fetchNewPairsDexScreener, fetchNewPairs);
+      // Handled by PumpPortal WebSocket — return empty
+      return Promise.resolve([]);
     case 'top':
       return fetchWithFallback(fetchTopByVolume, fetchHotPools);
     case 'trending':
