@@ -71,7 +71,7 @@ const TokenGrid = ({ tokens }: TokenGridProps) => {
 
             {/* Price + 24h change */}
             <div className="flex items-center justify-between mb-3">
-              <span className="text-lg font-bold text-foreground">{formatPrice(token.price)}</span>
+              <span className="text-lg font-bold text-foreground">{formatNumber(token.mcap)}</span>
               <div className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-[13px] font-bold tracking-tight ${
                 token.change24h >= 0
                   ? 'bg-[hsl(var(--profit)/0.18)] text-profit'
