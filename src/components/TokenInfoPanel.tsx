@@ -74,11 +74,24 @@ const TokenInfoPanel = ({ token, onBuyClick, onSellClick }: TokenInfoPanelProps)
               <span>Solana</span>
               <span className="text-muted-foreground/50">&gt;</span>
               <span>{token.exchangeName || 'Raydium'}</span>
-              {token.age && (
-                <span className="px-1.5 py-0 rounded bg-muted/30 text-muted-foreground border border-border">{token.age}</span>
-              )}
+              {token.age && (() => {
+                const ageStr = token.age;
+                const isYoung = ageStr.endsWith('h') || ageStr.endsWith('m') || ageStr.endsWith('s');
+                return (
+                  <span className={`px-1.5 py-0 rounded border border-border flex items-center gap-0.5 ${isYoung ? 'bg-[#26a269]/10 border-[#26a269]/30' : 'bg-muted/30'}`}>
+                    {isYoung && (
+                      <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#26a269" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M4.711 17.875c-.534 -1.339 -1.35 -4.178 .129 -6.47c1.415 -2.193 3.769 -3.608 5.099 -4.278l-5.229 10.748l.001 0" />
+                        <path d="M19.715 12.508c-.54 3.409 -2.094 6.156 -4.155 7.348c-4.069 2.353 -8.144 .45 -9.297 -.188c.877 -1.436 4.433 -7.22 6.882 -10.591c2.714 -3.737 5.864 -5.978 6.565 -6.077c0 .201 .03 .55 .071 1.03c.144 1.709 .443 5.264 -.066 8.478" />
+                      </svg>
+                    )}
+                    <span className={isYoung ? 'text-[#26a269] font-bold' : 'text-muted-foreground'}>{ageStr}</span>
+                  </span>
+                );
+              })()}
               {token.rank > 0 && (
-                <span className="px-1.5 py-0 rounded bg-muted/30 text-muted-foreground border border-border">#{token.rank}</span>
+                <span className={`px-1.5 py-0 rounded border border-border font-bold text-[11px] ${token.rank <= 5 ? 'bg-[#e5a50a]/10 text-[#e5a50a] border-[#e5a50a]/30' : 'bg-muted/30 text-foreground'}`}>#{token.rank}</span>
               )}
               {token.boosts && token.boosts > 0 && (
                 <span className="px-1.5 py-0 rounded bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 flex items-center gap-0.5">
