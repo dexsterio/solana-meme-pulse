@@ -31,7 +31,7 @@ const ViralBar = ({ clusters, selectedCluster, onSelect, onClear, viralSortBy = 
         <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground uppercase tracking-wider shrink-0 pr-1">
           <Flame className="w-4 h-4 text-orange-400" />
           <span className="font-semibold">Viral Memes</span>
-          <InfoTooltip text="Tokens with the same name appearing 3+ times in the last hour — a sign of viral meme activity." />
+          <InfoTooltip text="Meme-tokens som just nu går viralt — troligtvis uppmärksammade av en influencer eller trendar på sociala medier." />
         </div>
         <div className="w-px h-5 bg-border/50 shrink-0" />
         <div className="flex items-center gap-2">
@@ -82,7 +82,7 @@ const ViralBar = ({ clusters, selectedCluster, onSelect, onClear, viralSortBy = 
             <span className="text-muted-foreground text-[13px]">
               {selected.count} tokens
             </span>
-            <InfoTooltip text="These tokens share the same meme name. OG = first created. TOP = highest market cap." />
+            <InfoTooltip text="Dessa tokens delar samma meme-namn. OG = den som skapades först. TOP = den med högst market cap." />
             <div className="w-px h-4 bg-border/40" />
             {/* Sort buttons */}
             <div className="flex items-center gap-1">
