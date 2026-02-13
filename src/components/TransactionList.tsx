@@ -6,10 +6,10 @@ interface TransactionListProps {
   tokenId: string;
 }
 
-const tabs = ['Transactions', 'Top Traders', 'Holders'] as const;
+const tabs = ['Transaktioner', 'Topphandlare', 'Innehavare'] as const;
 
 const TransactionList = ({ tokenId }: TransactionListProps) => {
-  const [activeTab, setActiveTab] = useState<typeof tabs[number]>('Transactions');
+  const [activeTab, setActiveTab] = useState<typeof tabs[number]>('Transaktioner');
   const transactions = useMemo(() => generateMockTransactions(tokenId), [tokenId]);
 
   return (
@@ -32,12 +32,12 @@ const TransactionList = ({ tokenId }: TransactionListProps) => {
         <table className="w-full text-[11px]">
           <thead className="sticky top-0 bg-card">
             <tr className="border-b border-border text-muted-foreground">
-              <th className="px-2 py-1.5 text-left font-medium">DATE</th>
-              <th className="px-2 py-1.5 text-left font-medium">TYPE</th>
+              <th className="px-2 py-1.5 text-left font-medium">DATUM</th>
+              <th className="px-2 py-1.5 text-left font-medium">TYP</th>
               <th className="px-2 py-1.5 text-right font-medium">USD</th>
-              <th className="px-2 py-1.5 text-right font-medium">AMOUNT</th>
+              <th className="px-2 py-1.5 text-right font-medium">ANTAL</th>
               <th className="px-2 py-1.5 text-right font-medium">SOL</th>
-              <th className="px-2 py-1.5 text-right font-medium">PRICE</th>
+              <th className="px-2 py-1.5 text-right font-medium">PRIS</th>
               <th className="px-2 py-1.5 text-right font-medium">MAKER</th>
               <th className="px-2 py-1.5 text-center font-medium">TXN</th>
             </tr>
@@ -46,10 +46,10 @@ const TransactionList = ({ tokenId }: TransactionListProps) => {
             {transactions.map((tx) => (
               <tr key={tx.id} className="border-b border-border/30 hover:bg-accent/30">
                 <td className="px-2 py-1.5 text-muted-foreground">
-                  {new Date(tx.date).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                  {new Date(tx.date).toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
                 </td>
                 <td className={`px-2 py-1.5 font-medium ${tx.type === 'buy' ? 'text-profit' : 'text-loss'}`}>
-                  {tx.type === 'buy' ? 'Buy' : 'Sell'}
+                  {tx.type === 'buy' ? 'Köp' : 'Sälj'}
                 </td>
                 <td className="px-2 py-1.5 text-right text-foreground">${tx.usd.toFixed(2)}</td>
                 <td className="px-2 py-1.5 text-right text-foreground">{formatCompact(tx.tokenAmount)}</td>

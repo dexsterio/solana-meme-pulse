@@ -22,7 +22,7 @@ const StatsBar = ({ tokens = [], onSearch, searchQuery = '', onSearchChange, isC
         <Search className="w-3.5 h-3.5 text-muted-foreground ml-2.5" />
         <input
           type="text"
-          placeholder="Search token..."
+          placeholder="Sök token..."
           value={searchQuery}
           onChange={(e) => {
             onSearchChange?.(e.target.value);
@@ -53,7 +53,7 @@ const StatsBar = ({ tokens = [], onSearch, searchQuery = '', onSearchChange, isC
         }`}
       >
         <WorldIcon className="w-3.5 h-3.5" />
-        {isCryptoMarket ? 'Meme Zone' : 'Market View'}
+        {isCryptoMarket ? 'Meme-zon' : 'Marknadsvy'}
       </button>
     </div>
   );

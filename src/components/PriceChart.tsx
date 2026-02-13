@@ -54,7 +54,7 @@ const PriceChart = ({ token }: PriceChartProps) => {
             onClick={() => setShowMcap(false)}
             className={`px-2 py-1 text-[10px] rounded ${!showMcap ? 'bg-accent text-foreground' : 'text-muted-foreground'}`}
           >
-            Price
+            Pris
           </button>
           <button
             onClick={() => setShowMcap(true)}
@@ -95,7 +95,7 @@ const PriceChart = ({ token }: PriceChartProps) => {
       </div>
 
       <div className="px-3 py-1.5 border-t border-border text-[10px] text-muted-foreground text-center">
-        Chart placeholder — OHLCV data will be connected later
+        Diagramplacering — OHLCV-data kopplas senare
       </div>
     </div>
   );

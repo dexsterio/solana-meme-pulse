@@ -50,13 +50,13 @@ const ChangeCell = ({ value }: { value: number }) => (
 );
 
 const OgBadge = () => (
-  <span className="inline-flex items-center gap-0.5 text-[10px] text-yellow-400 font-bold shrink-0 ml-1.5" title="The first token created with this name">
+  <span className="inline-flex items-center gap-0.5 text-[10px] text-yellow-400 font-bold shrink-0 ml-1.5" title="Den första token med detta namn">
     <CrownFilledIcon className="w-3 h-3" /> OG
   </span>
 );
 
 const TopBadge = () => (
-  <span className="inline-flex items-center gap-0.5 text-[10px] text-emerald-400 font-bold shrink-0 ml-1.5" title="The token with the highest market cap in this cluster">
+  <span className="inline-flex items-center gap-0.5 text-[10px] text-emerald-400 font-bold shrink-0 ml-1.5" title="Token med högst market cap i klustret">
     <CaretUpFilledIcon className="w-3 h-3" /> TOP
   </span>
 );
@@ -71,10 +71,10 @@ const TokenTable = ({ tokens, isCryptoMarket = false, ogTokenId, topTokenId, sho
           <tr className="text-muted-foreground text-[11px] uppercase tracking-wider">
             <th className="w-10 px-3 py-2 text-left font-normal">#</th>
             <th className={`${showCreatedColumn ? 'w-[280px]' : isCryptoMarket ? 'w-[200px]' : 'w-[260px]'} px-3 py-2 text-left font-normal`}>TOKEN</th>
-            <th className="px-3 py-2 text-right font-normal">PRICE</th>
-            {!isCryptoMarket && <th className="px-3 py-2 text-right font-normal"><span className="inline-flex items-center gap-1">AGE <InfoTooltip text="tid sedan token skapades." iconSize={10} /></span></th>}
+            <th className="px-3 py-2 text-right font-normal">PRIS</th>
+            {!isCryptoMarket && <th className="px-3 py-2 text-right font-normal"><span className="inline-flex items-center gap-1">ÅLDER <InfoTooltip text="tid sedan token skapades." iconSize={10} /></span></th>}
             {!isCryptoMarket && <th className="px-3 py-2 text-right font-normal"><span className="inline-flex items-center gap-1">TXNS <InfoTooltip text="antal köp- och säljtransaktioner." iconSize={10} /></span></th>}
-            <th className="px-3 py-2 text-right font-normal"><span className="inline-flex items-center gap-1">VOLUME <InfoTooltip text="totalt handlat värde i USD." iconSize={10} /></span></th>
+            <th className="px-3 py-2 text-right font-normal"><span className="inline-flex items-center gap-1">VOLYM <InfoTooltip text="totalt handlat värde i USD." iconSize={10} /></span></th>
             {!isCryptoMarket && <th className="px-3 py-2 text-right font-normal"><span className="inline-flex items-center gap-1">MAKERS <InfoTooltip text="unika plånböcker som handlat denna token." iconSize={10} /></span></th>}
             {isCryptoMarket ? (
               <>
@@ -91,7 +91,7 @@ const TokenTable = ({ tokens, isCryptoMarket = false, ogTokenId, topTokenId, sho
                 <th className="px-3 py-2 text-right font-normal">24H</th>
               </>
             )}
-            {!isCryptoMarket && <th className="px-3 py-2 text-right font-normal"><span className="inline-flex items-center gap-1">LIQUIDITY <InfoTooltip text="tillgänglig likviditet i handelspoolen." iconSize={10} /></span></th>}
+            {!isCryptoMarket && <th className="px-3 py-2 text-right font-normal"><span className="inline-flex items-center gap-1">LIKVIDITET <InfoTooltip text="tillgänglig likviditet i handelspoolen." iconSize={10} /></span></th>}
             <th className="px-3 py-2 text-right font-normal"><span className="inline-flex items-center gap-1">MCAP <InfoTooltip text="market cap = pris × totalt utbud." iconSize={10} /></span></th>
             {showCreatedColumn && <th className="w-[120px] px-3 py-2 text-right font-normal"><span className="inline-flex items-center gap-1">STATUS <InfoTooltip text="OG = först skapad. TOP = högst market cap. Clone = kopia." iconSize={10} /></span></th>}
           </tr>
@@ -171,14 +171,14 @@ const TokenTable = ({ tokens, isCryptoMarket = false, ogTokenId, topTokenId, sho
                 <td className="px-3 py-2 text-right">
                   {ogTokenId === token.id ? (
                     <span className="inline-flex items-center gap-1 text-[10px] text-yellow-400 font-bold">
-                      <CrownFilledIcon className="w-3 h-3" /> First Created
+                      <CrownFilledIcon className="w-3 h-3" /> Först skapad
                     </span>
                   ) : topTokenId === token.id ? (
                     <span className="inline-flex items-center gap-1 text-[10px] text-emerald-400 font-bold">
-                      <CaretUpFilledIcon className="w-3 h-3" /> Highest MCap
+                      <CaretUpFilledIcon className="w-3 h-3" /> Högst MCap
                     </span>
                   ) : (
-                    <span className="text-[10px] text-muted-foreground">Clone</span>
+                    <span className="text-[10px] text-muted-foreground">Kopia</span>
                   )}
                 </td>
               )}
