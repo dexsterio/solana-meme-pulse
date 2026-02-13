@@ -1,124 +1,55 @@
 
 
-# Fix DexTools API Integration - Complete Overhaul
+# Edge Function Proxy for DexTools API
 
 ## Problem
-The current API integration is completely broken:
-1. The CORS proxy (`corsproxy.io`) is failing on every request
-2. The API response mapping is wrong - hotpools returns pool metadata only (no price/volume)
-3. Token logos are not being fetched
-4. Header name is incorrect (`x-api-key` should be `X-API-Key`)
-
-## Root Cause Analysis from API Spec
-
-The DexTools API has a specific data structure:
-
-- **`/v2/ranking/solana/hotpools`** returns `RankedPool[]` with: rank, address, exchangeName, creationTime, mainToken (address/symbol/name), sideToken - but NO price, volume, or variations
-- **`/v2/ranking/solana/gainers`** returns `GainersLosersPool[]` with: same as above PLUS price, price24h, variation24h
-- **`/v2/pool/solana/{poolAddress}/price`** returns `PoolPrice` with: price, priceChain, volume5m/1h/6h/24h, buys/sells, variation5m/1h/6h/24h - THIS is where the real data lives
-- **`/v2/token/solana/{tokenAddress}`** returns `TokenDescription` with: name, symbol, **logo** URL, description, socialInfo
-- **`/v2/token/solana/{tokenAddress}/info`** returns `TokenFinancialInfo` with: mcap, fdv, holders, circulatingSupply
-- **`/v2/pool/solana?sort=creationTime&order=desc&from=...&to=...`** for New Pairs
+DexTools API requires an `X-API-Key` header but does not support CORS. All CORS proxy attempts fail because they either don't forward the API key header or DexTools rejects the proxied request (403 Forbidden). The only reliable solution is a server-side proxy.
 
 ## Solution
+Create a Supabase Edge Function (`dextools-proxy`) that:
+1. Receives requests from the frontend with the desired DexTools endpoint path
+2. Forwards them to `https://public-api.dextools.io/trial/v2/` with the API key server-side
+3. Returns the response with proper CORS headers
 
-### 1. Fix CORS - Try multiple proxy services (`dextoolsApi.ts`)
-Replace the single `corsproxy.io` proxy with a fallback chain:
-- Try `https://api.allorigins.win/raw?url=` first
-- Fallback to `https://corsproxy.io/?url=`  
-- Fallback to direct call (in case DexTools allows it)
+Then update the frontend `dextoolsApi.ts` to call the edge function instead of CORS proxies.
 
-### 2. Correct API header (`dextoolsApi.ts`)
-Change header from `x-api-key` to `X-API-Key` per the OpenAPI spec security scheme.
+## Implementation
 
-### 3. Implement proper multi-step data fetching (`dextoolsApi.ts`)
+### 1. Store API key as a secret
+Use the secrets tool to securely store `DEXTOOLS_API_KEY` so the edge function can access it via `Deno.env.get()`.
 
-For **Trending (hotpools)**:
-1. Call `/v2/ranking/solana/hotpools` to get pool list with addresses
-2. For each pool, call `/v2/pool/solana/{address}/price` to get price, volume, variations, buys/sells
-3. For each mainToken, call `/v2/token/solana/{mainToken.address}` to get logo URL
-4. Combine all data into Token interface
+### 2. Create Edge Function: `supabase/functions/dextools-proxy/index.ts`
+- Accept GET requests with a `path` query parameter (e.g., `?path=/ranking/solana/hotpools`)
+- Forward to DexTools API with the `X-API-Key` header from the secret
+- Return JSON response with CORS headers
+- Handle errors gracefully
 
-For **Gainers**:
-1. Call `/v2/ranking/solana/gainers` (already includes price + variation24h)
-2. Enrich with pool price endpoint for full variation data (5m, 1h, 6h)
-3. Fetch token logos
+### 3. Update `supabase/config.toml`
+- Add `[functions.dextools-proxy]` with `verify_jwt = false` (public endpoint, no auth needed)
 
-For **New Pairs**:
-1. Call `/v2/pool/solana?sort=creationTime&order=desc&from={24hAgo}&to={now}`
-2. Enrich with price data and token logos
-
-For **Token Detail**:
-1. Call `/v2/token/solana/{address}` for metadata + logo + socials
-2. Call `/v2/token/solana/{address}/info` for mcap, fdv, holders
-3. Call `/v2/token/solana/{address}/price` for price variations
-
-### 4. Rate limiting and batching (`dextoolsApi.ts`)
-The trial plan has rate limits. Implement:
-- Batch pool price requests (max 5-10 concurrent)
-- Cache token logos (they don't change often)
-- Only fetch detailed price data for visible pools (first 20)
-
-### 5. Update Token interface (`mockTokens.ts`)
-Add `logoUrl` field (string URL) alongside existing `logo` emoji fallback.
-
-### 6. Remove mock data dependency
-- Remove `mockTokens` array from being used as placeholder data
-- Show proper loading skeleton instead
-- Keep `mockTokens.ts` only for the Token interface and format utilities
-
-### 7. Update components
-- **TokenTable.tsx**: Display actual token logo image (from logoUrl) instead of colored squares
-- **TrendingBar.tsx**: Show token logo images
-- **StatsBar.tsx**: Aggregate real volume/txns from pool price data
+### 4. Rewrite `src/services/dextoolsApi.ts`
+- Remove all CORS proxy logic (codetabs, corsproxy, allorigins)
+- Remove hardcoded API key from frontend code
+- Replace `apiFetch()` to call the edge function URL with `?path=` parameter
+- Keep all the existing enrichment logic (fetchHotPools, fetchGainers, fetchNewPairs, fetchTokenDetails) intact
 
 ## Technical Details
 
-### File changes:
-
-**`src/services/dextoolsApi.ts`** - Complete rewrite:
-- Multi-proxy CORS bypass with fallback
-- Correct `X-API-Key` header
-- `fetchHotPools()`: fetch ranking + enrich with pool prices + token logos
-- `fetchGainers()`: fetch gainers + enrich with full price data
-- `fetchNewPairs()`: fetch recent pools sorted by creation time
-- `fetchTokenDetails()`: full token info with metadata, price, financials
-- Rate-limited batch fetcher for pool prices
-- Response caching for logos
-
-**`src/data/mockTokens.ts`**:
-- Add `logoUrl?: string` to Token interface
-- Keep format utilities
-- Remove or keep mockTokens array only as type reference (not for display)
-
-**`src/hooks/useTokens.ts`**:
-- Add `fetchNewPairs` to category switch
-- Remove mockTokens as placeholderData
-- Add proper error handling with retry
-
-**`src/components/TokenTable.tsx`**:
-- Replace colored square icons with `<img>` for token logo (with emoji fallback)
-
-**`src/components/TrendingBar.tsx`**:
-- Show real token logo images
-
-**`src/pages/Index.tsx`**:
-- Add loading skeleton
-- Remove mock data fallback display
-
-**`src/pages/TokenDetail.tsx`**:
-- Use live `fetchTokenDetails()` instead of finding in mockTokens array
-
-## Data Flow
-
+### Edge Function (simple proxy)
 ```text
-User opens page
-  --> useTokens('trending') fires
-    --> fetchHotPools()
-      --> GET /v2/ranking/solana/hotpools (pool list with addresses)
-      --> For top 20 pools: GET /v2/pool/solana/{addr}/price (price + volume + variations)
-      --> For top 20 tokens: GET /v2/token/solana/{tokenAddr} (logo + metadata)
-      --> Combine into Token[] and return
-    --> Display in TokenTable with real logos, prices, volumes
+GET /functions/v1/dextools-proxy?path=/ranking/solana/hotpools
+  --> Server fetches: https://public-api.dextools.io/trial/v2/ranking/solana/hotpools
+      with header X-API-Key from Deno.env
+  --> Returns JSON to client with CORS headers
 ```
+
+### Files to create/modify:
+- **Create** `supabase/functions/dextools-proxy/index.ts` - The proxy edge function
+- **Create/Update** `supabase/config.toml` - JWT verification disabled for this function
+- **Modify** `src/services/dextoolsApi.ts` - Replace proxy chain with single edge function call, remove API key from frontend
+
+### Security
+- API key stored as Supabase secret (not in frontend code)
+- Edge function is a simple passthrough proxy - no sensitive logic exposed
+- No JWT required since this is public data (same as DexScreener)
 
