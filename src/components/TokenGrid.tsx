@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { Token, formatPrice, formatNumber } from '@/data/mockTokens';
-import { Zap, TrendingUp, TrendingDown } from 'lucide-react';
+import { Zap } from 'lucide-react';
 import pumpfunLogo from '@/assets/pumpfun-logo.png';
 import bonkLogo from '@/assets/bonk-logo.png';
 import raydiumLogo from '@/assets/raydium-logo.png';
@@ -76,7 +76,6 @@ const TokenGrid = ({ tokens }: TokenGridProps) => {
                   ? 'bg-[hsl(var(--profit)/0.18)] text-profit'
                   : 'bg-[hsl(var(--loss)/0.18)] text-loss'
               }`}>
-                {token.change24h >= 0 ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
                 {token.change24h >= 0 ? '+' : ''}{token.change24h.toFixed(1)}%
               </div>
             </div>
