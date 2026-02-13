@@ -104,7 +104,7 @@ const Index = () => {
         isCryptoMarket={isCryptoMarket}
         onCryptoMarketToggle={() => setIsCryptoMarket(!isCryptoMarket)}
       />
-      {!isCryptoMarket && (
+      {!isCryptoMarket && !isViralView && (
         <TokenFilters
           timeFilter={timeFilter}
           setTimeFilter={setTimeFilter}
