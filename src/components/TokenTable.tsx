@@ -13,7 +13,7 @@ const TokenLogo = ({ token }: { token: Token }) => {
       <img
         src={token.logoUrl}
         alt={token.ticker}
-        className="w-[22px] h-[22px] rounded-full shrink-0"
+        className="w-7 h-7 rounded-md shrink-0"
         onError={(e) => {
           e.currentTarget.style.display = 'none';
           const fallback = e.currentTarget.nextElementSibling;
@@ -23,7 +23,7 @@ const TokenLogo = ({ token }: { token: Token }) => {
     );
   }
   return (
-    <div className="w-[22px] h-[22px] rounded-full bg-gradient-to-br from-primary/60 to-accent flex items-center justify-center text-[9px] text-foreground font-bold shrink-0">
+    <div className="w-7 h-7 rounded-md bg-gradient-to-br from-primary/60 to-accent flex items-center justify-center text-[10px] text-foreground font-bold shrink-0">
       {token.ticker?.charAt(0) || '?'}
     </div>
   );
