@@ -8,7 +8,19 @@ const EDGE_FN_URL = `${SUPABASE_URL}/functions/v1/dextools-proxy`;
 const logoCache = new Map<string, string>();
 const tokenInfoCache = new Map<string, { mcap: number; fdv: number; holders: number }>();
 
+// Simple sequential queue to throttle API calls (DexTools trial: ~30 req/min)
+let lastRequestTime = 0;
+const MIN_DELAY_MS = 2200; // ~27 requests/min max
+
 async function apiFetch(endpoint: string): Promise<any> {
+  // Throttle: ensure minimum delay between requests
+  const now = Date.now();
+  const elapsed = now - lastRequestTime;
+  if (elapsed < MIN_DELAY_MS) {
+    await new Promise(r => setTimeout(r, MIN_DELAY_MS - elapsed));
+  }
+  lastRequestTime = Date.now();
+
   const url = `${EDGE_FN_URL}?path=${encodeURIComponent(endpoint)}`;
   const res = await fetch(url, {
     headers: {
@@ -17,7 +29,11 @@ async function apiFetch(endpoint: string): Promise<any> {
     },
   });
   if (!res.ok) {
-    if (res.status === 429) throw new Error('Rate limited');
+    if (res.status === 429) {
+      // Wait longer on rate limit, then throw
+      await new Promise(r => setTimeout(r, 10_000));
+      throw new Error('Rate limited');
+    }
     const text = await res.text();
     console.warn(`Edge function ${res.status} for ${endpoint}:`, text);
     throw new Error(`API error ${res.status}`);
@@ -123,7 +139,7 @@ export async function fetchHotPools(): Promise<Token[]> {
   const pools: any[] = data?.data || [];
   if (pools.length === 0) throw new Error('No hotpools data');
 
-  const limit = Math.min(pools.length, 20);
+  const limit = Math.min(pools.length, 10);
   const topPools = pools.slice(0, limit);
 
   // Prepare token data structure
@@ -156,47 +172,36 @@ export async function fetchHotPools(): Promise<Token[]> {
     exchangeName: pool.exchangeName || '',
   }));
 
-  // Enrich with pool price data (most important - has price, volume, variations)
-  await batchPromises(tokens, async (token) => {
+  // Enrich sequentially with pool price data (most important)
+  // Only enrich first 5 to stay within rate limits
+  for (const token of tokens.slice(0, 5)) {
     const poolAddr = (token as any).poolAddress;
-    if (!poolAddr) return;
-    const priceData = await fetchPoolPrice(poolAddr);
-    if (priceData) {
-      token.price = priceData.price ?? 0;
-      token.priceSOL = priceData.priceChain ?? 0;
-      token.change5m = priceData.variation5m ?? 0;
-      token.change1h = priceData.variation1h ?? 0;
-      token.change6h = priceData.variation6h ?? 0;
-      token.change24h = priceData.variation24h ?? 0;
-      token.volume = priceData.volume24h ?? 0;
-      token.txns = (priceData.buys24h ?? 0) + (priceData.sells24h ?? 0);
-      token.makers = (priceData.buys24h ?? 0) + (priceData.sells24h ?? 0); // approximate
-      (token as any).buys24h = priceData.buys24h ?? 0;
-      (token as any).sells24h = priceData.sells24h ?? 0;
-      (token as any).buyVolume24h = priceData.buyVolume24h ?? 0;
-      (token as any).sellVolume24h = priceData.sellVolume24h ?? 0;
-    }
-  }, 5);
+    if (!poolAddr) continue;
+    try {
+      const priceData = await fetchPoolPrice(poolAddr);
+      if (priceData) {
+        token.price = priceData.price ?? 0;
+        token.priceSOL = priceData.priceChain ?? 0;
+        token.change5m = priceData.variation5m ?? 0;
+        token.change1h = priceData.variation1h ?? 0;
+        token.change6h = priceData.variation6h ?? 0;
+        token.change24h = priceData.variation24h ?? 0;
+        token.volume = priceData.volume24h ?? 0;
+        token.txns = (priceData.buys24h ?? 0) + (priceData.sells24h ?? 0);
+        token.makers = token.txns;
+        (token as any).buys24h = priceData.buys24h ?? 0;
+        (token as any).sells24h = priceData.sells24h ?? 0;
+      }
+    } catch { /* skip on error */ }
+  }
 
-  // Enrich with logos + liquidity + financial info in parallel
-  await Promise.all([
-    batchPromises(tokens, async (token) => {
-      if (!token.address) return;
-      const logoUrl = await fetchTokenLogo(token.address);
-      (token as any).logoUrl = logoUrl;
-    }, 5),
-    batchPromises(tokens, async (token) => {
-      const poolAddr = (token as any).poolAddress;
-      if (!poolAddr) return;
-      token.liquidity = await fetchPoolLiquidity(poolAddr);
-    }, 5),
-    batchPromises(tokens, async (token) => {
-      if (!token.address) return;
-      const info = await fetchTokenFinancialInfo(token.address);
-      token.mcap = info.mcap;
-      token.fdv = info.fdv;
-    }, 5),
-  ]);
+  // Fetch logos sequentially for first 5
+  for (const token of tokens.slice(0, 5)) {
+    if (!token.address) continue;
+    try {
+      (token as any).logoUrl = await fetchTokenLogo(token.address);
+    } catch { /* skip */ }
+  }
 
   return tokens;
 }
@@ -211,7 +216,7 @@ export async function fetchGainers(): Promise<Token[]> {
   const pools: any[] = data?.data || [];
   if (pools.length === 0) throw new Error('No gainers data');
 
-  const limit = Math.min(pools.length, 20);
+  const limit = Math.min(pools.length, 10);
   const topPools = pools.slice(0, limit);
 
   const tokens: Token[] = topPools.map((pool, i) => ({
@@ -239,11 +244,11 @@ export async function fetchGainers(): Promise<Token[]> {
     exchangeName: pool.exchangeName || '',
   }));
 
-  // Enrich with full pool price data + logos
-  await Promise.all([
-    batchPromises(tokens, async (token) => {
-      const poolAddr = (token as any).poolAddress;
-      if (!poolAddr) return;
+  // Sequential enrichment for first 5
+  for (const token of tokens.slice(0, 5)) {
+    const poolAddr = (token as any).poolAddress;
+    if (!poolAddr) continue;
+    try {
       const priceData = await fetchPoolPrice(poolAddr);
       if (priceData) {
         token.price = priceData.price ?? token.price;
@@ -256,23 +261,12 @@ export async function fetchGainers(): Promise<Token[]> {
         token.txns = (priceData.buys24h ?? 0) + (priceData.sells24h ?? 0);
         token.makers = token.txns;
       }
-    }, 5),
-    batchPromises(tokens, async (token) => {
-      if (!token.address) return;
-      (token as any).logoUrl = await fetchTokenLogo(token.address);
-    }, 5),
-    batchPromises(tokens, async (token) => {
-      const poolAddr = (token as any).poolAddress;
-      if (!poolAddr) return;
-      token.liquidity = await fetchPoolLiquidity(poolAddr);
-    }, 5),
-    batchPromises(tokens, async (token) => {
-      if (!token.address) return;
-      const info = await fetchTokenFinancialInfo(token.address);
-      token.mcap = info.mcap;
-      token.fdv = info.fdv;
-    }, 5),
-  ]);
+    } catch { /* skip */ }
+  }
+  for (const token of tokens.slice(0, 5)) {
+    if (!token.address) continue;
+    try { (token as any).logoUrl = await fetchTokenLogo(token.address); } catch { /* skip */ }
+  }
 
   return tokens;
 }
@@ -285,7 +279,7 @@ export async function fetchLosers(): Promise<Token[]> {
   const pools: any[] = data?.data || [];
   if (pools.length === 0) throw new Error('No losers data');
 
-  const limit = Math.min(pools.length, 20);
+  const limit = Math.min(pools.length, 10);
   const topPools = pools.slice(0, limit);
 
   const tokens: Token[] = topPools.map((pool, i) => ({
@@ -313,10 +307,10 @@ export async function fetchLosers(): Promise<Token[]> {
     exchangeName: pool.exchangeName || '',
   }));
 
-  await Promise.all([
-    batchPromises(tokens, async (token) => {
-      const poolAddr = (token as any).poolAddress;
-      if (!poolAddr) return;
+  for (const token of tokens.slice(0, 5)) {
+    const poolAddr = (token as any).poolAddress;
+    if (!poolAddr) continue;
+    try {
       const priceData = await fetchPoolPrice(poolAddr);
       if (priceData) {
         token.price = priceData.price ?? token.price;
@@ -329,23 +323,12 @@ export async function fetchLosers(): Promise<Token[]> {
         token.txns = (priceData.buys24h ?? 0) + (priceData.sells24h ?? 0);
         token.makers = token.txns;
       }
-    }, 5),
-    batchPromises(tokens, async (token) => {
-      if (!token.address) return;
-      (token as any).logoUrl = await fetchTokenLogo(token.address);
-    }, 5),
-    batchPromises(tokens, async (token) => {
-      const poolAddr = (token as any).poolAddress;
-      if (!poolAddr) return;
-      token.liquidity = await fetchPoolLiquidity(poolAddr);
-    }, 5),
-    batchPromises(tokens, async (token) => {
-      if (!token.address) return;
-      const info = await fetchTokenFinancialInfo(token.address);
-      token.mcap = info.mcap;
-      token.fdv = info.fdv;
-    }, 5),
-  ]);
+    } catch { /* skip */ }
+  }
+  for (const token of tokens.slice(0, 5)) {
+    if (!token.address) continue;
+    try { (token as any).logoUrl = await fetchTokenLogo(token.address); } catch { /* skip */ }
+  }
 
   return tokens;
 }
@@ -364,7 +347,7 @@ export async function fetchNewPairs(): Promise<Token[]> {
   const pools: any[] = data?.data?.results || data?.data || [];
   if (pools.length === 0) throw new Error('No new pairs data');
 
-  const limit = Math.min(pools.length, 20);
+  const limit = Math.min(pools.length, 10);
   const topPools = pools.slice(0, limit);
 
   const tokens: Token[] = topPools.map((pool: any, i: number) => ({
@@ -392,11 +375,10 @@ export async function fetchNewPairs(): Promise<Token[]> {
     exchangeName: pool.exchangeName || '',
   }));
 
-  // Enrich
-  await Promise.all([
-    batchPromises(tokens, async (token) => {
-      const poolAddr = (token as any).poolAddress;
-      if (!poolAddr) return;
+  for (const token of tokens.slice(0, 5)) {
+    const poolAddr = (token as any).poolAddress;
+    if (!poolAddr) continue;
+    try {
       const priceData = await fetchPoolPrice(poolAddr);
       if (priceData) {
         token.price = priceData.price ?? 0;
@@ -409,23 +391,12 @@ export async function fetchNewPairs(): Promise<Token[]> {
         token.txns = (priceData.buys24h ?? 0) + (priceData.sells24h ?? 0);
         token.makers = token.txns;
       }
-    }, 5),
-    batchPromises(tokens, async (token) => {
-      if (!token.address) return;
-      (token as any).logoUrl = await fetchTokenLogo(token.address);
-    }, 5),
-    batchPromises(tokens, async (token) => {
-      const poolAddr = (token as any).poolAddress;
-      if (!poolAddr) return;
-      token.liquidity = await fetchPoolLiquidity(poolAddr);
-    }, 5),
-    batchPromises(tokens, async (token) => {
-      if (!token.address) return;
-      const info = await fetchTokenFinancialInfo(token.address);
-      token.mcap = info.mcap;
-      token.fdv = info.fdv;
-    }, 5),
-  ]);
+    } catch { /* skip */ }
+  }
+  for (const token of tokens.slice(0, 5)) {
+    if (!token.address) continue;
+    try { (token as any).logoUrl = await fetchTokenLogo(token.address); } catch { /* skip */ }
+  }
 
   return tokens;
 }
@@ -438,11 +409,10 @@ export async function fetchNewPairs(): Promise<Token[]> {
  */
 export async function fetchTokenDetails(tokenAddress: string): Promise<Token | null> {
   try {
-    const [descData, infoData, priceData] = await Promise.all([
-      apiFetch(`/token/solana/${tokenAddress}`),
-      apiFetch(`/token/solana/${tokenAddress}/info`),
-      apiFetch(`/token/solana/${tokenAddress}/price`),
-    ]);
+    // Sequential to avoid rate limits
+    const descData = await apiFetch(`/token/solana/${tokenAddress}`);
+    const infoData = await apiFetch(`/token/solana/${tokenAddress}/info`);
+    const priceData = await apiFetch(`/token/solana/${tokenAddress}/price`);
 
     const desc = descData?.data || {};
     const info = infoData?.data || {};

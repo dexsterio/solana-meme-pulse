@@ -20,9 +20,13 @@ export function useTokens(category: Category) {
   return useQuery<Token[]>({
     queryKey: ['tokens', category],
     queryFn: () => fetchByCategory(category),
-    refetchInterval: 60000, // 60s to avoid rate limits
-    staleTime: 30000,
-    retry: 2,
-    retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 10000),
+    refetchInterval: 120_000, // 2 min to stay within DexTools trial rate limits
+    staleTime: 90_000,
+    retry: (failureCount, error) => {
+      // Never retry on rate limit errors
+      if (error?.message?.includes('Rate limited')) return false;
+      return failureCount < 1;
+    },
+    retryDelay: 15_000,
   });
 }
