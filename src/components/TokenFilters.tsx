@@ -38,11 +38,11 @@ const TokenFilters = ({
     <div className="px-3 py-1.5 border-b border-border">
       <div className="flex items-center gap-1.5 min-w-0 whitespace-nowrap">
         {/* Time period pill - green */}
-        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-profit/40 text-profit text-[13px]">
-          <Clock className="w-3.5 h-3.5" />
-          <span>{timeLabel}</span>
-          <ChevronDown className="w-3 h-3" />
-        </div>
+        
+
+
+
+
 
         {/* Trending pill with embedded time toggles */}
         <div className="flex items-center rounded-full overflow-hidden border border-orange-500/30">
