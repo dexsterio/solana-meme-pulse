@@ -6,6 +6,10 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import TokenDetail from "./pages/TokenDetail";
 import NotFound from "./pages/NotFound";
+import { initPumpPortalService } from "./services/pumpPortalService";
+
+// Start collecting new tokens immediately on app load
+initPumpPortalService();
 
 const queryClient = new QueryClient();
 
