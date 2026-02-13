@@ -33,7 +33,7 @@ const TrendingBar = ({ tokens = [] }: TrendingBarProps) => {
             <span className="text-[14px]">🪙</span>
           )}
           <span className="text-[13px] font-medium text-foreground">{token.ticker}</span>
-          <span className={`text-[11px] ${token.change24h >= 0 ? 'text-profit' : 'text-loss'}`}>
+          <span className={`text-[12px] font-bold tracking-tight ${token.change24h >= 0 ? 'text-profit' : 'text-loss'}`}>
             {token.change24h >= 0 ? '+' : ''}{token.change24h.toFixed(0)}%
           </span>
         </button>

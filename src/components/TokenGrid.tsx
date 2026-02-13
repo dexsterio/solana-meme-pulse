@@ -71,12 +71,12 @@ const TokenGrid = ({ tokens }: TokenGridProps) => {
             {/* Price + 24h change */}
             <div className="flex items-center justify-between mb-3">
               <span className="text-lg font-bold text-foreground">{formatPrice(token.price)}</span>
-              <div className={`flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium ${
+              <div className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-[13px] font-bold tracking-tight ${
                 token.change24h >= 0
-                  ? 'bg-[hsl(var(--profit)/0.12)] text-profit'
-                  : 'bg-[hsl(var(--loss)/0.12)] text-loss'
+                  ? 'bg-[hsl(var(--profit)/0.18)] text-profit'
+                  : 'bg-[hsl(var(--loss)/0.18)] text-loss'
               }`}>
-                {token.change24h >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                {token.change24h >= 0 ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
                 {token.change24h >= 0 ? '+' : ''}{token.change24h.toFixed(1)}%
               </div>
             </div>
@@ -91,7 +91,7 @@ const TokenGrid = ({ tokens }: TokenGridProps) => {
               ].map(({ label, value }) => (
                 <div key={label} className="flex justify-between">
                   <span className="text-[12px] text-muted-foreground">{label}</span>
-                  <span className="text-[13px] text-foreground">{value}</span>
+                  <span className="text-[13px] font-semibold text-foreground">{value}</span>
                 </div>
               ))}
             </div>
@@ -104,11 +104,11 @@ const TokenGrid = ({ tokens }: TokenGridProps) => {
                 { label: '6h', val: token.change6h },
               ].map(({ label, val }) => (
                 <div key={label} className="flex-1 text-center">
-                  <div className="text-[10px] text-muted-foreground mb-0.5">{label}</div>
-                  <div className={`text-[11px] font-medium px-1.5 py-0.5 rounded-md ${
+                  <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-0.5">{label}</div>
+                  <div className={`text-[13px] font-bold tracking-tight px-2 py-1 rounded-lg ${
                     val >= 0
-                      ? 'bg-[hsl(var(--profit)/0.1)] text-profit'
-                      : 'bg-[hsl(var(--loss)/0.1)] text-loss'
+                      ? 'bg-[hsl(var(--profit)/0.15)] text-profit'
+                      : 'bg-[hsl(var(--loss)/0.15)] text-loss'
                   }`}>
                     {val >= 0 ? '+' : ''}{val.toFixed(1)}%
                   </div>
