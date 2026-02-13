@@ -108,11 +108,11 @@ const TokenFilters = ({
           <User className="w-3.5 h-3.5" />
           Profile
         </button>
-        <button className="flex items-center gap-1 px-3 py-1.5 rounded text-[13px] text-muted-foreground hover:text-foreground">
-          <Rocket className="w-3.5 h-3.5" />
-          Boosted
-          <ChevronDown className="w-3 h-3" />
-        </button>
+        
+
+
+
+
         
 
 
