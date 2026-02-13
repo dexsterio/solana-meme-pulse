@@ -1,45 +1,134 @@
 
 
-# Fix Color Palette -- Match DexScreener's True Dark Tone
+# Implementeringsplan: Trending Ticker, Cryptomarket-knapp och Filterfixar
 
-## Problem
-Current palette uses `225` hue with `16-20%` saturation and `11-17%` lightness, creating a visible blue-grey tint. The reference image shows DexScreener uses an almost pure black background with barely perceptible saturation -- much darker and more neutral than what we have now.
+## Sammanfattning
 
-## Analysis of Reference Image
+Tre huvudfunktioner ska implementeras:
+1. Reparera saknade tidsfilter-knappar (5M, 1H, 6H, 24H) i filter-raden
+2. Omdesigna trending-raden till en rullande/tågande ticker med guld-text, marketcap och procent
+3. Lägga till en "Cryptomarket"-knapp som hämtar top 500 krypto via CoinGecko API
 
-Pixel-level analysis of the uploaded screenshot reveals:
-- **Main body background**: Near-black, approximately `#0d0e12` -- extremely dark with faint cool undertone
-- **Table row area**: Essentially the same as body, rows blend seamlessly
-- **Header/filter bar**: Only marginally lighter, approximately `#141519`
-- **Borders/separators**: Very subtle, approximately `#1c1d24`
-- **Key insight**: Saturation is extremely low (3-6%), lightness is very low (4-8%), hue sits around `230-240`
+---
 
-The current `11-17%` lightness range is far too bright. We need to drop to `4-10%` lightness range.
+## 1. Trending-raden -- Rullande ticker med guld och marketcap
 
-## Changes
+**Fil: `src/components/TrendingBar.tsx`** -- Omskriven helt
 
-### File: `src/index.css` -- Corrected color variables
+Andringar:
+- CSS-animation (`@keyframes marquee`) som scrollar innehållet horisontellt i en oandlig loop
+- Duplicerat innehåll (renderas 2x) for somlös loop-effekt
+- Varje token visar: ranking, logo (storre, 20px), ticker-namn, foerkortad marketcap (t.ex. "$4.2M"), procentforandring
+- Top 3 tokens far guldfargatd text pa ticker-namnet (gradient gold: `#FFD700` till `#FFA500`)
+- Logoer ar storre (20px istället for 16px) for battre synlighet
+- `formatCompact` fran mockTokens anvands for marketcap-forkortning
 
-| Variable | Current | Corrected | Approx Hex |
-|----------|---------|-----------|------------|
-| `--background` | `225 20% 11%` | `235 15% 5%` | `#0d0e13` |
-| `--card` | `225 18% 13%` | `235 12% 7%` | `#101117` |
-| `--popover` | `225 18% 14%` | `235 12% 8%` | `#121319` |
-| `--secondary` | `225 16% 15%` | `235 10% 10%` | `#17181f` |
-| `--muted` | `225 16% 15%` | `235 10% 10%` | `#17181f` |
-| `--muted-foreground` | `220 12% 50%` | `225 8% 45%` | Slightly dimmer labels |
-| `--accent` | `225 16% 17%` | `235 10% 12%` | `#1b1c24` |
-| `--border` | `225 14% 18%` | `235 8% 14%` | `#212229` |
-| `--input` | `225 16% 15%` | `235 10% 10%` | `#17181f` |
-| `--surface-1` | `225 18% 13%` | `235 12% 7%` | `#101117` |
-| `--surface-2` | `225 18% 14%` | `235 12% 8%` | `#121319` |
-| `--surface-3` | `225 16% 17%` | `235 10% 12%` | `#1b1c24` |
+**Fil: `src/index.css`** -- Ny keyframe-animation
 
-Key corrections vs previous attempt:
-- Lightness dropped from 11-17% range to 5-12% range (much darker)
-- Saturation dropped from 16-20% to 8-15% (less color tint)
-- Hue shifted to 235 (very slight cool-neutral, not obviously blue)
+Lagg till:
+```css
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+```
 
-### Files Modified
-1. `src/index.css` -- All color custom properties corrected to near-black neutral tones matching the reference
+## 2. Filter-raden -- Aterstall saknade tidsfilter
+
+**Fil: `src/components/TokenFilters.tsx`**
+
+Tidsfilter-knapparna (5M, 1H, 6H, 24H) finns redan i koden (rad 60-74 inuti Trending-pill). De ser ut att fungera. Det som saknas ar den grona tidsperiod-pillen som togs bort (rad 40-45 ar tom). Denna lamnades tom medvetet -- den behovs inte da tidsknapparna redan finns inbaddade i trending-knappen.
+
+Inga andringar behovs har -- filtren fungerar redan.
+
+## 3. Cryptomarket-knapp -- CoinGecko-integration
+
+### 3a. Ny edge function for CoinGecko API
+
+**Ny fil: `supabase/functions/coingecko-proxy/index.ts`**
+
+- Anropar CoinGeckos fria API: `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1`
+- Ingen API-nyckel behovs for det fria lagret
+- Mappar data till Token-interfacet
+- Paginering: hamtar 5 sidor (500 tokens)
+- CORS-headers for frontend-anrop
+
+### 3b. Ny service-fil
+
+**Ny fil: `src/services/coingeckoApi.ts`**
+
+- `fetchCryptoMarket()` -- anropar edge function, returnerar `Token[]`
+- Mappar CoinGecko-falt (`current_price`, `market_cap`, `price_change_percentage_24h`, etc.) till Token-interfacet
+
+### 3c. Uppdatera StatsBar med Cryptomarket-knapp
+
+**Fil: `src/components/StatsBar.tsx`**
+
+- Ny prop: `onCryptoMarketToggle` och `isCryptoMarket`
+- Ny knapp "Cryptomarket" med ikon (Globe) bredvid 24H TXNS-rutan
+- Aktiv state: knappen far primarkfarg nar Cryptomarket ar valt
+- Toggle-beteende: klick byter mellan meme tokens och cryptomarket
+
+### 3d. Uppdatera Index.tsx
+
+**Fil: `src/pages/Index.tsx`**
+
+- Ny state: `const [isCryptoMarket, setIsCryptoMarket] = useState(false)`
+- Ny hook: `useCryptoMarket()` med React Query
+- Nar `isCryptoMarket` ar true, visas CoinGecko-data istallet for meme tokens
+- Filter-raden doljs eller anpassas i cryptomarket-lage (kategorier ar inte relevanta)
+
+### 3e. Uppdatera Category-typ
+
+**Fil: `src/components/TokenFilters.tsx`**
+
+- Lagg till `'cryptomarket'` som Category-alternativ (eller hantera via separat boolean)
+
+---
+
+## Tekniska detaljer
+
+### Guld-gradient for top 3
+
+```css
+background: linear-gradient(135deg, #FFD700, #FFA500);
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+```
+
+### Marquee-animation
+
+- Container med `overflow: hidden`
+- Inre div med `display: flex` och `animation: marquee 30s linear infinite`
+- Innehallet dupliceras for somlost loopande
+- Pausar vid hover (`animation-play-state: paused`)
+
+### CoinGecko API-mappning
+
+CoinGecko returnerar:
+```json
+{
+  "id": "bitcoin",
+  "symbol": "btc",
+  "name": "Bitcoin",
+  "image": "https://...",
+  "current_price": 67000,
+  "market_cap": 1300000000000,
+  "price_change_percentage_24h": 2.5,
+  "total_volume": 35000000000
+}
+```
+
+Mappas till Token-interfacet med rimliga defaults for Solana-specifika falt.
+
+### Filer som andras/skapas
+
+| Fil | Aktion |
+|-----|--------|
+| `src/components/TrendingBar.tsx` | Omskriven -- rullande ticker med guld |
+| `src/index.css` | Ny marquee keyframe |
+| `src/components/StatsBar.tsx` | Ny Cryptomarket-knapp |
+| `src/pages/Index.tsx` | Ny state och CoinGecko-integration |
+| `src/services/coingeckoApi.ts` | Ny fil -- CoinGecko API-anrop |
+| `supabase/functions/coingecko-proxy/index.ts` | Ny edge function |
 
