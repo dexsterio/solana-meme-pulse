@@ -1,56 +1,47 @@
 
-# Always-On New Pairs Data Pipeline
 
-## Problem
-The WebSocket connection and token state live inside the `usePumpPortalNewTokens` hook, which only runs when the "New" category is active. Switching tabs or reloading the page loses all collected tokens and starts from zero.
+# Improved Token Grid Card UI
 
-## Solution
-Make the PumpPortal WebSocket a **global singleton** that runs from app startup, independent of which tab is active. Tokens accumulate in a shared in-memory store and are instantly available when the user navigates to "New Pairs".
+## Overview
+Redesign the token grid cards to be visually polished and professional, with larger square logos, better typography, improved padding, refined colors, and a hover effect that enlarges the logo area.
 
-## Architecture
+## Changes
+
+### File: `src/components/TokenGrid.tsx` (Full Rewrite)
+
+**Visual Improvements:**
+- **Larger square token logos**: 48x48px (`w-12 h-12`) with `rounded-lg` instead of small round avatars
+- **Hover effect**: On card hover, the logo scales up smoothly (`group-hover:scale-110`) with a subtle glow
+- **Better typography**: Token name at 15px semibold, ticker at 13px, price at 18px bold -- all using Inter (no monospace)
+- **Improved padding**: Card padding increased from `p-4` to `p-5`
+- **Enhanced colors**: Subtle gradient border on hover (`border-primary/40`), slightly elevated card background (`bg-surface-2`), and a soft inner glow effect
+- **Clearer data labels**: Stats labels at 12px with better contrast, values at 13px
+- **Change indicators**: Larger percentage badges with colored backgrounds (`bg-profit/10` or `bg-loss/10`) instead of plain text
+- **Exchange logos**: Show platform logos (pump.fun, Raydium, Meteora, Orca, Bonk) in grid cards too, positioned near the token name
+- **Grid spacing**: Increased gap from `gap-3` to `gap-4`
+
+### Technical Details
 
 ```text
-App Startup
-    |
-    v
-PumpPortalService (singleton module)
-    |-- WebSocket always connected
-    |-- Accumulates tokens in memory (max 50)
-    |-- Auto-reconnect on disconnect
-    |
-    v
-usePumpPortalNewTokens (hook)
-    |-- Subscribes to the singleton's token updates
-    |-- Returns current tokens instantly (no empty state)
+Card Layout (improved):
++----------------------------------+
+|  [48x48 Logo]   Name   [DEX]    |
+|                 $TICK            |
+|                                  |
+|  $0.00001234         +12.5%     |
+|                                  |
+|  Vol  $1.2M    MCap  $4.5M     |
+|  Liq  $800K    Age   2h        |
+|                                  |
+|  [5m +2.1%] [1h -0.5%] [6h +8%]|
++----------------------------------+
 ```
 
-## Implementation Steps
-
-### 1. Create `src/services/pumpPortalService.ts` - Global Singleton
-- Move all WebSocket logic, metadata fetching, and token mapping out of the hook into a standalone module
-- The module connects immediately on import (app startup)
-- Maintains an internal token array (max 50) and a set of listener callbacks
-- Exposes `subscribe(callback)`, `getTokens()`, and `isConnected()` functions
-- Auto-reconnect with 3s delay on disconnect
-
-### 2. Refactor `src/hooks/usePumpPortalNewTokens.ts` - Thin Hook
-- Replace all WebSocket logic with a simple subscription to the singleton service
-- On mount: get current tokens from `getTokens()` (instant data)
-- Subscribe to updates for new tokens as they arrive
-- On unmount: unsubscribe (but the service keeps running)
-
-### 3. Update `src/App.tsx` - Initialize Service on App Start
-- Import the service module at the top level so the WebSocket connects immediately when the app loads, not when the user clicks "New Pairs"
-
-### 4. Update `src/pages/Index.tsx` - Remove Empty State Delay
-- Since tokens are now always available from the singleton, the "Listening for new tokens..." state only appears briefly on the very first app load
-- The loading state checks if the service has tokens, which it will after a few seconds of the app being open
-
-## Technical Details
-
-- **No database needed**: The WebSocket produces tokens fast enough (every few seconds) that an in-memory buffer of 50 tokens is always populated within seconds of app start
-- **No stale data**: Tokens are always fresh from the live WebSocket stream
-- **Rate limit safe**: Single WebSocket connection shared across the entire app, never multiple connections
-- **Memory efficient**: Capped at 50 tokens, old ones dropped automatically
-- **Listener pattern**: Uses a simple pub/sub pattern so multiple components could subscribe if needed
+Key class changes:
+- Card: `bg-[hsl(var(--surface-2))] border border-border/50 rounded-xl p-5 group cursor-pointer hover:border-primary/40 hover:bg-[hsl(var(--surface-3))] transition-all duration-200 hover:shadow-lg hover:shadow-primary/5`
+- Logo: `w-12 h-12 rounded-lg transition-transform duration-200 group-hover:scale-110`
+- Token name: `font-semibold text-foreground text-[15px]`
+- Price: `text-lg font-bold text-foreground` (no font-mono)
+- Stats grid: `text-[12px]` labels, `text-[13px]` values
+- Change pills: Rounded background pills with `px-2 py-0.5 rounded-md text-[11px] font-medium`
 
