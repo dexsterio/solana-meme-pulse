@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import StatsBar from '@/components/StatsBar';
 import TokenFilters, { TimeFilter, Category, RankBy, ViewMode } from '@/components/TokenFilters';
 import TokenTable from '@/components/TokenTable';
@@ -6,8 +7,8 @@ import TokenGrid from '@/components/TokenGrid';
 import TrendingBar from '@/components/TrendingBar';
 import { useTokens } from '@/hooks/useTokens';
 import { usePumpPortalNewTokens } from '@/hooks/usePumpPortalNewTokens';
+import { fetchCryptoMarket } from '@/services/coingeckoApi';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useQueryClient } from '@tanstack/react-query';
 
 const Index = () => {
   const queryClient = useQueryClient();
@@ -15,16 +16,32 @@ const Index = () => {
   const [category, setCategory] = useState<Category>('trending');
   const [rankBy, setRankBy] = useState<RankBy>('trending');
   const [viewMode, setViewMode] = useState<ViewMode>('list');
+  const [isCryptoMarket, setIsCryptoMarket] = useState(false);
 
   const { data: apiTokens = [], isLoading: apiLoading, isError: apiError, error: apiErrorObj } = useTokens(category);
   const { tokens: newPairTokens, isConnected: wsConnected } = usePumpPortalNewTokens();
 
-  // Use WebSocket data for 'new' category, API data for others
-  const isNewCategory = category === 'new';
-  const tokens = isNewCategory ? newPairTokens : apiTokens;
-  const isLoading = isNewCategory ? (!wsConnected && newPairTokens.length === 0) : apiLoading;
-  const isError = isNewCategory ? false : apiError;
-  const error = isNewCategory ? null : apiErrorObj;
+  const { data: cryptoTokens = [], isLoading: cryptoLoading, isError: cryptoError } = useQuery({
+    queryKey: ['cryptoMarket'],
+    queryFn: () => fetchCryptoMarket(3),
+    enabled: isCryptoMarket,
+    staleTime: 60_000,
+  });
+
+  // Determine data source
+  const isNewCategory = !isCryptoMarket && category === 'new';
+  const tokens = isCryptoMarket
+    ? cryptoTokens
+    : isNewCategory
+      ? newPairTokens
+      : apiTokens;
+  const isLoading = isCryptoMarket
+    ? cryptoLoading
+    : isNewCategory
+      ? (!wsConnected && newPairTokens.length === 0)
+      : apiLoading;
+  const isError = isCryptoMarket ? cryptoError : isNewCategory ? false : apiError;
+  const error = isCryptoMarket ? null : isNewCategory ? null : apiErrorObj;
 
   const sortedTokens = useMemo(() => {
     let list = [...tokens];
@@ -51,20 +68,27 @@ const Index = () => {
 
   return (
     <div className="flex flex-col h-screen bg-background">
-      <TrendingBar tokens={tokens} />
-      <StatsBar tokens={tokens} onSearch={(addr) => console.log('Search:', addr)} />
-      <TokenFilters
-        timeFilter={timeFilter}
-        setTimeFilter={setTimeFilter}
-        category={category}
-        setCategory={setCategory}
-        rankBy={rankBy}
-        setRankBy={setRankBy}
-        viewMode={viewMode}
-        setViewMode={setViewMode}
+      <TrendingBar tokens={isCryptoMarket ? cryptoTokens : apiTokens} />
+      <StatsBar
+        tokens={tokens}
+        onSearch={(addr) => console.log('Search:', addr)}
+        isCryptoMarket={isCryptoMarket}
+        onCryptoMarketToggle={() => setIsCryptoMarket(!isCryptoMarket)}
       />
+      {!isCryptoMarket && (
+        <TokenFilters
+          timeFilter={timeFilter}
+          setTimeFilter={setTimeFilter}
+          category={category}
+          setCategory={setCategory}
+          rankBy={rankBy}
+          setRankBy={setRankBy}
+          viewMode={viewMode}
+          setViewMode={setViewMode}
+        />
+      )}
       <div className="flex-1 overflow-auto">
-        {isNewCategory && wsConnected && tokens.length === 0 ? (
+        {!isCryptoMarket && isNewCategory && wsConnected && tokens.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-40 gap-2">
             <div className="flex items-center gap-2">
               <span className="relative flex h-2.5 w-2.5">
@@ -101,15 +125,14 @@ const Index = () => {
             <p className="text-loss text-sm">
               {error?.message?.includes('Rate limited')
                 ? 'DexTools API rate limited — trial plan limit reached.'
-                : 'Failed to load data from DexTools API.'}
+                : 'Failed to load data.'}
             </p>
             <button
-              onClick={() => queryClient.invalidateQueries({ queryKey: ['tokens', category] })}
+              onClick={() => queryClient.invalidateQueries({ queryKey: isCryptoMarket ? ['cryptoMarket'] : ['tokens', category] })}
               className="px-4 py-2 text-xs rounded bg-primary text-primary-foreground hover:opacity-90 transition-opacity"
             >
               Retry now
             </button>
-            <p className="text-muted-foreground text-xs">Auto-retries every 3 minutes</p>
           </div>
         ) : viewMode === 'list' ? (
           <TokenTable tokens={sortedTokens} />

@@ -1,13 +1,15 @@
 import { useState } from 'react';
-import { Search } from 'lucide-react';
+import { Search, Globe } from 'lucide-react';
 import { Token, formatNumber } from '@/data/mockTokens';
 
 interface StatsBarProps {
   tokens?: Token[];
   onSearch?: (address: string) => void;
+  isCryptoMarket?: boolean;
+  onCryptoMarketToggle?: () => void;
 }
 
-const StatsBar = ({ tokens = [], onSearch }: StatsBarProps) => {
+const StatsBar = ({ tokens = [], onSearch, isCryptoMarket = false, onCryptoMarketToggle }: StatsBarProps) => {
   const [searchValue, setSearchValue] = useState('');
   const totalVolume = tokens.reduce((sum, t) => sum + t.volume, 0);
   const totalTxns = tokens.reduce((sum, t) => sum + t.txns, 0);
@@ -35,6 +37,18 @@ const StatsBar = ({ tokens = [], onSearch }: StatsBarProps) => {
         <span className="text-[13px] text-muted-foreground">24H TXNS:</span>
         <span className="text-[15px] text-foreground font-bold">{totalTxns.toLocaleString()}</span>
       </div>
+
+      <button
+        onClick={onCryptoMarketToggle}
+        className={`flex items-center gap-1.5 px-4 py-1.5 border rounded text-[13px] font-medium transition-colors ${
+          isCryptoMarket
+            ? 'bg-primary text-primary-foreground border-primary'
+            : 'bg-secondary text-muted-foreground border-border hover:text-foreground'
+        }`}
+      >
+        <Globe className="w-3.5 h-3.5" />
+        Cryptomarket
+      </button>
     </div>
   );
 };
