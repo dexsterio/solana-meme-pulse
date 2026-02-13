@@ -65,18 +65,19 @@ Deno.serve(async (req) => {
   const ttlSeconds = getTTLSeconds(path);
 
   // ── Check DB cache ──
+  let cached: { body: string; status: number; cached_at: string } | null = null;
   try {
-    const { data: cached } = await supabase
+    const { data } = await supabase
       .from('api_cache')
       .select('body, status, cached_at')
       .eq('path', path)
       .maybeSingle();
+    cached = data;
 
     if (cached) {
       const age = (Date.now() - new Date(cached.cached_at).getTime()) / 1000;
-      // Use shorter TTL for error responses (429)
-      const effectiveTTL = cached.status === 429 ? 60 : ttlSeconds;
-      if (age < effectiveTTL) {
+      // Fresh successful data → serve it
+      if (cached.status >= 200 && cached.status < 300 && age < ttlSeconds) {
         const remaining = Math.ceil(ttlSeconds - age);
         console.log(`CACHE HIT: ${path} (${remaining}s remaining)`);
         return new Response(cached.body, {
@@ -87,6 +88,20 @@ Deno.serve(async (req) => {
             'X-Cache': 'HIT',
             'X-Cache-TTL': `${remaining}`,
             'Cache-Control': `public, max-age=${remaining}`,
+          },
+        });
+      }
+      // Cached 429 still within cooldown → serve stale good data if we have it, otherwise wait
+      if (cached.status === 429 && age < 120) {
+        // Don't hit DexTools again yet — just return a friendly error
+        console.log(`RATE LIMITED: ${path} — cooldown (${Math.ceil(120 - age)}s left)`);
+        return new Response(JSON.stringify({ error: 'Rate limited, please wait', retryAfter: Math.ceil(120 - age) }), {
+          status: 429,
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json',
+            'X-Cache': 'THROTTLE',
+            'Retry-After': `${Math.ceil(120 - age)}`,
           },
         });
       }
@@ -102,8 +117,8 @@ Deno.serve(async (req) => {
 
     const { body, status } = await throttledFetch(targetUrl, apiKey);
 
-    // Cache successful responses AND 429s (to prevent hammering)
     if (status >= 200 && status < 300) {
+      // Success → cache it (overwrites any previous entry including 429s)
       try {
         await supabase
           .from('api_cache')
@@ -116,32 +131,60 @@ Deno.serve(async (req) => {
       } catch (e) {
         console.warn('Cache write error:', e);
       }
-    } else if (status === 429) {
-      // Cache 429 for 60s to stop retries from hitting DexTools
+      return new Response(body, {
+        status,
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json',
+          'X-Cache': 'MISS',
+          'X-Cache-TTL': `${ttlSeconds}`,
+          'Cache-Control': `public, max-age=${ttlSeconds}`,
+        },
+      });
+    }
+
+    if (status === 429) {
+      console.log(`DexTools 429 for ${path} — saving cooldown marker`);
+      // Save 429 marker ONLY if there's no existing good data
+      // If good data exists (even stale), keep it and just add a cooldown marker
+      const markerPath = `__429__${path}`;
       try {
         await supabase
           .from('api_cache')
           .upsert({
-            path,
-            body,
-            status,
+            path: markerPath,
+            body: '429',
+            status: 429,
             cached_at: new Date().toISOString(),
           }, { onConflict: 'path' });
-        console.log(`Cached 429 for ${path} (60s cooldown)`);
       } catch (e) {
-        console.warn('Cache write error (429):', e);
+        console.warn('429 marker write error:', e);
       }
+
+      // If we have stale good data, serve it instead of the 429
+      if (cached && cached.status >= 200 && cached.status < 300) {
+        console.log(`Serving STALE data for ${path} (was ${Math.ceil((Date.now() - new Date(cached.cached_at).getTime()) / 1000)}s old)`);
+        return new Response(cached.body, {
+          status: 200,
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json',
+            'X-Cache': 'STALE',
+          },
+        });
+      }
+
+      // No good data at all → return 429
+      return new Response(body, {
+        status: 429,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Retry-After': '120' },
+      });
     }
 
+    // Other errors
     return new Response(body, {
       status,
-      headers: {
-        ...corsHeaders,
-        'Content-Type': 'application/json',
-        'X-Cache': 'MISS',
-        'X-Cache-TTL': `${ttlSeconds}`,
-        'Cache-Control': status < 300 ? `public, max-age=${ttlSeconds}` : 'no-cache',
-      },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Cache-Control': 'no-cache' },
     });
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : 'Unknown error';
