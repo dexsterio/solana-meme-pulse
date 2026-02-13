@@ -1,91 +1,56 @@
 
-
-# Server-Side Cache System for DexTools API
+# Always-On New Pairs Data Pipeline
 
 ## Problem
-Every frontend page/component triggers its own API calls to DexTools through the edge function. A single category fetch (e.g., hotpools) makes ~15 sequential API calls (1 listing + 5 price + 5 logo + extras). With the DexTools trial plan limit of ~30 req/min, this causes constant 429 rate limit errors.
+The WebSocket connection and token state live inside the `usePumpPortalNewTokens` hook, which only runs when the "New" category is active. Switching tabs or reloading the page loses all collected tokens and starts from zero.
 
-## Solution: Two-Layer Caching
+## Solution
+Make the PumpPortal WebSocket a **global singleton** that runs from app startup, independent of which tab is active. Tokens accumulate in a shared in-memory store and are instantly available when the user navigates to "New Pairs".
 
-### Layer 1: Edge Function Server-Side Cache
-Add an in-memory cache inside the `dextools-proxy` edge function. Every DexTools response is cached by its path with a configurable TTL (time-to-live). When a request comes in:
-- If the path is in cache and not expired, return the cached response instantly (zero DexTools API calls)
-- If expired or missing, fetch from DexTools, cache the result, then return it
+## Architecture
 
-Cache TTLs:
-- Rankings (hotpools, gainers, losers): 120 seconds
-- Token info/price: 90 seconds  
-- Pool price/liquidity: 90 seconds
-- New pairs listing: 60 seconds
+```text
+App Startup
+    |
+    v
+PumpPortalService (singleton module)
+    |-- WebSocket always connected
+    |-- Accumulates tokens in memory (max 50)
+    |-- Auto-reconnect on disconnect
+    |
+    v
+usePumpPortalNewTokens (hook)
+    |-- Subscribes to the singleton's token updates
+    |-- Returns current tokens instantly (no empty state)
+```
 
-### Layer 2: Frontend Shared Data Store
-Create a centralized `TokenDataProvider` (React Context) that fetches data once and shares it across all components (TrendingBar, TokenTable, TokenGrid, StatsBar, etc.). This eliminates duplicate fetches from different components rendering at the same time.
+## Implementation Steps
 
-## Files to Modify
+### 1. Create `src/services/pumpPortalService.ts` - Global Singleton
+- Move all WebSocket logic, metadata fetching, and token mapping out of the hook into a standalone module
+- The module connects immediately on import (app startup)
+- Maintains an internal token array (max 50) and a set of listener callbacks
+- Exposes `subscribe(callback)`, `getTokens()`, and `isConnected()` functions
+- Auto-reconnect with 3s delay on disconnect
 
-### 1. `supabase/functions/dextools-proxy/index.ts`
-- Add a `Map<string, { data: string; timestamp: number }>` in-memory cache
-- Before calling DexTools, check if the path has a valid cached entry
-- Add a `Cache-Control` response header so the browser also knows the data is cacheable
-- Add a `X-Cache: HIT` or `X-Cache: MISS` header for debugging
-- Add cache size limit (max 200 entries) with LRU-style eviction
+### 2. Refactor `src/hooks/usePumpPortalNewTokens.ts` - Thin Hook
+- Replace all WebSocket logic with a simple subscription to the singleton service
+- On mount: get current tokens from `getTokens()` (instant data)
+- Subscribe to updates for new tokens as they arrive
+- On unmount: unsubscribe (but the service keeps running)
 
-### 2. `src/services/dextoolsApi.ts`
-- Remove the client-side throttle delay (`MIN_DELAY_MS`) since the edge function cache handles rate protection
-- Keep the 429 error handling as a safety net
-- Remove `logoCache` and `tokenInfoCache` (server-side cache replaces them)
+### 3. Update `src/App.tsx` - Initialize Service on App Start
+- Import the service module at the top level so the WebSocket connects immediately when the app loads, not when the user clicks "New Pairs"
 
-### 3. `src/hooks/useTokens.ts`
-- Keep `staleTime: 90_000` and `refetchInterval: 120_000` (matches server cache TTL)
-- These settings already prevent React Query from re-fetching too aggressively
-
-### 4. `src/pages/Index.tsx`
-- No changes needed -- TrendingBar already receives tokens as props from the same query, so no duplicate fetches
-
-### 5. `src/pages/TokenDetail.tsx`
-- No changes needed -- uses its own query for a single token detail, which will benefit from edge function cache
+### 4. Update `src/pages/Index.tsx` - Remove Empty State Delay
+- Since tokens are now always available from the singleton, the "Listening for new tokens..." state only appears briefly on the very first app load
+- The loading state checks if the service has tokens, which it will after a few seconds of the app being open
 
 ## Technical Details
 
-### Edge Function Cache Implementation
-```text
-In-memory Map stored at module level (persists across requests within the same edge function instance):
-
-cache = Map<path, { body: string, status: number, cachedAt: number }>
-
-On each request:
-  1. Check cache[path]
-  2. If exists AND (now - cachedAt) < TTL -> return cached body (X-Cache: HIT)
-  3. Else -> fetch from DexTools, store in cache, return (X-Cache: MISS)
-  4. If cache.size > 200 -> delete oldest entries
-
-TTL logic by path pattern:
-  /ranking/* -> 120s
-  /token/*/price -> 90s
-  /token/*/info -> 90s
-  /token/* -> 90s
-  /pool/*/price -> 90s
-  /pool/*/liquidity -> 90s
-  /pool/* (new pairs) -> 60s
-```
-
-### Request Flow After Implementation
-```text
-Before (per category load):
-  Frontend -> Edge Fn -> DexTools (x15 calls) = 15 API hits
-
-After (per category load, warm cache):
-  Frontend -> Edge Fn -> Cache HIT (x15 calls) = 0 API hits
-  
-After (cold cache, first load):
-  Frontend -> Edge Fn -> DexTools (x15 calls) = 15 API hits
-  Then cached for 90-120s for ALL subsequent users/tabs/pages
-```
-
-### Impact
-- First load: same as before (15 DexTools calls)
-- All subsequent loads within 90-120s: zero DexTools calls
-- Multiple browser tabs, page navigation back and forth: zero extra calls
-- TokenDetail page for a token already seen in listing: cache HIT on token info/price
-- Estimated reduction: 80-95% fewer DexTools API calls
+- **No database needed**: The WebSocket produces tokens fast enough (every few seconds) that an in-memory buffer of 50 tokens is always populated within seconds of app start
+- **No stale data**: Tokens are always fresh from the live WebSocket stream
+- **Rate limit safe**: Single WebSocket connection shared across the entire app, never multiple connections
+- **Memory efficient**: Capped at 50 tokens, old ones dropped automatically
+- **Listener pattern**: Uses a simple pub/sub pattern so multiple components could subscribe if needed
 
