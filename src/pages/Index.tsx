@@ -6,14 +6,16 @@ import TokenGrid from '@/components/TokenGrid';
 import TrendingBar from '@/components/TrendingBar';
 import { useTokens } from '@/hooks/useTokens';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useQueryClient } from '@tanstack/react-query';
 
 const Index = () => {
+  const queryClient = useQueryClient();
   const [timeFilter, setTimeFilter] = useState<TimeFilter>('24h');
   const [category, setCategory] = useState<Category>('trending');
   const [rankBy, setRankBy] = useState<RankBy>('trending');
   const [viewMode, setViewMode] = useState<ViewMode>('list');
 
-  const { data: tokens = [], isLoading, isError } = useTokens(category);
+  const { data: tokens = [], isLoading, isError, error } = useTokens(category);
 
   const sortedTokens = useMemo(() => {
     let list = [...tokens];
@@ -75,8 +77,19 @@ const Index = () => {
             ))}
           </div>
         ) : isError && tokens.length === 0 ? (
-          <div className="flex items-center justify-center h-40 text-loss text-sm">
-            Failed to load data from DexTools API. Check console for details.
+          <div className="flex flex-col items-center justify-center h-40 gap-3">
+            <p className="text-loss text-sm">
+              {error?.message?.includes('Rate limited')
+                ? 'DexTools API rate limited — trial plan limit reached.'
+                : 'Failed to load data from DexTools API.'}
+            </p>
+            <button
+              onClick={() => queryClient.invalidateQueries({ queryKey: ['tokens', category] })}
+              className="px-4 py-2 text-xs rounded bg-primary text-primary-foreground hover:opacity-90 transition-opacity"
+            >
+              Retry now
+            </button>
+            <p className="text-muted-foreground text-xs">Auto-retries every 3 minutes</p>
           </div>
         ) : viewMode === 'list' ? (
           <TokenTable tokens={sortedTokens} />
