@@ -1,18 +1,38 @@
 import { useQuery } from '@tanstack/react-query';
-import { fetchHotPools, fetchGainers, fetchLosers, fetchNewPairs } from '@/services/dextoolsApi';
+import {
+  fetchTrendingTokens,
+  fetchGainersDexScreener,
+  fetchNewPairsDexScreener,
+  fetchTopByVolume,
+} from '@/services/dexscreenerApi';
+import { fetchHotPools, fetchGainers, fetchNewPairs } from '@/services/dextoolsApi';
 import { Token } from '@/data/mockTokens';
 import { Category } from '@/components/TokenFilters';
+
+// Try DexScreener first (free, no key), fall back to DexTools
+async function fetchWithFallback(
+  primary: () => Promise<Token[]>,
+  fallback: () => Promise<Token[]>,
+): Promise<Token[]> {
+  try {
+    return await primary();
+  } catch (e) {
+    console.warn('Primary API failed, trying fallback:', e);
+    return await fallback();
+  }
+}
 
 function fetchByCategory(category: Category): Promise<Token[]> {
   switch (category) {
     case 'gainers':
-      return fetchGainers();
+      return fetchWithFallback(fetchGainersDexScreener, fetchGainers);
     case 'new':
-      return fetchNewPairs();
-    case 'trending':
+      return fetchWithFallback(fetchNewPairsDexScreener, fetchNewPairs);
     case 'top':
+      return fetchWithFallback(fetchTopByVolume, fetchHotPools);
+    case 'trending':
     default:
-      return fetchHotPools();
+      return fetchWithFallback(fetchTrendingTokens, fetchHotPools);
   }
 }
 
@@ -20,12 +40,9 @@ export function useTokens(category: Category) {
   return useQuery<Token[]>({
     queryKey: ['tokens', category],
     queryFn: () => fetchByCategory(category),
-    refetchInterval: 180_000, // 3 min — server cache handles freshness
-    staleTime: 120_000,       // 2 min — matches server cache TTL
-    retry: (failureCount, error) => {
-      if (error?.message?.includes('Rate limited')) return false;
-      return failureCount < 1;
-    },
-    retryDelay: 30_000, // 30s before retry
+    refetchInterval: 60_000,  // 1 min — DexScreener is free
+    staleTime: 30_000,        // 30s
+    retry: 2,
+    retryDelay: 5_000,
   });
 }
