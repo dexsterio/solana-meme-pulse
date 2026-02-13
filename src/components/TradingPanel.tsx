@@ -106,33 +106,35 @@ const TradingPanel = ({ token, initialMode, onBack }: TradingPanelProps) => {
       </div>
 
       {/* Amount input */}
-      <div className="px-3 py-3 border-b border-border space-y-2.5 overflow-hidden">
-        <div className="flex items-center gap-1.5 bg-secondary rounded-md border border-border px-2.5 py-2.5 min-w-0">
+      {/* Amount input */}
+      <div className="px-3 py-3 border-b border-border space-y-2">
+        <div className="flex items-center gap-2 rounded-md border border-border bg-[hsl(0,0%,16%)] px-3 py-2.5 min-w-0">
           <span className="text-xs text-muted-foreground uppercase tracking-wide shrink-0">Amount</span>
           <input
             type="text"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            className="flex-1 min-w-0 bg-transparent text-sm font-bold text-foreground outline-none text-right"
+            placeholder="0.00"
+            className="flex-1 min-w-0 bg-transparent text-sm font-bold text-foreground outline-none text-right placeholder:text-muted-foreground"
           />
           <SolanaIcon size={14} className="shrink-0" />
           <Menu className="w-3.5 h-3.5 text-muted-foreground cursor-pointer shrink-0" />
         </div>
-        <div className="flex gap-1 min-w-0">
+        <div className="flex gap-1.5 min-w-0">
           {presetAmounts.map((val) => (
             <button
               key={val}
               onClick={() => setAmount(val)}
               className={`flex-1 py-1.5 rounded text-xs font-medium transition-colors min-w-0 truncate ${
                 amount === val
-                  ? 'bg-accent text-foreground border border-primary/40'
-                  : 'bg-secondary text-muted-foreground border border-border hover:text-foreground'
+                  ? 'bg-[hsl(0,0%,20%)] text-foreground border border-primary/50'
+                  : 'bg-[hsl(0,0%,16%)] text-muted-foreground border border-border hover:text-foreground'
               }`}
             >
               {val}
             </button>
           ))}
-          <button className="px-2 py-1.5 rounded bg-secondary border border-border text-muted-foreground hover:text-foreground shrink-0">
+          <button className="px-2 py-1.5 rounded bg-[hsl(0,0%,16%)] border border-border text-muted-foreground hover:text-foreground shrink-0">
             <Pencil className="w-3 h-3" />
           </button>
         </div>
