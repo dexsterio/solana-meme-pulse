@@ -36,36 +36,36 @@ const TokenGrid = ({ tokens }: TokenGridProps) => {
   }
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 p-4 max-w-[1920px] mx-auto">
+    <div className="grid grid-cols-1 min-[375px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 md:gap-4 p-2 md:p-4 max-w-[1920px] mx-auto">
       {tokens.map((token) => {
         const exchange = getExchangeLogo(token.exchangeName);
         return (
           <div
             key={token.id}
             onClick={() => navigate(`/token/${token.id}`)}
-            className="bg-[hsl(0,0%,14%)] border border-border rounded-xl p-5 group cursor-pointer hover:border-primary/40 hover:bg-[hsl(0,0%,16%)] transition-all duration-200 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5"
+            className="bg-[hsl(0,0%,14%)] border border-border rounded-xl p-3 md:p-5 group cursor-pointer hover:border-primary/40 hover:bg-[hsl(0,0%,16%)] transition-all duration-200 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5"
           >
             {/* Rank badge + Header */}
-            <div className="flex items-center gap-3 mb-4">
+            <div className="flex items-center gap-2 md:gap-3 mb-3 md:mb-4">
               <div className="relative shrink-0">
                 {token.logoUrl ? (
                   <>
                     <img
                       src={token.logoUrl}
                       alt={token.ticker}
-                      className="w-12 h-12 rounded-lg object-cover transition-transform duration-200 group-hover:scale-110"
+                      className="w-10 h-10 md:w-12 md:h-12 rounded-lg object-cover transition-transform duration-200 group-hover:scale-110"
                       onError={(e) => {
                         e.currentTarget.style.display = 'none';
                         const fallback = e.currentTarget.nextElementSibling;
                         if (fallback) (fallback as HTMLElement).style.display = 'flex';
                       }}
                     />
-                    <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-primary/60 to-accent items-center justify-center text-base font-bold text-foreground transition-transform duration-200 group-hover:scale-110 hidden">
+                    <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg bg-gradient-to-br from-primary/60 to-accent items-center justify-center text-base font-bold text-foreground transition-transform duration-200 group-hover:scale-110 hidden">
                       {token.ticker?.charAt(0) || '?'}
                     </div>
                   </>
                 ) : (
-                  <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-primary/60 to-accent flex items-center justify-center text-base font-bold text-foreground transition-transform duration-200 group-hover:scale-110">
+                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg bg-gradient-to-br from-primary/60 to-accent flex items-center justify-center text-base font-bold text-foreground transition-transform duration-200 group-hover:scale-110">
                     {token.ticker?.charAt(0) || '?'}
                   </div>
                 )}
@@ -73,7 +73,7 @@ const TokenGrid = ({ tokens }: TokenGridProps) => {
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5">
                   <span className={`text-[11px] font-bold ${token.rank <= 5 ? 'text-[#e5a50a]' : 'text-muted-foreground'}`}>#{token.rank}</span>
-                  <span className="font-semibold text-foreground text-[15px] truncate">{token.ticker}</span>
+                  <span className="font-semibold text-foreground text-[14px] md:text-[15px] truncate">{token.ticker}</span>
                   {exchange && (
                     <img src={exchange.src} alt={exchange.alt} className="w-4 h-4 shrink-0" />
                   )}
@@ -84,14 +84,14 @@ const TokenGrid = ({ tokens }: TokenGridProps) => {
                     </span>
                   )}
                 </div>
-                <span className="text-[12px] text-muted-foreground truncate block">{token.name}</span>
+                <span className="text-[11px] md:text-[12px] text-muted-foreground truncate block">{token.name}</span>
               </div>
             </div>
 
             {/* Price + 24h change */}
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-lg font-bold text-foreground">{formatPrice(token.price)}</span>
-              <div className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-[13px] font-bold tracking-tight ${
+            <div className="flex items-center justify-between mb-2 md:mb-3">
+              <span className="text-base md:text-lg font-bold text-foreground">{formatPrice(token.price)}</span>
+              <div className={`flex items-center gap-1 px-2 md:px-2.5 py-0.5 md:py-1 rounded-md text-[12px] md:text-[13px] font-bold tracking-tight ${
                 token.change24h >= 0
                   ? 'bg-[hsl(var(--profit)/0.18)] text-profit'
                   : 'bg-[hsl(var(--loss)/0.18)] text-loss'
@@ -101,7 +101,7 @@ const TokenGrid = ({ tokens }: TokenGridProps) => {
             </div>
 
             {/* Stats grid */}
-            <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 mb-3">
+            <div className="grid grid-cols-2 gap-x-3 md:gap-x-4 gap-y-1 md:gap-y-1.5 mb-2 md:mb-3">
               {[
                 { label: 'Vol', value: formatNumber(token.volume) },
                 { label: 'MCap', value: formatNumber(token.mcap) },
@@ -109,8 +109,8 @@ const TokenGrid = ({ tokens }: TokenGridProps) => {
                 { label: 'Age', value: token.age },
               ].map(({ label, value }) => (
                 <div key={label} className="flex justify-between">
-                  <span className="text-[12px] text-muted-foreground">{label}</span>
-                  <span className="text-[13px] font-semibold text-foreground">{value}</span>
+                  <span className="text-[11px] md:text-[12px] text-muted-foreground">{label}</span>
+                  <span className="text-[12px] md:text-[13px] font-semibold text-foreground">{value}</span>
                 </div>
               ))}
             </div>
@@ -124,8 +124,8 @@ const TokenGrid = ({ tokens }: TokenGridProps) => {
                 { label: '24h', val: token.change24h },
               ].map(({ label, val }) => (
                 <div key={label} className="flex-1 text-center">
-                  <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-0.5">{label}</div>
-                  <div className={`text-[12px] font-bold tracking-tight px-1.5 py-0.5 rounded-lg ${
+                  <div className="text-[10px] md:text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-0.5">{label}</div>
+                  <div className={`text-[11px] md:text-[12px] font-bold tracking-tight px-1 md:px-1.5 py-0.5 rounded-lg ${
                     val >= 0
                       ? 'bg-[hsl(var(--profit)/0.15)] text-profit'
                       : 'bg-[hsl(var(--loss)/0.15)] text-loss'

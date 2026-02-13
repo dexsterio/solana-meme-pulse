@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { Token, formatPrice, formatNumber } from '@/data/mockTokens';
 import { Zap } from 'lucide-react';
 import { CrownFilledIcon, CaretUpFilledIcon } from '@/components/icons/TablerIcons';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 import pumpfunLogo from '@/assets/pumpfun-logo.png';
 import bonkLogo from '@/assets/bonk-logo.png';
@@ -24,28 +25,28 @@ const TokenLogo = ({ token }: { token: Token }) => {
         <img
           src={token.logoUrl}
           alt={token.ticker}
-          className="w-7 h-7 rounded-md shrink-0"
+          className="w-6 h-6 md:w-7 md:h-7 rounded-md shrink-0"
           onError={(e) => {
             e.currentTarget.style.display = 'none';
             const fallback = e.currentTarget.nextElementSibling;
             if (fallback) (fallback as HTMLElement).style.display = 'flex';
           }}
         />
-        <div className="w-7 h-7 rounded-md bg-gradient-to-br from-primary/60 to-accent items-center justify-center text-[10px] text-foreground font-bold shrink-0 hidden">
+        <div className="w-6 h-6 md:w-7 md:h-7 rounded-md bg-gradient-to-br from-primary/60 to-accent items-center justify-center text-[10px] text-foreground font-bold shrink-0 hidden">
           {token.ticker?.charAt(0) || '?'}
         </div>
       </>
     );
   }
   return (
-    <div className="w-7 h-7 rounded-md bg-gradient-to-br from-primary/60 to-accent flex items-center justify-center text-[10px] text-foreground font-bold shrink-0">
+    <div className="w-6 h-6 md:w-7 md:h-7 rounded-md bg-gradient-to-br from-primary/60 to-accent flex items-center justify-center text-[10px] text-foreground font-bold shrink-0">
       {token.ticker?.charAt(0) || '?'}
     </div>
   );
 };
 
 const ChangeCell = ({ value }: { value: number }) => (
-  <td className={`px-3 py-2 text-right text-[13px] font-bold tracking-tight ${value >= 0 ? 'text-profit' : 'text-loss'}`}>
+  <td className={`px-2 md:px-3 py-2 text-right text-[12px] md:text-[13px] font-bold tracking-tight ${value >= 0 ? 'text-profit' : 'text-loss'}`}>
     {value >= 0 ? '+' : ''}
     {Math.abs(value) >= 1000
       ? `${value.toLocaleString(undefined, { maximumFractionDigits: 0 })}%`
@@ -68,6 +69,7 @@ const TopBadge = () => (
 
 const TokenTable = ({ tokens, isCryptoMarket = false, ogTokenId, topTokenId, showCreatedColumn }: TokenTableProps) => {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
 
   if (tokens.length === 0) {
     return (
@@ -80,17 +82,19 @@ const TokenTable = ({ tokens, isCryptoMarket = false, ogTokenId, topTokenId, sho
 
   return (
     <div className="overflow-x-auto">
-      <table className="w-full table-fixed">
+      <table className={`w-full ${isMobile ? 'table-auto' : 'table-fixed'}`}>
         <thead className="sticky top-0 bg-background z-10">
           <tr className="text-muted-foreground/80 text-[11px] uppercase tracking-wider border-b border-border">
-            <th className="w-10 px-3 py-2 text-left font-medium">#</th>
-            <th className={`${showCreatedColumn ? 'w-[280px]' : isCryptoMarket ? 'w-[200px]' : 'w-[260px]'} px-3 py-2 text-left font-medium`}>TOKEN</th>
-            <th className="px-3 py-2 text-right font-medium">PRICE</th>
-            {!isCryptoMarket && <th className="px-3 py-2 text-right font-medium">AGE</th>}
-            {!isCryptoMarket && <th className="px-3 py-2 text-right font-medium">TXNS</th>}
-            <th className="px-3 py-2 text-right font-medium">VOLUME</th>
-            {!isCryptoMarket && <th className="px-3 py-2 text-right font-medium">MAKERS</th>}
-            {isCryptoMarket ? (
+            <th className="w-8 md:w-10 px-2 md:px-3 py-2 text-left font-medium">#</th>
+            <th className="px-2 md:px-3 py-2 text-left font-medium">TOKEN</th>
+            <th className="px-2 md:px-3 py-2 text-right font-medium">PRICE</th>
+            {!isMobile && !isCryptoMarket && <th className="px-3 py-2 text-right font-medium">AGE</th>}
+            {!isMobile && !isCryptoMarket && <th className="px-3 py-2 text-right font-medium">TXNS</th>}
+            {!isMobile && <th className="px-3 py-2 text-right font-medium">VOLUME</th>}
+            {!isMobile && !isCryptoMarket && <th className="px-3 py-2 text-right font-medium">MAKERS</th>}
+            {isMobile ? (
+              <th className="px-2 py-2 text-right font-medium">24H</th>
+            ) : isCryptoMarket ? (
               <>
                 <th className="px-3 py-2 text-right font-medium">1H</th>
                 <th className="px-3 py-2 text-right font-medium">24H</th>
@@ -105,9 +109,9 @@ const TokenTable = ({ tokens, isCryptoMarket = false, ogTokenId, topTokenId, sho
                 <th className="px-3 py-2 text-right font-medium">24H</th>
               </>
             )}
-            {!isCryptoMarket && <th className="px-3 py-2 text-right font-medium">LIQUIDITY</th>}
-            <th className="px-3 py-2 text-right font-medium">MCAP</th>
-            {showCreatedColumn && <th className="w-[120px] px-3 py-2 text-right font-medium">STATUS</th>}
+            {!isMobile && !isCryptoMarket && <th className="px-3 py-2 text-right font-medium">LIQUIDITY</th>}
+            <th className="px-2 md:px-3 py-2 text-right font-medium">MCAP</th>
+            {!isMobile && showCreatedColumn && <th className="w-[120px] px-3 py-2 text-right font-medium">STATUS</th>}
           </tr>
         </thead>
         <tbody>
@@ -118,23 +122,25 @@ const TokenTable = ({ tokens, isCryptoMarket = false, ogTokenId, topTokenId, sho
               onKeyDown={(e) => { if (e.key === 'Enter') navigate(`/token/${token.id}`); }}
               tabIndex={0}
               role="button"
-              className="border-b border-border/30 hover:bg-accent/40 cursor-pointer transition-colors text-[13px] focus-visible:bg-accent/40 outline-none"
+              className="border-b border-border/30 hover:bg-accent/40 cursor-pointer transition-colors text-[12px] md:text-[13px] focus-visible:bg-accent/40 outline-none"
             >
               {/* Rank */}
-              <td className={`px-3 py-2 font-bold ${token.rank <= 5 ? 'text-[#e5a50a]' : 'text-muted-foreground/70'}`}>
+              <td className={`px-2 md:px-3 py-2 font-bold ${token.rank <= 5 ? 'text-[#e5a50a]' : 'text-muted-foreground/70'}`}>
                 #{token.rank}
               </td>
 
-              {/* Token name: ticker first, then name */}
-              <td className="px-3 py-2 min-w-0">
-                <div className="flex items-center gap-2 min-w-0">
+              {/* Token name */}
+              <td className="px-2 md:px-3 py-2 min-w-0">
+                <div className="flex items-center gap-1.5 md:gap-2 min-w-0">
                   <TokenLogo token={token} />
-                  <div className="flex items-center gap-1.5 min-w-0 overflow-hidden">
-                    <span className="font-semibold text-foreground shrink-0">{token.ticker}</span>
-                    <span className="text-muted-foreground text-[12px] truncate max-w-[120px]" title={token.name}>{token.name}</span>
+                  <div className="flex items-center gap-1 md:gap-1.5 min-w-0 overflow-hidden">
+                    <span className="font-semibold text-foreground shrink-0 text-[12px] md:text-[13px]">{token.ticker}</span>
+                    {!isMobile && (
+                      <span className="text-muted-foreground text-[12px] truncate max-w-[120px]" title={token.name}>{token.name}</span>
+                    )}
                     {ogTokenId === token.id && <OgBadge />}
                     {topTokenId === token.id && topTokenId !== ogTokenId && <TopBadge />}
-                    {!isCryptoMarket && (
+                    {!isMobile && !isCryptoMarket && (
                       <>
                         {(token.exchangeName === 'pump.fun' || token.exchangeName === 'pumpfun' || token.exchangeName?.toLowerCase().includes('pump')) ? (
                           <img src={pumpfunLogo} alt="pump.fun" className="w-4 h-4 shrink-0" />
@@ -161,12 +167,14 @@ const TokenTable = ({ tokens, isCryptoMarket = false, ogTokenId, topTokenId, sho
                 </div>
               </td>
 
-              <td className="px-3 py-2 text-right text-foreground">{formatPrice(token.price)}</td>
-              {!isCryptoMarket && <td className="px-3 py-2 text-right text-muted-foreground">{token.age}</td>}
-              {!isCryptoMarket && <td className="px-3 py-2 text-right text-foreground">{token.txns.toLocaleString()}</td>}
-              <td className="px-3 py-2 text-right text-foreground">{formatNumber(token.volume)}</td>
-              {!isCryptoMarket && <td className="px-3 py-2 text-right text-muted-foreground">{token.makers.toLocaleString()}</td>}
-              {isCryptoMarket ? (
+              <td className="px-2 md:px-3 py-2 text-right text-foreground">{formatPrice(token.price)}</td>
+              {!isMobile && !isCryptoMarket && <td className="px-3 py-2 text-right text-muted-foreground">{token.age}</td>}
+              {!isMobile && !isCryptoMarket && <td className="px-3 py-2 text-right text-foreground">{token.txns.toLocaleString()}</td>}
+              {!isMobile && <td className="px-3 py-2 text-right text-foreground">{formatNumber(token.volume)}</td>}
+              {!isMobile && !isCryptoMarket && <td className="px-3 py-2 text-right text-muted-foreground">{token.makers.toLocaleString()}</td>}
+              {isMobile ? (
+                <ChangeCell value={token.change24h} />
+              ) : isCryptoMarket ? (
                 <>
                   <ChangeCell value={token.change1h} />
                   <ChangeCell value={token.change24h} />
@@ -181,9 +189,9 @@ const TokenTable = ({ tokens, isCryptoMarket = false, ogTokenId, topTokenId, sho
                   <ChangeCell value={token.change24h} />
                 </>
               )}
-              {!isCryptoMarket && <td className="px-3 py-2 text-right text-foreground">{formatNumber(token.liquidity)}</td>}
-              <td className="px-3 py-2 text-right text-foreground">{formatNumber(token.mcap)}</td>
-              {showCreatedColumn && (
+              {!isMobile && !isCryptoMarket && <td className="px-3 py-2 text-right text-foreground">{formatNumber(token.liquidity)}</td>}
+              <td className="px-2 md:px-3 py-2 text-right text-foreground">{formatNumber(token.mcap)}</td>
+              {!isMobile && showCreatedColumn && (
                 <td className="px-3 py-2 text-right">
                   {ogTokenId === token.id ? (
                     <span className="inline-flex items-center gap-1 text-[10px] text-yellow-400 font-bold">
