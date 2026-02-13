@@ -30,10 +30,10 @@ const TokenFilters = ({
   const timeOptions: TimeFilter[] = ['5m', '1h', '6h', '24h'];
 
   const timeLabel = {
-    '5m': 'Senaste 5 minuterna',
-    '1h': 'Senaste timmen',
-    '6h': 'Senaste 6 timmarna',
-    '24h': 'Senaste 24 timmarna'
+    '5m': 'Last 5 minutes',
+    '1h': 'Last hour',
+    '6h': 'Last 6 hours',
+    '24h': 'Last 24 hours'
   }[timeFilter];
 
   return (
@@ -57,8 +57,8 @@ const TokenFilters = ({
             }>
 
             <FlameFilledIcon className="w-3.5 h-3.5" />
-            Trendande
-            <InfoTooltip text="tokens med mest aktivitet och uppmärksamhet just nu." iconSize={11} />
+            Trending
+            <InfoTooltip text="tokens with the most activity and attention right now." iconSize={11} />
           </button>
           <div className="flex items-center bg-secondary/80 border-l border-border">
             {timeOptions.map((t) =>
@@ -85,8 +85,8 @@ const TokenFilters = ({
           }>
 
           <Trophy className="w-3.5 h-3.5" />
-          Topp
-          <InfoTooltip text="högst rankade tokens efter market cap och volym." iconSize={11} />
+          Top
+          <InfoTooltip text="highest ranked tokens by market cap and volume." iconSize={11} />
         </button>
         <button
           onClick={() => setCategory('gainers')}
@@ -95,8 +95,8 @@ const TokenFilters = ({
           }>
 
           <TrendingUp className="w-3.5 h-3.5" />
-          Vinnare
-          <InfoTooltip text="tokens med störst prisökning." iconSize={11} />
+          Gainers
+          <InfoTooltip text="tokens with the biggest price increase." iconSize={11} />
         </button>
         <button
           onClick={() => setCategory('new')}
@@ -105,8 +105,8 @@ const TokenFilters = ({
           }>
 
           <Sparkles className="w-3.5 h-3.5" />
-          Nya Par
-          <InfoTooltip text="nyskapade tokens som strömmar in i realtid." iconSize={11} />
+          New Pairs
+          <InfoTooltip text="newly created tokens streaming in real-time." iconSize={11} />
         </button>
 
         {/* Decorative buttons */}
@@ -128,17 +128,17 @@ const TokenFilters = ({
 
         {/* Rank by dropdown */}
         <div className="flex items-center gap-1.5">
-          <span className="text-[13px] text-muted-foreground">Sortera:</span>
+          <span className="text-[13px] text-muted-foreground">Rank by:</span>
           <div className="relative">
             <select
               value={rankBy}
               onChange={(e) => setRankBy(e.target.value as RankBy)}
               className="appearance-none bg-secondary text-foreground text-[13px] rounded border border-border px-3 py-1.5 pr-7 outline-none cursor-pointer">
 
-              <option value="trending">Trendande {timeFilter.toUpperCase()}</option>
-              <option value="volume">Volym</option>
-              <option value="priceChange">Prisförändring</option>
-              <option value="txns">Transaktioner</option>
+              <option value="trending">Trending {timeFilter.toUpperCase()}</option>
+              <option value="volume">Volume</option>
+              <option value="priceChange">Price Change</option>
+              <option value="txns">Transactions</option>
               <option value="mcap">Market Cap</option>
             </select>
             <ChevronDown className="w-3.5 h-3.5 absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
@@ -153,13 +153,13 @@ const TokenFilters = ({
           }>
 
           <Filter className="w-3.5 h-3.5" />
-          Filter
+          Filters
         </button>
 
         {/* Customize */}
         <button className="flex items-center gap-1 px-3 py-1.5 text-[13px] rounded bg-secondary text-muted-foreground hover:text-foreground">
           <Settings className="w-3.5 h-3.5" />
-          Anpassa
+          Customize
         </button>
 
         {/* View toggle */}
@@ -186,11 +186,11 @@ const TokenFilters = ({
       {showFilters &&
       <div className="flex items-center gap-4 p-3 bg-secondary rounded text-[13px]">
           <div className="flex items-center gap-2">
-            <span className="text-muted-foreground">Min Volym:</span>
+            <span className="text-muted-foreground">Min Volume:</span>
             <input type="text" placeholder="$0" className="w-20 bg-background border border-border rounded px-2 py-1 text-foreground text-[13px]" />
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-muted-foreground">Min Likviditet:</span>
+            <span className="text-muted-foreground">Min Liquidity:</span>
             <input type="text" placeholder="$0" className="w-20 bg-background border border-border rounded px-2 py-1 text-foreground text-[13px]" />
           </div>
           <div className="flex items-center gap-2">
@@ -198,8 +198,8 @@ const TokenFilters = ({
             <input type="text" placeholder="$0" className="w-20 bg-background border border-border rounded px-2 py-1 text-foreground text-[13px]" />
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-muted-foreground">Max Ålder:</span>
-            <input type="text" placeholder="Alla" className="w-20 bg-background border border-border rounded px-2 py-1 text-foreground text-[13px]" />
+            <span className="text-muted-foreground">Max Age:</span>
+            <input type="text" placeholder="Any" className="w-20 bg-background border border-border rounded px-2 py-1 text-foreground text-[13px]" />
           </div>
         </div>
       }

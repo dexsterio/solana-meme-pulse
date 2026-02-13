@@ -46,8 +46,8 @@ const TrendingBar = ({ tokens = [] }: TrendingBarProps) => {
     <div className="flex items-center border-b border-border overflow-hidden">
       <div className="flex items-center gap-1 text-[13px] text-muted-foreground shrink-0 px-3 py-1.5 border-r border-border bg-secondary/50">
         <FlameFilledIcon className="w-3.5 h-3.5" />
-        <span className="font-medium">Trendande</span>
-        <InfoTooltip text="topp 10 tokens efter 24h prisförändring, scrollar live." iconSize={11} />
+        <span className="font-medium">Trending</span>
+        <InfoTooltip text="top 10 tokens by 24h price change, scrolling live." iconSize={11} />
       </div>
       <div className="overflow-hidden flex-1">
         <div className="flex items-center gap-2 py-1.5 animate-marquee hover:[animation-play-state:paused]">

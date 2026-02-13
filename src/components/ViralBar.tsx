@@ -15,9 +15,9 @@ interface ViralBarProps {
 }
 
 const sortOptions: { value: ViralSortBy; label: string; icon: React.ReactNode }[] = [
-  { value: 'created', label: 'Först skapad', icon: <Clock className="w-3.5 h-3.5" /> },
-  { value: 'mcap', label: 'Högst MCap', icon: <CaretUpFilledIcon className="w-3.5 h-3.5" /> },
-  { value: 'volume', label: 'Högst Volym', icon: <BarChart3 className="w-3.5 h-3.5" /> },
+  { value: 'created', label: 'First Created', icon: <Clock className="w-3.5 h-3.5" /> },
+  { value: 'mcap', label: 'Highest MCap', icon: <CaretUpFilledIcon className="w-3.5 h-3.5" /> },
+  { value: 'volume', label: 'Highest Volume', icon: <BarChart3 className="w-3.5 h-3.5" /> },
 ];
 
 const ViralBar = ({ clusters, selectedCluster, onSelect, onClear, viralSortBy = 'created', onViralSortChange }: ViralBarProps) => {
@@ -31,8 +31,8 @@ const ViralBar = ({ clusters, selectedCluster, onSelect, onClear, viralSortBy = 
       <div className="flex items-center gap-3 px-4 py-2.5 overflow-x-auto scrollbar-hide">
         <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground uppercase tracking-wider shrink-0 pr-1">
           <FlameFilledIcon className="w-4 h-4" />
-          <span className="font-semibold">Virala Memes</span>
-          <InfoTooltip text="meme-tokens som just nu går viralt — troligtvis uppmärksammade av en influencer eller trendar på sociala medier." />
+          <span className="font-semibold">Viral Memes</span>
+          <InfoTooltip text="meme tokens currently going viral — likely spotted by an influencer or trending on social media." />
         </div>
         <div className="w-px h-5 bg-border/50 shrink-0" />
         <div className="flex items-center gap-2">
@@ -73,7 +73,7 @@ const ViralBar = ({ clusters, selectedCluster, onSelect, onClear, viralSortBy = 
               onClick={onClear}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12px] font-semibold bg-secondary hover:bg-accent text-muted-foreground hover:text-foreground transition-colors border border-border/30 shrink-0"
             >
-              ← Tillbaka
+              ← Back
             </button>
             <div className="w-px h-5 bg-border/40" />
             <div className="flex items-center gap-1.5">
@@ -83,11 +83,11 @@ const ViralBar = ({ clusters, selectedCluster, onSelect, onClear, viralSortBy = 
             <span className="text-muted-foreground text-[13px]">
               {selected.count} tokens
             </span>
-            <InfoTooltip text="dessa tokens delar samma meme-namn. OG = den som skapades först. TOP = den med högst market cap." />
+            <InfoTooltip text="these tokens share the same meme name. OG = first created. TOP = highest market cap." />
             <div className="w-px h-4 bg-border/40" />
             {/* Sort buttons */}
             <div className="flex items-center gap-1">
-              <span className="text-muted-foreground text-[11px] uppercase tracking-wider mr-1">Sortera:</span>
+              <span className="text-muted-foreground text-[11px] uppercase tracking-wider mr-1">Sort:</span>
               {sortOptions.map((opt) => (
                 <button
                   key={opt.value}

@@ -17,9 +17,9 @@ function getFearGreedColor(value: number): string {
 }
 
 function getAltSeasonStatus(btcDominance: number): { label: string; color: string; icon: typeof TrendingUp } {
-  if (btcDominance < 40) return { label: 'Alt-säsong', color: 'text-profit', icon: TrendingUp };
+  if (btcDominance < 40) return { label: 'Alt Season', color: 'text-profit', icon: TrendingUp };
   if (btcDominance <= 50) return { label: 'Neutral', color: 'text-yellow-400', icon: Minus };
-  return { label: 'BTC-säsong', color: 'text-orange-400', icon: Bitcoin };
+  return { label: 'BTC Season', color: 'text-orange-400', icon: Bitcoin };
 }
 
 const FearGreedGauge = ({ value, classification }: { value: number; classification: string }) => {
@@ -73,8 +73,8 @@ const FearGreedGauge = ({ value, classification }: { value: number; classificati
       {/* Text side */}
       <div className="flex flex-col items-start gap-0.5">
         <div className="flex items-center gap-1">
-          <span className="text-[10px] text-muted-foreground font-medium">Rädsla & Girighet</span>
-          <InfoTooltip text="sentimentindex från 0 (extrem rädsla) till 100 (extrem girighet)." iconSize={10} />
+          <span className="text-[10px] text-muted-foreground font-medium">Fear & Greed</span>
+          <InfoTooltip text="sentiment index from 0 (extreme fear) to 100 (extreme greed)." iconSize={10} />
           <ChevronRight className="w-3 h-3 text-muted-foreground" />
         </div>
         <span className="text-xl font-bold leading-none" style={{ color: needleColor }}>
@@ -106,7 +106,7 @@ const MarketSentimentBar = ({ data, isLoading }: MarketSentimentBarProps) => {
       <div className="flex items-center gap-1.5 px-3 py-1.5 rounded border border-border bg-secondary shrink-0">
         <BarChart3 className="w-3.5 h-3.5 text-muted-foreground" />
         <span className="text-[11px] text-muted-foreground">Market Cap</span>
-        <InfoTooltip text="totalt värde av alla kryptovalutor kombinerat." iconSize={10} />
+        <InfoTooltip text="total value of all cryptocurrencies combined." iconSize={10} />
         <span className="text-[13px] font-bold text-foreground">{formatNumber(data.totalMarketCap)}</span>
         <span className={`text-[11px] font-medium ${data.marketCapChange24h >= 0 ? 'text-profit' : 'text-loss'}`}>
           {data.marketCapChange24h >= 0 ? '+' : ''}{data.marketCapChange24h.toFixed(2)}%
@@ -117,7 +117,7 @@ const MarketSentimentBar = ({ data, isLoading }: MarketSentimentBarProps) => {
       <div className="flex items-center gap-1.5 px-3 py-1.5 rounded border border-border bg-secondary shrink-0">
         <Bitcoin className="w-3.5 h-3.5 text-orange-400" />
         <span className="text-[11px] text-muted-foreground">BTC Dom</span>
-        <InfoTooltip text="bitcoins andel av den totala kryptomarknaden." iconSize={10} />
+        <InfoTooltip text="bitcoin's share of the total crypto market." iconSize={10} />
         <span className="text-[13px] font-bold text-foreground">{data.btcDominance.toFixed(1)}%</span>
       </div>
 
@@ -125,7 +125,7 @@ const MarketSentimentBar = ({ data, isLoading }: MarketSentimentBarProps) => {
       <div className="flex items-center gap-1.5 px-3 py-1.5 rounded border border-border bg-secondary shrink-0">
         <Fuel className="w-3.5 h-3.5 text-muted-foreground" />
         <span className="text-[11px] text-muted-foreground">ETH Gas</span>
-        <InfoTooltip text="aktuell transaktionsavgift på ethereum-nätverket." iconSize={10} />
+        <InfoTooltip text="current transaction fee on the Ethereum network." iconSize={10} />
         <span className="text-[13px] font-bold text-foreground">
           {data.ethGas > 0 ? `${data.ethGas} Gwei` : '—'}
         </span>
@@ -134,8 +134,8 @@ const MarketSentimentBar = ({ data, isLoading }: MarketSentimentBarProps) => {
       {/* Alt Season */}
       <div className="flex items-center gap-1.5 px-3 py-1.5 rounded border border-border bg-secondary shrink-0">
         <AltIcon className={`w-3.5 h-3.5 ${altSeason.color}`} />
-        <span className="text-[11px] text-muted-foreground">Säsong</span>
-        <InfoTooltip text="när BTC-dominansen är låg tenderar altcoins att prestera bättre (alt season)." iconSize={10} />
+        <span className="text-[11px] text-muted-foreground">Season</span>
+        <InfoTooltip text="when BTC dominance is low, altcoins tend to perform better (alt season)." iconSize={10} />
         <span className={`text-[13px] font-bold ${altSeason.color}`}>{altSeason.label}</span>
       </div>
 

@@ -135,9 +135,9 @@ const Index = () => {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-profit opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-profit"></span>
               </span>
-               <p className="text-muted-foreground text-sm">Lyssnar efter nya tokens...</p>
+               <p className="text-muted-foreground text-sm">Listening for new tokens...</p>
              </div>
-             <p className="text-muted-foreground/60 text-xs">Bara tokens med logotyp visas</p>
+             <p className="text-muted-foreground/60 text-xs">Only tokens with logos are shown</p>
           </div>
         ) : isLoading && tokens.length === 0 ? (
           <div className="space-y-0">
@@ -164,14 +164,14 @@ const Index = () => {
           <div className="flex flex-col items-center justify-center h-40 gap-3">
             <p className="text-loss text-sm">
                {error?.message?.includes('Rate limited')
-                ? 'DexTools API-gräns nådd — prova igen.'
-                : 'Kunde inte ladda data.'}
+                ? 'DexTools API rate limited — try again.'
+                : 'Failed to load data.'}
             </p>
             <button
               onClick={() => queryClient.invalidateQueries({ queryKey: isCryptoMarket ? ['cryptoMarket'] : ['tokens', category] })}
               className="px-4 py-2 text-xs rounded bg-primary text-primary-foreground hover:opacity-90 transition-opacity"
             >
-              Försök igen
+              Retry now
             </button>
           </div>
         ) : viewMode === 'list' ? (

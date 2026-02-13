@@ -22,7 +22,7 @@ const StatsBar = ({ tokens = [], onSearch, searchQuery = '', onSearchChange, isC
         <Search className="w-3.5 h-3.5 text-muted-foreground ml-2.5" />
         <input
           type="text"
-          placeholder="Sök token..."
+          placeholder="Search token..."
           value={searchQuery}
           onChange={(e) => {
             onSearchChange?.(e.target.value);
@@ -34,13 +34,13 @@ const StatsBar = ({ tokens = [], onSearch, searchQuery = '', onSearchChange, isC
 
       <div className="flex items-center gap-2 px-4 py-1.5 border border-border rounded bg-secondary">
         <span className="text-[13px] text-muted-foreground">24H VOLUME:</span>
-        <InfoTooltip text="total handelsvolym för alla listade tokens senaste 24 timmarna." />
+        <InfoTooltip text="total trading volume for all listed tokens in the last 24 hours." />
         <span className="text-[15px] text-profit font-bold">{formatNumber(totalVolume)}</span>
       </div>
 
       <div className="flex items-center gap-2 px-4 py-1.5 border border-border rounded bg-secondary">
         <span className="text-[13px] text-muted-foreground">24H TXNS:</span>
-        <InfoTooltip text="totalt antal köp/sälj-transaktioner för alla tokens senaste 24 timmarna." />
+        <InfoTooltip text="total number of buy/sell transactions for all tokens in the last 24 hours." />
         <span className="text-[15px] text-foreground font-bold">{totalTxns.toLocaleString()}</span>
       </div>
 
@@ -53,7 +53,7 @@ const StatsBar = ({ tokens = [], onSearch, searchQuery = '', onSearchChange, isC
         }`}
       >
         <WorldIcon className="w-3.5 h-3.5" />
-        {isCryptoMarket ? 'Meme-zon' : 'Marknadsvy'}
+        {isCryptoMarket ? 'Meme Zone' : 'Market View'}
       </button>
     </div>
   );
