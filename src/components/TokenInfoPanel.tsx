@@ -91,9 +91,9 @@ const TokenInfoPanel = ({ token, onBuyClick, onSellClick }: TokenInfoPanelProps)
       </div>
 
       {/* Banner / Header Image + overlapping social buttons */}
-      <div className="px-4 pt-3 pb-0 border-b border-border">
+      <div className="border-b border-border">
         {/* Banner - wide rectangle ~5:2 aspect ratio like reference */}
-        <div className="w-full rounded-lg overflow-hidden relative" style={{ aspectRatio: '5 / 2' }}>
+        <div className="w-full overflow-hidden relative" style={{ aspectRatio: '5 / 2' }}>
           {token.headerImage ? (
             <img src={token.headerImage} alt={`${token.name} banner`} className="w-full h-full object-cover" />
           ) : token.logoUrl ? (
@@ -123,7 +123,7 @@ const TokenInfoPanel = ({ token, onBuyClick, onSellClick }: TokenInfoPanelProps)
 
         {/* Social buttons - overlapping banner bottom edge */}
         {hasSocials && (
-          <div className="flex gap-2 -mt-4 relative z-10 pb-3">
+          <div className="flex gap-2 -mt-4 relative z-10 pb-3 px-4">
             {token.website && (
               <a href={token.website} target="_blank" rel="noopener noreferrer" className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md bg-[hsl(0,0%,16%)] backdrop-blur-sm text-foreground hover:bg-accent transition-colors text-xs font-medium border border-border">
                 <Globe className="w-3.5 h-3.5" /> Website
