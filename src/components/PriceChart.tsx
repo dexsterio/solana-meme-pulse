@@ -12,23 +12,31 @@ const PriceChart = ({ token }: PriceChartProps) => {
   const [selectedTf, setSelectedTf] = useState('15m');
   const [showMcap, setShowMcap] = useState(false);
 
+  // Stabilize on token.id + selectedTf + showMcap to avoid regenerating on every render
   const data = useMemo(() => {
     const points = 100;
     const basePrice = showMcap ? token.mcap : token.price;
     const result = [];
+    // Use a seeded-ish approach based on token id hash
+    let seed = 0;
+    for (let i = 0; i < (token.id || '').length; i++) {
+      seed = ((seed << 5) - seed + (token.id || '').charCodeAt(i)) | 0;
+    }
     let price = basePrice * 0.7;
 
     for (let i = 0; i < points; i++) {
-      const change = (Math.random() - 0.45) * basePrice * 0.03;
+      seed = (seed * 16807 + 0) % 2147483647;
+      const random = (seed & 0x7fffffff) / 2147483647;
+      const change = (random - 0.45) * basePrice * 0.03;
       price = Math.max(price + change, basePrice * 0.3);
       result.push({
         time: i,
         price: price,
-        volume: Math.random() * token.volume * 0.05,
+        volume: random * token.volume * 0.05,
       });
     }
     return result;
-  }, [token, showMcap]);
+  }, [token.id, token.mcap, token.price, token.volume, showMcap]);
 
   const isUp = data[data.length - 1].price > data[0].price;
 
@@ -49,7 +57,7 @@ const PriceChart = ({ token }: PriceChartProps) => {
             </button>
           ))}
         </div>
-        <div className="flex items-center bg-secondary rounded p-0.5">
+        <div className="flex items-center bg-[hsl(0,0%,16%)] rounded p-0.5 border border-border">
           <button
             onClick={() => setShowMcap(false)}
             className={`px-2 py-1 text-[10px] rounded ${!showMcap ? 'bg-accent text-foreground' : 'text-muted-foreground'}`}
@@ -71,22 +79,27 @@ const PriceChart = ({ token }: PriceChartProps) => {
           <AreaChart data={data}>
             <defs>
               <linearGradient id="priceGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor={isUp ? 'hsl(142, 71%, 45%)' : 'hsl(0, 72%, 51%)'} stopOpacity={0.3} />
-                <stop offset="100%" stopColor={isUp ? 'hsl(142, 71%, 45%)' : 'hsl(0, 72%, 51%)'} stopOpacity={0} />
+                <stop offset="0%" stopColor={isUp ? 'hsl(var(--profit))' : 'hsl(var(--loss))'} stopOpacity={0.3} />
+                <stop offset="100%" stopColor={isUp ? 'hsl(var(--profit))' : 'hsl(var(--loss))'} stopOpacity={0} />
               </linearGradient>
             </defs>
             <XAxis dataKey="time" hide />
             <YAxis hide domain={['auto', 'auto']} />
             <Tooltip
-              contentStyle={{ backgroundColor: 'hsl(220, 13%, 14%)', border: '1px solid hsl(220, 13%, 18%)', borderRadius: '6px', fontSize: '11px' }}
-              labelStyle={{ color: 'hsl(215, 15%, 55%)' }}
-              itemStyle={{ color: 'hsl(210, 20%, 90%)' }}
+              contentStyle={{
+                backgroundColor: 'hsl(var(--card))',
+                border: '1px solid hsl(var(--border))',
+                borderRadius: '6px',
+                fontSize: '11px'
+              }}
+              labelStyle={{ color: 'hsl(var(--muted-foreground))' }}
+              itemStyle={{ color: 'hsl(var(--foreground))' }}
               formatter={(value: number) => showMcap ? `$${value.toFixed(0)}` : `$${value.toFixed(8)}`}
             />
             <Area
               type="monotone"
               dataKey="price"
-              stroke={isUp ? 'hsl(142, 71%, 45%)' : 'hsl(0, 72%, 51%)'}
+              stroke={isUp ? 'hsl(var(--profit))' : 'hsl(var(--loss))'}
               fill="url(#priceGrad)"
               strokeWidth={1.5}
             />

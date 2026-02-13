@@ -20,16 +20,21 @@ interface TokenTableProps {
 const TokenLogo = ({ token }: { token: Token }) => {
   if (token.logoUrl) {
     return (
-      <img
-        src={token.logoUrl}
-        alt={token.ticker}
-        className="w-7 h-7 rounded-md shrink-0"
-        onError={(e) => {
-          e.currentTarget.style.display = 'none';
-          const fallback = e.currentTarget.nextElementSibling;
-          if (fallback) (fallback as HTMLElement).style.display = 'flex';
-        }}
-      />
+      <>
+        <img
+          src={token.logoUrl}
+          alt={token.ticker}
+          className="w-7 h-7 rounded-md shrink-0"
+          onError={(e) => {
+            e.currentTarget.style.display = 'none';
+            const fallback = e.currentTarget.nextElementSibling;
+            if (fallback) (fallback as HTMLElement).style.display = 'flex';
+          }}
+        />
+        <div className="w-7 h-7 rounded-md bg-gradient-to-br from-primary/60 to-accent items-center justify-center text-[10px] text-foreground font-bold shrink-0 hidden">
+          {token.ticker?.charAt(0) || '?'}
+        </div>
+      </>
     );
   }
   return (
@@ -68,32 +73,32 @@ const TokenTable = ({ tokens, isCryptoMarket = false, ogTokenId, topTokenId, sho
     <div className="overflow-x-auto">
       <table className="w-full table-fixed">
         <thead>
-          <tr className="text-muted-foreground text-[11px] uppercase tracking-wider">
-            <th className="w-10 px-3 py-2 text-left font-normal">#</th>
-            <th className={`${showCreatedColumn ? 'w-[280px]' : isCryptoMarket ? 'w-[200px]' : 'w-[260px]'} px-3 py-2 text-left font-normal`}>TOKEN</th>
-            <th className="px-3 py-2 text-right font-normal">PRICE</th>
-            {!isCryptoMarket && <th className="px-3 py-2 text-right font-normal">AGE</th>}
-            {!isCryptoMarket && <th className="px-3 py-2 text-right font-normal">TXNS</th>}
-            <th className="px-3 py-2 text-right font-normal">VOLUME</th>
-            {!isCryptoMarket && <th className="px-3 py-2 text-right font-normal">MAKERS</th>}
+          <tr className="text-muted-foreground/80 text-[11px] uppercase tracking-wider border-b border-border">
+            <th className="w-10 px-3 py-2 text-left font-medium">#</th>
+            <th className={`${showCreatedColumn ? 'w-[280px]' : isCryptoMarket ? 'w-[200px]' : 'w-[260px]'} px-3 py-2 text-left font-medium`}>TOKEN</th>
+            <th className="px-3 py-2 text-right font-medium">PRICE</th>
+            {!isCryptoMarket && <th className="px-3 py-2 text-right font-medium">AGE</th>}
+            {!isCryptoMarket && <th className="px-3 py-2 text-right font-medium">TXNS</th>}
+            <th className="px-3 py-2 text-right font-medium">VOLUME</th>
+            {!isCryptoMarket && <th className="px-3 py-2 text-right font-medium">MAKERS</th>}
             {isCryptoMarket ? (
               <>
-                <th className="px-3 py-2 text-right font-normal">1H</th>
-                <th className="px-3 py-2 text-right font-normal">24H</th>
-                <th className="px-3 py-2 text-right font-normal">7D</th>
-                <th className="px-3 py-2 text-right font-normal">30D</th>
+                <th className="px-3 py-2 text-right font-medium">1H</th>
+                <th className="px-3 py-2 text-right font-medium">24H</th>
+                <th className="px-3 py-2 text-right font-medium">7D</th>
+                <th className="px-3 py-2 text-right font-medium">30D</th>
               </>
             ) : (
               <>
-                <th className="px-3 py-2 text-right font-normal">5M</th>
-                <th className="px-3 py-2 text-right font-normal">1H</th>
-                <th className="px-3 py-2 text-right font-normal">6H</th>
-                <th className="px-3 py-2 text-right font-normal">24H</th>
+                <th className="px-3 py-2 text-right font-medium">5M</th>
+                <th className="px-3 py-2 text-right font-medium">1H</th>
+                <th className="px-3 py-2 text-right font-medium">6H</th>
+                <th className="px-3 py-2 text-right font-medium">24H</th>
               </>
             )}
-            {!isCryptoMarket && <th className="px-3 py-2 text-right font-normal">LIQUIDITY</th>}
-            <th className="px-3 py-2 text-right font-normal">MCAP</th>
-            {showCreatedColumn && <th className="w-[120px] px-3 py-2 text-right font-normal">STATUS</th>}
+            {!isCryptoMarket && <th className="px-3 py-2 text-right font-medium">LIQUIDITY</th>}
+            <th className="px-3 py-2 text-right font-medium">MCAP</th>
+            {showCreatedColumn && <th className="w-[120px] px-3 py-2 text-right font-medium">STATUS</th>}
           </tr>
         </thead>
         <tbody>
@@ -103,8 +108,8 @@ const TokenTable = ({ tokens, isCryptoMarket = false, ogTokenId, topTokenId, sho
               onClick={() => navigate(`/token/${token.id}`)}
               className="border-b border-border/30 hover:bg-accent/40 cursor-pointer transition-colors text-[13px]"
             >
-              {/* Rank — clean, no badges */}
-              <td className="px-3 py-2 text-muted-foreground">
+              {/* Rank */}
+              <td className="px-3 py-2 text-muted-foreground/70">
                 #{token.rank}
               </td>
 
@@ -113,7 +118,7 @@ const TokenTable = ({ tokens, isCryptoMarket = false, ogTokenId, topTokenId, sho
                 <div className="flex items-center gap-2 min-w-0">
                   <TokenLogo token={token} />
                   <div className="flex items-center gap-1.5 min-w-0 overflow-hidden">
-                    <span className="font-semibold text-foreground truncate max-w-[100px]">{token.name}</span>
+                    <span className="font-semibold text-foreground truncate max-w-[140px]">{token.name}</span>
                     
                     <span className="text-muted-foreground text-[12px] shrink-0">{token.ticker}</span>
                     {ogTokenId === token.id && <OgBadge />}
@@ -131,7 +136,7 @@ const TokenTable = ({ tokens, isCryptoMarket = false, ogTokenId, topTokenId, sho
                         ) : (token.exchangeName?.toLowerCase().includes('orca')) ? (
                           <img src={orcaLogo} alt="Orca" className="w-4 h-4 shrink-0" />
                         ) : token.exchangeName ? (
-                          <span className="text-[10px] px-1 py-0.5 rounded bg-secondary text-muted-foreground shrink-0">{token.exchangeName}</span>
+                          <span className="text-[10px] px-1 py-0.5 rounded bg-[hsl(0,0%,16%)] text-muted-foreground shrink-0">{token.exchangeName}</span>
                         ) : null}
                         {token.boosts && (
                           <span className="flex items-center gap-0.5 text-[11px] text-profit font-medium shrink-0">

@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { Filter, LayoutList, LayoutGrid, Clock, Trophy, TrendingUp, Sparkles, User, Rocket, Megaphone, Settings, ChevronDown } from 'lucide-react';
+import { Filter, LayoutList, LayoutGrid, Clock, Trophy, TrendingUp, Sparkles, Settings, ChevronDown } from 'lucide-react';
 import { FlameFilledIcon } from '@/components/icons/TablerIcons';
-
+import { toast } from 'sonner';
 
 export type TimeFilter = '5m' | '1h' | '6h' | '24h';
 export type Category = 'trending' | 'top' | 'gainers' | 'new';
@@ -29,23 +29,9 @@ const TokenFilters = ({
 
   const timeOptions: TimeFilter[] = ['5m', '1h', '6h', '24h'];
 
-  const timeLabel = {
-    '5m': 'Last 5 minutes',
-    '1h': 'Last hour',
-    '6h': 'Last 6 hours',
-    '24h': 'Last 24 hours'
-  }[timeFilter];
-
   return (
     <div className="px-3 py-1.5 border-b border-border">
-      <div className="flex items-center gap-1.5 min-w-0 whitespace-nowrap">
-        {/* Time period pill - green */}
-        
-
-
-
-
-
+      <div className="flex items-center gap-1.5 min-w-0 whitespace-nowrap overflow-x-auto scrollbar-hide">
         {/* Trending pill with embedded time toggles */}
         <div className="flex items-center rounded-full overflow-hidden border border-orange-500/30">
           <button
@@ -53,13 +39,12 @@ const TokenFilters = ({
             className={`flex items-center gap-1 px-3 py-1.5 text-[13px] transition-colors ${
             category === 'trending' ?
             'bg-orange-500/15 text-orange-400' :
-            'bg-secondary text-muted-foreground hover:text-foreground'}`
-            }>
-
+            'bg-[hsl(0,0%,16%)] text-muted-foreground hover:text-foreground'}`}
+          >
             <FlameFilledIcon className="w-3.5 h-3.5" />
             Trending
           </button>
-          <div className="flex items-center bg-secondary/80 border-l border-border">
+          <div className="flex items-center bg-[hsl(0,0%,14%)] border-l border-border">
             {timeOptions.map((t) =>
             <button
               key={t}
@@ -67,11 +52,10 @@ const TokenFilters = ({
               className={`px-2 py-1.5 text-[12px] transition-colors ${
               timeFilter === t ?
               'text-foreground bg-accent' :
-              'text-muted-foreground hover:text-foreground'}`
-              }>
-
-                {t.toUpperCase()}
-              </button>
+              'text-muted-foreground hover:text-foreground'}`}
+            >
+              {t.toUpperCase()}
+            </button>
             )}
           </div>
         </div>
@@ -80,45 +64,27 @@ const TokenFilters = ({
         <button
           onClick={() => setCategory('top')}
           className={`flex items-center gap-1 px-3 py-1.5 rounded text-[13px] transition-colors ${
-          category === 'top' ? 'bg-accent text-foreground' : 'text-muted-foreground hover:text-foreground'}`
-          }>
-
+          category === 'top' ? 'bg-accent text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+        >
           <Trophy className="w-3.5 h-3.5" />
           Top
         </button>
         <button
           onClick={() => setCategory('gainers')}
           className={`flex items-center gap-1 px-3 py-1.5 rounded text-[13px] transition-colors ${
-          category === 'gainers' ? 'bg-accent text-foreground' : 'text-muted-foreground hover:text-foreground'}`
-          }>
-
+          category === 'gainers' ? 'bg-accent text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+        >
           <TrendingUp className="w-3.5 h-3.5" />
           Gainers
         </button>
         <button
           onClick={() => setCategory('new')}
           className={`flex items-center gap-1 px-3 py-1.5 rounded text-[13px] transition-colors ${
-          category === 'new' ? 'bg-accent text-foreground' : 'text-muted-foreground hover:text-foreground'}`
-          }>
-
+          category === 'new' ? 'bg-accent text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+        >
           <Sparkles className="w-3.5 h-3.5" />
           New Pairs
         </button>
-
-        {/* Decorative buttons */}
-        
-
-
-
-        
-
-
-
-
-        
-
-
-
 
         <div className="flex-1" />
 
@@ -129,8 +95,9 @@ const TokenFilters = ({
             <select
               value={rankBy}
               onChange={(e) => setRankBy(e.target.value as RankBy)}
-              className="appearance-none bg-secondary text-foreground text-[13px] rounded border border-border px-3 py-1.5 pr-7 outline-none cursor-pointer">
-
+              className="appearance-none bg-[hsl(0,0%,16%)] text-foreground text-[13px] rounded border border-border px-3 py-1.5 pr-7 outline-none cursor-pointer"
+              aria-label="Rank tokens by"
+            >
               <option value="trending">Trending {timeFilter.toUpperCase()}</option>
               <option value="volume">Volume</option>
               <option value="priceChange">Price Change</option>
@@ -145,62 +112,63 @@ const TokenFilters = ({
         <button
           onClick={() => setShowFilters(!showFilters)}
           className={`flex items-center gap-1 px-3 py-1.5 text-[13px] rounded transition-colors ${
-          showFilters ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:text-foreground'}`
-          }>
-
+          showFilters ? 'bg-primary text-primary-foreground' : 'bg-[hsl(0,0%,16%)] text-muted-foreground hover:text-foreground border border-border'}`}
+        >
           <Filter className="w-3.5 h-3.5" />
           Filters
         </button>
 
         {/* Customize */}
-        <button className="flex items-center gap-1 px-3 py-1.5 text-[13px] rounded bg-secondary text-muted-foreground hover:text-foreground">
+        <button
+          onClick={() => toast.info('Column customization coming soon')}
+          className="flex items-center gap-1 px-3 py-1.5 text-[13px] rounded bg-[hsl(0,0%,16%)] text-muted-foreground hover:text-foreground border border-border"
+        >
           <Settings className="w-3.5 h-3.5" />
           Customize
         </button>
 
         {/* View toggle */}
-        <div className="flex items-center bg-secondary rounded p-0.5">
+        <div className="flex items-center bg-[hsl(0,0%,16%)] rounded p-0.5 border border-border">
           <button
             onClick={() => setViewMode('list')}
             className={`p-1.5 rounded-sm transition-colors ${
-            viewMode === 'list' ? 'bg-accent text-foreground' : 'text-muted-foreground'}`
-            }>
-
+            viewMode === 'list' ? 'bg-accent text-foreground' : 'text-muted-foreground'}`}
+            aria-label="List view"
+          >
             <LayoutList className="w-4 h-4" />
           </button>
           <button
             onClick={() => setViewMode('grid')}
             className={`p-1.5 rounded-sm transition-colors ${
-            viewMode === 'grid' ? 'bg-accent text-foreground' : 'text-muted-foreground'}`
-            }>
-
+            viewMode === 'grid' ? 'bg-accent text-foreground' : 'text-muted-foreground'}`}
+            aria-label="Grid view"
+          >
             <LayoutGrid className="w-4 h-4" />
           </button>
         </div>
       </div>
 
       {showFilters &&
-      <div className="flex items-center gap-4 p-3 bg-secondary rounded text-[13px]">
+      <div className="flex items-center gap-4 p-3 bg-[hsl(0,0%,14%)] rounded border border-border mt-1.5 text-[13px]">
           <div className="flex items-center gap-2">
             <span className="text-muted-foreground">Min Volume:</span>
-            <input type="text" placeholder="$0" className="w-20 bg-background border border-border rounded px-2 py-1 text-foreground text-[13px]" />
+            <input type="text" placeholder="$0" className="w-20 bg-[hsl(0,0%,16%)] border border-border rounded px-2 py-1 text-foreground text-[13px]" />
           </div>
           <div className="flex items-center gap-2">
             <span className="text-muted-foreground">Min Liquidity:</span>
-            <input type="text" placeholder="$0" className="w-20 bg-background border border-border rounded px-2 py-1 text-foreground text-[13px]" />
+            <input type="text" placeholder="$0" className="w-20 bg-[hsl(0,0%,16%)] border border-border rounded px-2 py-1 text-foreground text-[13px]" />
           </div>
           <div className="flex items-center gap-2">
             <span className="text-muted-foreground">Min MCAP:</span>
-            <input type="text" placeholder="$0" className="w-20 bg-background border border-border rounded px-2 py-1 text-foreground text-[13px]" />
+            <input type="text" placeholder="$0" className="w-20 bg-[hsl(0,0%,16%)] border border-border rounded px-2 py-1 text-foreground text-[13px]" />
           </div>
           <div className="flex items-center gap-2">
             <span className="text-muted-foreground">Max Age:</span>
-            <input type="text" placeholder="Any" className="w-20 bg-background border border-border rounded px-2 py-1 text-foreground text-[13px]" />
+            <input type="text" placeholder="Any" className="w-20 bg-[hsl(0,0%,16%)] border border-border rounded px-2 py-1 text-foreground text-[13px]" />
           </div>
         </div>
       }
     </div>);
-
 };
 
 export default TokenFilters;

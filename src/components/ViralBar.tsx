@@ -4,7 +4,6 @@ import { X, Clock, BarChart3 } from 'lucide-react';
 import { FlameFilledIcon, CrownFilledIcon, CaretUpFilledIcon } from '@/components/icons/TablerIcons';
 import { ViralSortBy } from '@/hooks/useViralClusters';
 
-
 interface ViralBarProps {
   clusters: ViralCluster[];
   selectedCluster: string | null;
@@ -44,7 +43,7 @@ const ViralBar = ({ clusters, selectedCluster, onSelect, onClear, viralSortBy = 
               className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-[12px] font-medium whitespace-nowrap transition-all duration-150 shrink-0 border ${
                 selectedCluster === cluster.name
                   ? 'bg-orange-500/20 text-orange-300 border-orange-500/40 shadow-[0_0_12px_-3px] shadow-orange-500/20'
-                  : 'bg-secondary/80 hover:bg-accent text-foreground border-border/30 hover:border-border/60'
+                  : 'bg-[hsl(0,0%,14%)] hover:bg-accent text-foreground border-border/30 hover:border-border/60'
               }`}
             >
               <span className="relative flex h-2 w-2 shrink-0">
@@ -66,11 +65,10 @@ const ViralBar = ({ clusters, selectedCluster, onSelect, onClear, viralSortBy = 
       {/* Selected cluster: BACK button top-left + info + sort */}
       {selected && (
         <div className="border-t border-border/30 bg-gradient-to-r from-orange-500/8 to-transparent">
-          {/* Row 1: Back button prominent top-left */}
           <div className="flex items-center gap-3 px-4 py-2">
             <button
               onClick={onClear}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12px] font-semibold bg-secondary hover:bg-accent text-muted-foreground hover:text-foreground transition-colors border border-border/30 shrink-0"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12px] font-semibold bg-[hsl(0,0%,16%)] hover:bg-accent text-muted-foreground hover:text-foreground transition-colors border border-border/30 shrink-0"
             >
               ← Back
             </button>
