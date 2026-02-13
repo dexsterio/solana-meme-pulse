@@ -52,7 +52,7 @@ function mapToToken(coin: CoinGeckoToken, index: number): Token {
   };
 }
 
-export async function fetchCryptoMarket(pages = 3): Promise<Token[]> {
+export async function fetchCryptoMarket(pages = 1): Promise<Token[]> {
   const allTokens: Token[] = [];
 
   for (let page = 1; page <= pages; page++) {
@@ -71,6 +71,9 @@ export async function fetchCryptoMarket(pages = 3): Promise<Token[]> {
 
     const coins: CoinGeckoToken[] = await response.json();
     allTokens.push(...coins.map((c, i) => mapToToken(c, (page - 1) * 100 + i)));
+
+    // Delay between pages to avoid rate limits
+    if (page < pages) await new Promise(r => setTimeout(r, 1500));
   }
 
   return allTokens;
