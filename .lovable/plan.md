@@ -1,53 +1,37 @@
 
-# Comprehensive UI Overflow Fix for TradingPanel
+## Plan: Ta bort InfoTooltip-ikoner och rensa token-partext
 
-## Problem
-The TradingPanel is constrained to 320px width but several elements overflow their containers due to oversized text, long addresses, and tight spacing.
+### 1. Ta bort alla InfoTooltip-anvandningar
 
-## Specific Issues and Fixes
+Filer som anvander InfoTooltip:
 
-### 1. CA (Contract Address) Row - Overflow
-- **Problem**: `text-sm font-mono` address is too wide, icons get pushed out
-- **Fix**: Shorten truncation to show fewer characters (e.g., `5T17...pump` with `slice(0,4)...slice(-4)`), use `text-xs font-mono` for the address, and add `min-w-0 truncate` to prevent overflow
+- **TokenTable.tsx** (rad 75-96): Ta bort InfoTooltip fran AGE, TXNS, VOLUME, MAKERS, LIQUIDITY, MCAP, STATUS kolumnrubriker. Behall bara texten.
+- **TokenGrid.tsx** (rad 93): Ta bort InfoTooltip fran Vol, MCap, Liq, Age labels. Ta aven bort `tip`-propertyn fran arrayen.
+- **MarketSentimentBar.tsx** (rad 77, 109, 120): Ta bort InfoTooltip fran Fear and Greed, Market Cap, BTC Dom.
+- **StatsBar.tsx**, **ViralBar.tsx**, **TokenFilters.tsx** (om de anvander InfoTooltip): Kontrollera och ta bort.
 
-### 2. DA (Dev Address) Row - Same issue
-- **Fix**: Same shorter truncation and smaller font
+Ta aven bort importen av InfoTooltip fran alla filer.
 
-### 3. Exchange Info Row - SOL price overflow
-- **Problem**: `0.00000195` in `text-sm font-mono` plus exchange name plus clock is too wide
-- **Fix**: Use `text-xs` for the price, limit decimal display, use `truncate` on exchange name
+### 2. Rensa "/SOL" och partext
 
-### 4. Buy Button - Long token names
-- **Problem**: "Buy Official Lizard Coin" can be very long
-- **Fix**: Add `truncate` to the button text and `overflow-hidden`
+- **TokenTable.tsx** (rad 117): Ta bort `<span>/SOL</span>` sa det bara visar tokennamn och ticker.
+- **TokenInfoPanel.tsx** (rad 39-42): Ta bort `/ SolanaIcon`-raden fran ticker-sektionen. Visa bara ticker.
+- **TokenDetail.tsx** (rad 82-83): Andra fran `{token.name} / {token.ticker}` till `{token.ticker} {token.name}` (ticker forst, sedan namn, utan snedstreck).
 
-### 5. Holders / Pro Traders / Dex Paid
-- **Problem**: "Unpaid" text with icon in `text-base font-bold` is tight in 1/3 of 304px
-- **Fix**: Reduce to `text-sm font-bold` for these values
+### 3. Ta bort InfoTooltip-komponenten
 
-### 6. Settings Row
-- **Problem**: Four emoji+value pairs on one line can be tight
-- **Fix**: Reduce gap from `gap-4` to `gap-3`, keep `text-xs`
+- Radera filen `src/components/InfoTooltip.tsx` eftersom den inte langre anvands.
 
-### 7. Portfolio Row - PnL column
-- **Problem**: "+0 (+0%)" with refresh icon in a quarter of 304px
-- **Fix**: Use `text-xs` for PnL value, reduce icon size
+---
 
-### 8. 5m Stats Row
-- **Problem**: Values like "20.3K" in `text-sm font-bold` are fine but labels can clip
-- **Fix**: Add `truncate` safety on stat values
+### Tekniska detaljer
 
-### 9. General Container Safety
-- Add `overflow-hidden` to the root container to prevent any horizontal scroll
-- Add `min-w-0` to flex children where needed
-- Ensure all text uses `truncate` or `break-all` where content is dynamic
+**Filer som andras:**
+- `src/components/TokenTable.tsx` - Ta bort 6 InfoTooltip-instanser och `/SOL`-text
+- `src/components/TokenGrid.tsx` - Ta bort 4 InfoTooltip-instanser
+- `src/components/MarketSentimentBar.tsx` - Ta bort 3 InfoTooltip-instanser
+- `src/components/TokenInfoPanel.tsx` - Ta bort `/ SolanaIcon` fran ticker-rad
+- `src/pages/TokenDetail.tsx` - Andra header till `{token.ticker} {token.name}`
+- `src/components/InfoTooltip.tsx` - Radera filen
 
-## File Modified
-| File | Changes |
-|------|---------|
-| `src/components/TradingPanel.tsx` | Fix all overflow issues with shorter truncation, smaller fonts for addresses, truncate classes, and overflow-hidden on containers |
-
-## Technical Notes
-- No new dependencies
-- All changes are CSS class adjustments and truncation logic
-- Panel width stays at 320px - content must fit within ~304px usable width
+**Filer att kontrollera:** StatsBar.tsx, ViralBar.tsx, TokenFilters.tsx for eventuella InfoTooltip-anvandningar.
