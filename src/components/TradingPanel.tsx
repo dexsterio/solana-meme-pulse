@@ -194,18 +194,18 @@ const TradingPanel = ({ token, initialMode, onBack }: TradingPanelProps) => {
 
       {/* Preset tabs */}
       <div className="flex border-b border-border">
-        {[0, 1, 2].map((i) =>
-        <button
-          key={i}
-          onClick={() => setActivePreset(i)}
-          className={`flex-1 py-2.5 text-xs font-medium text-center transition-colors ${
-          activePreset === i ?
-          'text-foreground border-b-2 border-primary' :
-          'text-muted-foreground hover:text-foreground'}`
-          }>
+        {[0, 1, 2].map((i) => {}
 
-            PRESET {i + 1}
-          </button>
+
+
+
+
+
+
+
+
+
+
         )}
       </div>
 
