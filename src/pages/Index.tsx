@@ -135,7 +135,7 @@ const Index = () => {
             </button>
           </div>
         ) : viewMode === 'list' ? (
-          <TokenTable tokens={sortedTokens} />
+          <TokenTable tokens={sortedTokens} isCryptoMarket={isCryptoMarket} />
         ) : (
           <TokenGrid tokens={sortedTokens} />
         )}
