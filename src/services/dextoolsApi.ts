@@ -1,88 +1,28 @@
 import { Token } from '@/data/mockTokens';
 
-const API_KEY = 'Cn5a0ucAiY1dP2KIuykwRa22bzBBQDq61cA7Xy9O';
-const BASE_URL = 'https://public-api.dextools.io/trial/v2';
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+const EDGE_FN_URL = `${SUPABASE_URL}/functions/v1/dextools-proxy`;
 
-// CORS proxy configurations
-interface ProxyConfig {
-  name: string;
-  getUrl: (url: string) => string;
-  getHeaders: () => Record<string, string>;
-  parseResponse?: (res: Response) => Promise<any>;
-}
-
-const PROXY_CONFIGS: ProxyConfig[] = [
-  // codetabs - known to forward headers
-  {
-    name: 'codetabs',
-    getUrl: (url: string) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
-    getHeaders: () => ({
-      'X-API-Key': API_KEY,
-      'accept': 'application/json',
-    }),
-  },
-  // corsproxy.io
-  {
-    name: 'corsproxy',
-    getUrl: (url: string) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
-    getHeaders: () => ({
-      'X-API-Key': API_KEY,
-      'accept': 'application/json',
-    }),
-  },
-  // allorigins - wraps response, headers NOT forwarded, so this will only work
-  // if DexTools allows requests without API key (unlikely, but try as last resort)
-  {
-    name: 'allorigins',
-    getUrl: (url: string) => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
-    getHeaders: () => ({
-      'accept': 'application/json',
-    }),
-    parseResponse: async (res: Response) => {
-      const wrapper = await res.json();
-      if (wrapper?.contents) {
-        try {
-          return JSON.parse(wrapper.contents);
-        } catch {
-          throw new Error('Failed to parse allorigins contents');
-        }
-      }
-      throw new Error('No contents in allorigins response');
-    },
-  },
-];
 // Simple in-memory cache for token logos
 const logoCache = new Map<string, string>();
 const tokenInfoCache = new Map<string, { mcap: number; fdv: number; holders: number }>();
 
 async function apiFetch(endpoint: string): Promise<any> {
-  const fullUrl = `${BASE_URL}${endpoint}`;
-
-  for (const proxy of PROXY_CONFIGS) {
-    const url = proxy.getUrl(fullUrl);
-    try {
-      const res = await fetch(url, {
-        headers: proxy.getHeaders(),
-      });
-      if (!res.ok) {
-        console.warn(`[${proxy.name}] API ${res.status} for ${endpoint}`);
-        if (res.status === 429) {
-          throw new Error('Rate limited');
-        }
-        continue;
-      }
-      if (proxy.parseResponse) {
-        return await proxy.parseResponse(res);
-      }
-      const data = await res.json();
-      return data;
-    } catch (err: any) {
-      if (err?.message === 'Rate limited') throw err;
-      console.warn(`[${proxy.name}] failed for ${endpoint}:`, err?.message);
-      continue;
-    }
+  const url = `${EDGE_FN_URL}?path=${encodeURIComponent(endpoint)}`;
+  const res = await fetch(url, {
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Content-Type': 'application/json',
+    },
+  });
+  if (!res.ok) {
+    if (res.status === 429) throw new Error('Rate limited');
+    const text = await res.text();
+    console.warn(`Edge function ${res.status} for ${endpoint}:`, text);
+    throw new Error(`API error ${res.status}`);
   }
-  throw new Error(`All proxies failed for ${endpoint}`);
+  return await res.json();
 }
 
 function calcAge(creationTime: string | undefined): string {
