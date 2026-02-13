@@ -17,6 +17,8 @@ export interface Token {
   change1h: number;
   change6h: number;
   change24h: number;
+  change7d: number;
+  change30d: number;
   liquidity: number;
   mcap: number;
   fdv: number;

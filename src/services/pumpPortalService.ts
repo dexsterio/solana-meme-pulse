@@ -90,6 +90,8 @@ function mapEventToToken(event: PumpPortalTokenEvent, logoUrl: string, index: nu
     change1h: 0,
     change6h: 0,
     change24h: 0,
+    change7d: 0,
+    change30d: 0,
     liquidity: (event.vSolInBondingCurve || 0) * solPrice,
     mcap: mcapUsd,
     fdv: mcapUsd,

@@ -10,8 +10,19 @@ interface CoinGeckoToken {
   total_volume: number;
   price_change_percentage_24h: number;
   price_change_percentage_1h_in_currency?: number;
+  price_change_percentage_7d_in_currency?: number;
+  price_change_percentage_30d_in_currency?: number;
   market_cap_rank: number;
   fully_diluted_valuation?: number;
+}
+
+export interface CryptoGlobalData {
+  fearGreed: { value: number; classification: string };
+  btcDominance: number;
+  ethDominance: number;
+  totalMarketCap: number;
+  marketCapChange24h: number;
+  ethGas: number;
 }
 
 function mapToToken(coin: CoinGeckoToken, index: number): Token {
@@ -33,6 +44,8 @@ function mapToToken(coin: CoinGeckoToken, index: number): Token {
     change1h: coin.price_change_percentage_1h_in_currency || 0,
     change6h: 0,
     change24h: coin.price_change_percentage_24h || 0,
+    change7d: coin.price_change_percentage_7d_in_currency || 0,
+    change30d: coin.price_change_percentage_30d_in_currency || 0,
     liquidity: 0,
     mcap: coin.market_cap || 0,
     fdv: coin.fully_diluted_valuation || coin.market_cap || 0,
@@ -61,4 +74,17 @@ export async function fetchCryptoMarket(pages = 3): Promise<Token[]> {
   }
 
   return allTokens;
+}
+
+export async function fetchCryptoGlobal(): Promise<CryptoGlobalData> {
+  const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/crypto-global`;
+  const response = await fetch(url, {
+    headers: {
+      'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!response.ok) throw new Error(`crypto-global failed: ${response.status}`);
+  return response.json();
 }
