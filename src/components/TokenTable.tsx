@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { Token, formatPrice, formatNumber } from '@/data/mockTokens';
-import { Zap, Info, Crown, TrendingUp } from 'lucide-react';
+import { Zap, Crown, TrendingUp } from 'lucide-react';
 import pumpfunLogo from '@/assets/pumpfun-logo.png';
 import bonkLogo from '@/assets/bonk-logo.png';
 import raydiumLogo from '@/assets/raydium-logo.png';
@@ -47,6 +47,18 @@ const ChangeCell = ({ value }: { value: number }) => (
   </td>
 );
 
+const OgBadge = () => (
+  <span className="inline-flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded-md bg-yellow-500/15 text-yellow-400 border border-yellow-500/30 font-bold shrink-0 ml-1.5">
+    <Crown className="w-3 h-3" /> OG
+  </span>
+);
+
+const TopBadge = () => (
+  <span className="inline-flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded-md bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-bold shrink-0 ml-1.5">
+    <TrendingUp className="w-3 h-3" /> TOP
+  </span>
+);
+
 const TokenTable = ({ tokens, isCryptoMarket = false, ogTokenId, topTokenId, showCreatedColumn }: TokenTableProps) => {
   const navigate = useNavigate();
 
@@ -55,14 +67,9 @@ const TokenTable = ({ tokens, isCryptoMarket = false, ogTokenId, topTokenId, sho
       <table className="w-full table-fixed">
         <thead>
           <tr className="text-muted-foreground text-[11px] uppercase tracking-wider">
-            <th className="w-12 px-3 py-2 text-left font-normal">#</th>
-            <th className={`${isCryptoMarket ? 'w-[200px]' : 'w-[220px]'} px-3 py-2 text-left font-normal`}>TOKEN</th>
-            <th className="px-3 py-2 text-right font-normal">
-              <span className="inline-flex items-center gap-1">
-                PRICE
-                <Info className="w-3 h-3 text-muted-foreground/40" />
-              </span>
-            </th>
+            <th className="w-10 px-3 py-2 text-left font-normal">#</th>
+            <th className={`${showCreatedColumn ? 'w-[280px]' : isCryptoMarket ? 'w-[200px]' : 'w-[260px]'} px-3 py-2 text-left font-normal`}>TOKEN</th>
+            <th className="px-3 py-2 text-right font-normal">PRICE</th>
             {!isCryptoMarket && <th className="px-3 py-2 text-right font-normal">AGE</th>}
             {!isCryptoMarket && <th className="px-3 py-2 text-right font-normal">TXNS</th>}
             <th className="px-3 py-2 text-right font-normal">VOLUME</th>
@@ -84,7 +91,7 @@ const TokenTable = ({ tokens, isCryptoMarket = false, ogTokenId, topTokenId, sho
             )}
             {!isCryptoMarket && <th className="px-3 py-2 text-right font-normal">LIQUIDITY</th>}
             <th className="px-3 py-2 text-right font-normal">MCAP</th>
-            {showCreatedColumn && <th className="px-3 py-2 text-right font-normal">STATUS</th>}
+            {showCreatedColumn && <th className="w-[120px] px-3 py-2 text-right font-normal">STATUS</th>}
           </tr>
         </thead>
         <tbody>
@@ -94,28 +101,21 @@ const TokenTable = ({ tokens, isCryptoMarket = false, ogTokenId, topTokenId, sho
               onClick={() => navigate(`/token/${token.id}`)}
               className="border-b border-border/30 hover:bg-accent/40 cursor-pointer transition-colors text-[13px]"
             >
+              {/* Rank — clean, no badges */}
               <td className="px-3 py-2 text-muted-foreground">
-                <div className="flex items-center gap-1">
-                  <span>#{token.rank}</span>
-                  {ogTokenId === token.id && (
-                    <span className="inline-flex items-center gap-0.5 text-[10px] px-1 py-0.5 rounded bg-yellow-500/20 text-yellow-300 font-bold">
-                      <Crown className="w-3 h-3" /> OG
-                    </span>
-                  )}
-                  {topTokenId === token.id && topTokenId !== ogTokenId && (
-                    <span className="inline-flex items-center gap-0.5 text-[10px] px-1 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold">
-                      <TrendingUp className="w-3 h-3" /> TOP
-                    </span>
-                  )}
-                </div>
+                #{token.rank}
               </td>
-              <td className="px-3 py-2">
-                <div className="flex items-center gap-2">
+
+              {/* Token name + badges inline */}
+              <td className="px-3 py-2 min-w-0">
+                <div className="flex items-center gap-2 min-w-0">
                   <TokenLogo token={token} />
-                  <div className="flex items-center gap-1.5">
-                    <span className="font-semibold text-foreground">{token.name}</span>
-                    {!isCryptoMarket && <span className="text-muted-foreground text-[12px]">/SOL</span>}
-                    <span className="text-muted-foreground text-[12px]">{token.ticker}</span>
+                  <div className="flex items-center gap-1.5 min-w-0 overflow-hidden">
+                    <span className="font-semibold text-foreground truncate max-w-[100px]">{token.name}</span>
+                    {!isCryptoMarket && <span className="text-muted-foreground text-[12px] shrink-0">/SOL</span>}
+                    <span className="text-muted-foreground text-[12px] shrink-0">{token.ticker}</span>
+                    {ogTokenId === token.id && <OgBadge />}
+                    {topTokenId === token.id && topTokenId !== ogTokenId && <TopBadge />}
                     {!isCryptoMarket && (
                       <>
                         {(token.exchangeName === 'pump.fun' || token.exchangeName === 'pumpfun') ? (
@@ -129,10 +129,10 @@ const TokenTable = ({ tokens, isCryptoMarket = false, ogTokenId, topTokenId, sho
                         ) : (token.exchangeName?.toLowerCase().includes('orca')) ? (
                           <img src={orcaLogo} alt="Orca" className="w-4 h-4 shrink-0" />
                         ) : token.exchangeName ? (
-                          <span className="text-[10px] px-1 py-0.5 rounded bg-secondary text-muted-foreground">{token.exchangeName}</span>
+                          <span className="text-[10px] px-1 py-0.5 rounded bg-secondary text-muted-foreground shrink-0">{token.exchangeName}</span>
                         ) : null}
                         {token.boosts && (
-                          <span className="flex items-center gap-0.5 text-[11px] text-profit font-medium">
+                          <span className="flex items-center gap-0.5 text-[11px] text-profit font-medium shrink-0">
                             <Zap className="w-3 h-3" />
                             {token.boosts}
                           </span>
@@ -142,6 +142,7 @@ const TokenTable = ({ tokens, isCryptoMarket = false, ogTokenId, topTokenId, sho
                   </div>
                 </div>
               </td>
+
               <td className="px-3 py-2 text-right text-foreground">{formatPrice(token.price)}</td>
               {!isCryptoMarket && <td className="px-3 py-2 text-right text-muted-foreground">{token.age}</td>}
               {!isCryptoMarket && <td className="px-3 py-2 text-right text-foreground">{token.txns.toLocaleString()}</td>}
@@ -167,11 +168,15 @@ const TokenTable = ({ tokens, isCryptoMarket = false, ogTokenId, topTokenId, sho
               {showCreatedColumn && (
                 <td className="px-3 py-2 text-right">
                   {ogTokenId === token.id ? (
-                    <span className="text-yellow-300 text-[11px] font-bold">First Created</span>
+                    <span className="inline-flex items-center gap-1 text-[10px] px-2 py-1 rounded-md bg-yellow-500/15 text-yellow-400 border border-yellow-500/30 font-bold">
+                      <Crown className="w-3 h-3" /> First Created
+                    </span>
                   ) : topTokenId === token.id ? (
-                    <span className="text-emerald-300 text-[11px] font-bold">Highest MCap</span>
+                    <span className="inline-flex items-center gap-1 text-[10px] px-2 py-1 rounded-md bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-bold">
+                      <TrendingUp className="w-3 h-3" /> Highest MCap
+                    </span>
                   ) : (
-                    <span className="text-muted-foreground text-[11px]">Clone</span>
+                    <span className="text-[10px] px-2 py-1 rounded-md bg-secondary text-muted-foreground">Clone</span>
                   )}
                 </td>
               )}
