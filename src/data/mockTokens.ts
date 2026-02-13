@@ -31,6 +31,8 @@ export interface Token {
   sells24h?: number;
   buyVolume24h?: number;
   sellVolume24h?: number;
+  headerImage?: string;
+  description?: string;
 }
 
 export interface Transaction {
