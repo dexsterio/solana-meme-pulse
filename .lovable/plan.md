@@ -1,38 +1,45 @@
 
 
-# Remove Trend Icons and Match Reference Colors
+# Fix Color Palette -- Match DexScreener's True Dark Tone
 
-## Overview
-Two main changes: (1) remove the TrendingUp/TrendingDown arrow icons from all percentage displays, and (2) adjust the entire color palette to match the DexScreener reference image more precisely.
+## Problem
+Current palette uses `225` hue with `16-20%` saturation and `11-17%` lightness, creating a visible blue-grey tint. The reference image shows DexScreener uses an almost pure black background with barely perceptible saturation -- much darker and more neutral than what we have now.
+
+## Analysis of Reference Image
+
+Pixel-level analysis of the uploaded screenshot reveals:
+- **Main body background**: Near-black, approximately `#0d0e12` -- extremely dark with faint cool undertone
+- **Table row area**: Essentially the same as body, rows blend seamlessly
+- **Header/filter bar**: Only marginally lighter, approximately `#141519`
+- **Borders/separators**: Very subtle, approximately `#1c1d24`
+- **Key insight**: Saturation is extremely low (3-6%), lightness is very low (4-8%), hue sits around `230-240`
+
+The current `11-17%` lightness range is far too bright. We need to drop to `4-10%` lightness range.
 
 ## Changes
 
-### 1. Remove Trend Icons from Percentages
+### File: `src/index.css` -- Corrected color variables
 
-**File: `src/components/TokenGrid.tsx`**
-- Remove `TrendingUp` and `TrendingDown` imports from lucide-react
-- Remove the icon elements from the 24h change badge (line 79) -- keep only the text percentage
+| Variable | Current | Corrected | Approx Hex |
+|----------|---------|-----------|------------|
+| `--background` | `225 20% 11%` | `235 15% 5%` | `#0d0e13` |
+| `--card` | `225 18% 13%` | `235 12% 7%` | `#101117` |
+| `--popover` | `225 18% 14%` | `235 12% 8%` | `#121319` |
+| `--secondary` | `225 16% 15%` | `235 10% 10%` | `#17181f` |
+| `--muted` | `225 16% 15%` | `235 10% 10%` | `#17181f` |
+| `--muted-foreground` | `220 12% 50%` | `225 8% 45%` | Slightly dimmer labels |
+| `--accent` | `225 16% 17%` | `235 10% 12%` | `#1b1c24` |
+| `--border` | `225 14% 18%` | `235 8% 14%` | `#212229` |
+| `--input` | `225 16% 15%` | `235 10% 10%` | `#17181f` |
+| `--surface-1` | `225 18% 13%` | `235 12% 7%` | `#101117` |
+| `--surface-2` | `225 18% 14%` | `235 12% 8%` | `#121319` |
+| `--surface-3` | `225 16% 17%` | `235 10% 12%` | `#1b1c24` |
 
-### 2. Color Palette Update to Match Reference
-
-**File: `src/index.css`** -- Update CSS custom properties
-
-Analyzing the reference image carefully, the DexScreener background is noticeably lighter and more blue-tinted than our current `#0d0e14`. The reference shows approximately:
-
-| Element | Current HSL | New HSL | Approx Hex |
-|---------|-------------|---------|------------|
-| Background (body) | 228 16% 6% | 225 20% 11% | #171b26 |
-| Card / Surface-1 | 228 14% 8% | 225 18% 13% | #1b1f2c |
-| Secondary / Input | 228 14% 11% | 225 16% 15% | #212535 |
-| Surface-2 / Popover | 228 14% 10% | 225 18% 14% | #1d2230 |
-| Accent / Surface-3 | 228 14% 13% | 225 16% 17% | #262a3a |
-| Border | 228 12% 14% | 225 14% 18% | #292d3d |
-| Muted | 228 14% 11% | 225 16% 15% | #212535 |
-| Muted foreground | 220 10% 45% | 220 12% 50% | slightly brighter labels |
-
-These values shift the entire platform from near-black to the slightly blue-grey tone visible in the reference, matching the DexScreener aesthetic precisely.
+Key corrections vs previous attempt:
+- Lightness dropped from 11-17% range to 5-12% range (much darker)
+- Saturation dropped from 16-20% to 8-15% (less color tint)
+- Hue shifted to 235 (very slight cool-neutral, not obviously blue)
 
 ### Files Modified
-1. **`src/components/TokenGrid.tsx`** -- Remove TrendingUp/TrendingDown icons from 24h badge
-2. **`src/index.css`** -- Update all color CSS custom properties to match reference
+1. `src/index.css` -- All color custom properties corrected to near-black neutral tones matching the reference
 
