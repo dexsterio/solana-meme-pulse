@@ -77,10 +77,23 @@ export function formatNumber(num: number): string {
 
 export function formatPrice(price: number): string {
   if (price === 0) return '$0.00';
-  if (price < 0.00001) return `$${price.toExponential(2)}`;
-  if (price < 0.01) return `$${price.toFixed(6)}`;
-  if (price < 1) return `$${price.toFixed(4)}`;
-  return `$${price.toFixed(2)}`;
+  if (price >= 1) return `$${price.toFixed(2)}`;
+  if (price >= 0.01) return `$${price.toFixed(4)}`;
+  // Subscript notation for very small prices: $0.0₄5554
+  const str = price.toFixed(20);
+  const match = str.match(/^0\.(0+)/);
+  if (match) {
+    const zeroCount = match[1].length;
+    // Get significant digits after the zeros
+    const significant = str.slice(2 + zeroCount, 2 + zeroCount + 4);
+    if (zeroCount >= 2) {
+      const subscriptDigits = '₀₁₂₃₄₅₆₇₈₉';
+      const sub = String(zeroCount).split('').map(d => subscriptDigits[parseInt(d)]).join('');
+      return `$0.0${sub}${significant}`;
+    }
+    return `$${price.toFixed(zeroCount + 4)}`;
+  }
+  return `$${price.toFixed(6)}`;
 }
 
 export function formatCompact(num: number): string {
