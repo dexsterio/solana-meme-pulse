@@ -1,5 +1,5 @@
 import { Token, formatPrice, formatNumber, formatCompact } from '@/data/mockTokens';
-import { Globe, Twitter, MessageCircle, Star, Bell, ExternalLink, Zap, Copy, Shield, ChevronDown } from 'lucide-react';
+import { Globe, Twitter, MessageCircle, Star, Bell, ExternalLink, Zap, Copy, Lock, ChevronDown } from 'lucide-react';
 import SolanaIcon from '@/components/SolanaIcon';
 import { toast } from 'sonner';
 import { useState } from 'react';
@@ -170,7 +170,11 @@ const TokenInfoPanel = ({ token, onBuyClick, onSellClick }: TokenInfoPanelProps)
               <div className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1">{label}</div>
               <div className="text-xs font-bold text-foreground flex items-center justify-center gap-1">
                 {value}
-                {icon && <Shield className="w-3 h-3 text-profit" />}
+                {icon && (
+                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-profit/20 border border-profit/40">
+                    <Lock className="w-2.5 h-2.5 text-profit" />
+                  </span>
+                )}
               </div>
             </div>
           ))}
