@@ -1,5 +1,6 @@
 import { Token, formatPrice, formatNumber, formatCompact } from '@/data/mockTokens';
 import { Globe, Twitter, MessageCircle, Star, Bell, ExternalLink, Zap, Copy, Shield } from 'lucide-react';
+import SolanaIcon from '@/components/SolanaIcon';
 
 interface TokenInfoPanelProps {
   token: Token;
@@ -38,7 +39,7 @@ const TokenInfoPanel = ({ token, onBuyClick, onSellClick }: TokenInfoPanelProps)
           <span className="font-semibold text-foreground">{token.ticker}</span>
           <Copy className="w-3 h-3 text-muted-foreground cursor-pointer" />
           <span className="text-muted-foreground">/</span>
-          <span className="text-muted-foreground">SOL</span>
+          <SolanaIcon size={12} />
           {token.boosts && (
             <span className="text-yellow-500 text-[10px] flex items-center gap-0.5">
               <Zap className="w-3 h-3" /> {token.boosts}
@@ -82,7 +83,7 @@ const TokenInfoPanel = ({ token, onBuyClick, onSellClick }: TokenInfoPanelProps)
           </div>
           <div className="bg-secondary rounded-md p-2.5 text-center border border-border">
             <div className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1">Price</div>
-            <div className="text-sm font-bold tracking-tight text-foreground">{token.priceSOL.toFixed(8)} SOL</div>
+            <div className="text-sm font-bold tracking-tight text-foreground flex items-center justify-center gap-1">{token.priceSOL.toFixed(8)} <SolanaIcon size={12} /></div>
           </div>
         </div>
       </div>

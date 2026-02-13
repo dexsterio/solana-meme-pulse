@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { generateMockTransactions, formatPrice, formatCompact } from '@/data/mockTokens';
 import { ExternalLink } from 'lucide-react';
+import SolanaIcon from '@/components/SolanaIcon';
 
 interface TransactionListProps {
   tokenId: string;
@@ -36,7 +37,7 @@ const TransactionList = ({ tokenId }: TransactionListProps) => {
               <th className="px-2 py-1.5 text-left font-medium">TYPE</th>
               <th className="px-2 py-1.5 text-right font-medium">USD</th>
               <th className="px-2 py-1.5 text-right font-medium">AMOUNT</th>
-              <th className="px-2 py-1.5 text-right font-medium">SOL</th>
+              <th className="px-2 py-1.5 text-right font-medium"><span className="flex items-center justify-end gap-1"><SolanaIcon size={10} /></span></th>
               <th className="px-2 py-1.5 text-right font-medium">PRICE</th>
               <th className="px-2 py-1.5 text-right font-medium">MAKER</th>
               <th className="px-2 py-1.5 text-center font-medium">TXN</th>
@@ -53,7 +54,9 @@ const TransactionList = ({ tokenId }: TransactionListProps) => {
                 </td>
                 <td className="px-2 py-1.5 text-right text-foreground">${tx.usd.toFixed(2)}</td>
                 <td className="px-2 py-1.5 text-right text-foreground">{formatCompact(tx.tokenAmount)}</td>
-                <td className="px-2 py-1.5 text-right text-muted-foreground">{tx.sol.toFixed(3)}</td>
+                <td className="px-2 py-1.5 text-right text-muted-foreground">
+                  <span className="flex items-center justify-end gap-0.5"><SolanaIcon size={10} />{tx.sol.toFixed(3)}</span>
+                </td>
                 <td className="px-2 py-1.5 text-right font-mono text-foreground">{formatPrice(tx.price)}</td>
                 <td className="px-2 py-1.5 text-right text-primary font-mono">{tx.maker}</td>
                 <td className="px-2 py-1.5 text-center">
