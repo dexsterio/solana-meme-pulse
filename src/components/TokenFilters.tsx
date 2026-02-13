@@ -35,8 +35,8 @@ const TokenFilters = ({
   }[timeFilter];
 
   return (
-    <div className="px-3 py-2 border-b border-border space-y-2">
-      <div className="flex items-center gap-1.5 flex-wrap">
+    <div className="px-3 py-1.5 border-b border-border">
+      <div className="flex items-center gap-1.5 min-w-0 whitespace-nowrap">
         {/* Time period pill - green */}
         <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-profit/40 text-profit text-[13px]">
           <Clock className="w-3.5 h-3.5" />
