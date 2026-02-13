@@ -48,13 +48,13 @@ const ChangeCell = ({ value }: { value: number }) => (
 );
 
 const OgBadge = () => (
-  <span className="inline-flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded-md bg-yellow-500/15 text-yellow-400 border border-yellow-500/30 font-bold shrink-0 ml-1.5">
+  <span className="inline-flex items-center gap-0.5 text-[10px] text-yellow-400 font-bold shrink-0 ml-1.5">
     <Crown className="w-3 h-3" /> OG
   </span>
 );
 
 const TopBadge = () => (
-  <span className="inline-flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded-md bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-bold shrink-0 ml-1.5">
+  <span className="inline-flex items-center gap-0.5 text-[10px] text-emerald-400 font-bold shrink-0 ml-1.5">
     <TrendingUp className="w-3 h-3" /> TOP
   </span>
 );
@@ -168,15 +168,15 @@ const TokenTable = ({ tokens, isCryptoMarket = false, ogTokenId, topTokenId, sho
               {showCreatedColumn && (
                 <td className="px-3 py-2 text-right">
                   {ogTokenId === token.id ? (
-                    <span className="inline-flex items-center gap-1 text-[10px] px-2 py-1 rounded-md bg-yellow-500/15 text-yellow-400 border border-yellow-500/30 font-bold">
+                    <span className="inline-flex items-center gap-1 text-[10px] text-yellow-400 font-bold">
                       <Crown className="w-3 h-3" /> First Created
                     </span>
                   ) : topTokenId === token.id ? (
-                    <span className="inline-flex items-center gap-1 text-[10px] px-2 py-1 rounded-md bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-bold">
+                    <span className="inline-flex items-center gap-1 text-[10px] text-emerald-400 font-bold">
                       <TrendingUp className="w-3 h-3" /> Highest MCap
                     </span>
                   ) : (
-                    <span className="text-[10px] px-2 py-1 rounded-md bg-secondary text-muted-foreground">Clone</span>
+                    <span className="text-[10px] text-muted-foreground">Clone</span>
                   )}
                 </td>
               )}
