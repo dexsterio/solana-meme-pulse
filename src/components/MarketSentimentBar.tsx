@@ -17,9 +17,9 @@ function getFearGreedColor(value: number): string {
 }
 
 function getAltSeasonStatus(btcDominance: number): { label: string; color: string; icon: typeof TrendingUp } {
-  if (btcDominance < 40) return { label: 'Alt Season', color: 'text-profit', icon: TrendingUp };
+  if (btcDominance < 40) return { label: 'Alt-säsong', color: 'text-profit', icon: TrendingUp };
   if (btcDominance <= 50) return { label: 'Neutral', color: 'text-yellow-400', icon: Minus };
-  return { label: 'BTC Season', color: 'text-orange-400', icon: Bitcoin };
+  return { label: 'BTC-säsong', color: 'text-orange-400', icon: Bitcoin };
 }
 
 const FearGreedGauge = ({ value, classification }: { value: number; classification: string }) => {
@@ -73,7 +73,7 @@ const FearGreedGauge = ({ value, classification }: { value: number; classificati
       {/* Text side */}
       <div className="flex flex-col items-start gap-0.5">
         <div className="flex items-center gap-1">
-          <span className="text-[10px] text-muted-foreground font-medium">Fear & Greed</span>
+          <span className="text-[10px] text-muted-foreground font-medium">Rädsla & Girighet</span>
           <InfoTooltip text="sentimentindex från 0 (extrem rädsla) till 100 (extrem girighet)." iconSize={10} />
           <ChevronRight className="w-3 h-3 text-muted-foreground" />
         </div>
@@ -134,7 +134,7 @@ const MarketSentimentBar = ({ data, isLoading }: MarketSentimentBarProps) => {
       {/* Alt Season */}
       <div className="flex items-center gap-1.5 px-3 py-1.5 rounded border border-border bg-secondary shrink-0">
         <AltIcon className={`w-3.5 h-3.5 ${altSeason.color}`} />
-        <span className="text-[11px] text-muted-foreground">Season</span>
+        <span className="text-[11px] text-muted-foreground">Säsong</span>
         <InfoTooltip text="när BTC-dominansen är låg tenderar altcoins att prestera bättre (alt season)." iconSize={10} />
         <span className={`text-[13px] font-bold ${altSeason.color}`}>{altSeason.label}</span>
       </div>

@@ -51,9 +51,9 @@ const TokenDetail = () => {
     return (
       <div className="flex items-center justify-center h-screen bg-background">
         <div className="text-center">
-          <p className="text-muted-foreground mb-4">Token not found</p>
+          <p className="text-muted-foreground mb-4">Token hittades inte</p>
           <button onClick={() => navigate('/')} className="text-primary hover:underline text-sm">
-            Go back
+            Gå tillbaka
           </button>
         </div>
       </div>
