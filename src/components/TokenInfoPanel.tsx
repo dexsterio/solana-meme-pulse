@@ -171,7 +171,7 @@ const TokenInfoPanel = ({ token, onBuyClick, onSellClick }: TokenInfoPanelProps)
               <div className="text-xs font-bold text-foreground flex items-center justify-center gap-1">
                 {value}
                 {icon && (
-                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-profit/20 border border-profit/40">
+                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full border border-profit">
                     <Lock className="w-2.5 h-2.5 text-profit" />
                   </span>
                 )}
