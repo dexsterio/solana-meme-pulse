@@ -1,17 +1,48 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { mockTokens } from '@/data/mockTokens';
+import { useQuery } from '@tanstack/react-query';
+import { fetchTokenDetails } from '@/services/dextoolsApi';
 import PriceChart from '@/components/PriceChart';
 import TransactionList from '@/components/TransactionList';
 import TokenInfoPanel from '@/components/TokenInfoPanel';
 import TrendingBar from '@/components/TrendingBar';
 import { ArrowLeft } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const TokenDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const token = mockTokens.find((t) => t.id === id);
 
-  if (!token) {
+  const { data: token, isLoading, isError } = useQuery({
+    queryKey: ['token-detail', id],
+    queryFn: () => fetchTokenDetails(id || ''),
+    enabled: !!id,
+    retry: 2,
+  });
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col h-screen bg-background">
+        <TrendingBar />
+        <div className="flex items-center gap-3 px-4 py-2 border-b border-border">
+          <button onClick={() => navigate('/')} className="p-1.5 rounded hover:bg-accent transition-colors">
+            <ArrowLeft className="w-4 h-4 text-muted-foreground" />
+          </button>
+          <Skeleton className="w-8 h-8 rounded-full" />
+          <Skeleton className="w-32 h-5" />
+        </div>
+        <div className="flex-1 flex min-h-0 p-2 gap-2">
+          <div className="flex-1">
+            <Skeleton className="w-full h-full" />
+          </div>
+          <div className="w-[320px]">
+            <Skeleton className="w-full h-full" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (isError || !token) {
     return (
       <div className="flex items-center justify-center h-screen bg-background">
         <div className="text-center">
@@ -33,17 +64,20 @@ const TokenDetail = () => {
         <button onClick={() => navigate('/')} className="p-1.5 rounded hover:bg-accent transition-colors">
           <ArrowLeft className="w-4 h-4 text-muted-foreground" />
         </button>
-        <span className="text-2xl">{token.logo}</span>
+        {token.logoUrl ? (
+          <img src={token.logoUrl} alt={token.name} className="w-7 h-7 rounded-full" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+        ) : (
+          <span className="text-2xl">🪙</span>
+        )}
         <div>
           <span className="font-semibold text-foreground">{token.name}</span>
           <span className="text-muted-foreground ml-1.5 text-sm">/ {token.ticker}</span>
         </div>
-        <span className="text-[10px] px-1.5 py-0.5 rounded bg-surface-3 text-muted-foreground">SOL</span>
+        <span className="text-[10px] px-1.5 py-0.5 rounded bg-secondary text-muted-foreground">SOL</span>
       </div>
 
       {/* 3-panel layout */}
       <div className="flex-1 flex min-h-0">
-        {/* Left: Chart + Transactions */}
         <div className="flex-1 flex flex-col min-w-0 p-2 gap-2">
           <div className="flex-1 min-h-0">
             <PriceChart token={token} />
@@ -52,8 +86,6 @@ const TokenDetail = () => {
             <TransactionList tokenId={token.id} />
           </div>
         </div>
-
-        {/* Right: Token Info */}
         <div className="w-[320px] shrink-0 p-2 pl-0">
           <TokenInfoPanel token={token} />
         </div>

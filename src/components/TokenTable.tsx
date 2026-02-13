@@ -6,6 +6,28 @@ interface TokenTableProps {
   tokens: Token[];
 }
 
+const TokenLogo = ({ token }: { token: Token }) => {
+  if (token.logoUrl) {
+    return (
+      <img
+        src={token.logoUrl}
+        alt={token.ticker}
+        className="w-[22px] h-[22px] rounded-full shrink-0"
+        onError={(e) => {
+          e.currentTarget.style.display = 'none';
+          const fallback = e.currentTarget.nextElementSibling;
+          if (fallback) (fallback as HTMLElement).style.display = 'flex';
+        }}
+      />
+    );
+  }
+  return (
+    <div className="w-[22px] h-[22px] rounded-full bg-gradient-to-br from-primary/60 to-accent flex items-center justify-center text-[9px] text-foreground font-bold shrink-0">
+      {token.ticker?.charAt(0) || '?'}
+    </div>
+  );
+};
+
 const ChangeCell = ({ value }: { value: number }) => (
   <td className={`px-3 py-2 text-right text-[13px] ${value >= 0 ? 'text-profit' : 'text-loss'}`}>
     {Math.abs(value) >= 1000
@@ -53,14 +75,14 @@ const TokenTable = ({ tokens }: TokenTableProps) => {
               <td className="px-3 py-2 text-muted-foreground">#{token.rank}</td>
               <td className="px-3 py-2">
                 <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-0.5">
-                    <div className="w-[18px] h-[18px] rounded bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-[8px] text-foreground font-bold shrink-0">S</div>
-                    <div className="w-[18px] h-[18px] rounded bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-[8px] text-foreground font-bold shrink-0">R</div>
-                  </div>
+                  <TokenLogo token={token} />
                   <div className="flex items-center gap-1.5">
                     <span className="font-semibold text-foreground">{token.name}</span>
                     <span className="text-muted-foreground text-[12px]">/SOL</span>
                     <span className="text-muted-foreground text-[12px]">{token.ticker}</span>
+                    {token.exchangeName && (
+                      <span className="text-[10px] px-1 py-0.5 rounded bg-secondary text-muted-foreground">{token.exchangeName}</span>
+                    )}
                     {token.boosts && (
                       <span className="flex items-center gap-0.5 text-[11px] text-profit font-medium">
                         <Zap className="w-3 h-3" />
