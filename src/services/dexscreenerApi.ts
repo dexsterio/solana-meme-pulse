@@ -34,6 +34,8 @@ function mapPairToToken(pair: any, i: number): Token {
     change1h: pair.priceChange?.h1 ?? 0,
     change6h: pair.priceChange?.h6 ?? 0,
     change24h: pair.priceChange?.h24 ?? 0,
+    change7d: 0,
+    change30d: 0,
     liquidity: pair.liquidity?.usd ?? 0,
     mcap: pair.marketCap ?? pair.fdv ?? 0,
     fdv: pair.fdv ?? 0,

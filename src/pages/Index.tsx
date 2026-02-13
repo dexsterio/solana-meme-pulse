@@ -5,9 +5,10 @@ import TokenFilters, { TimeFilter, Category, RankBy, ViewMode } from '@/componen
 import TokenTable from '@/components/TokenTable';
 import TokenGrid from '@/components/TokenGrid';
 import TrendingBar from '@/components/TrendingBar';
+import MarketSentimentBar from '@/components/MarketSentimentBar';
 import { useTokens } from '@/hooks/useTokens';
 import { usePumpPortalNewTokens } from '@/hooks/usePumpPortalNewTokens';
-import { fetchCryptoMarket } from '@/services/coingeckoApi';
+import { fetchCryptoMarket, fetchCryptoGlobal } from '@/services/coingeckoApi';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const Index = () => {
@@ -26,6 +27,13 @@ const Index = () => {
     queryFn: () => fetchCryptoMarket(3),
     enabled: isCryptoMarket,
     staleTime: 60_000,
+  });
+
+  const { data: globalData, isLoading: globalLoading } = useQuery({
+    queryKey: ['cryptoGlobal'],
+    queryFn: fetchCryptoGlobal,
+    enabled: isCryptoMarket,
+    staleTime: 120_000,
   });
 
   // Determine data source
@@ -87,6 +95,7 @@ const Index = () => {
           setViewMode={setViewMode}
         />
       )}
+      {isCryptoMarket && <MarketSentimentBar data={globalData} isLoading={globalLoading} />}
       <div className="flex-1 overflow-auto">
         {!isCryptoMarket && isNewCategory && wsConnected && tokens.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-40 gap-2">

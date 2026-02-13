@@ -47,7 +47,7 @@ const StatsBar = ({ tokens = [], onSearch, isCryptoMarket = false, onCryptoMarke
         }`}
       >
         <Globe className="w-3.5 h-3.5" />
-        {isCryptoMarket ? 'MemeMarket' : 'CryptoMarket'}
+        {isCryptoMarket ? 'Meme Zone' : 'Market View'}
       </button>
     </div>
   );

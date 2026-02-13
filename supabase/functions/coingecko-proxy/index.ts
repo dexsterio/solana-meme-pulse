@@ -15,7 +15,7 @@ serve(async (req) => {
     const page = url.searchParams.get('page') || '1';
     const perPage = url.searchParams.get('per_page') || '100';
 
-    const apiUrl = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=${perPage}&page=${page}&sparkline=false&price_change_percentage=1h,24h`;
+    const apiUrl = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=${perPage}&page=${page}&sparkline=false&price_change_percentage=1h,24h,7d,30d`;
 
     const response = await fetch(apiUrl, {
       headers: { 'Accept': 'application/json' },

@@ -112,6 +112,8 @@ function mapPoolToToken(pool: any, i: number, idPrefix: string): Token {
     change1h: 0,
     change6h: 0,
     change24h: pool.variation24h ?? 0,
+    change7d: 0,
+    change30d: 0,
     liquidity: 0,
     mcap: 0,
     fdv: 0,

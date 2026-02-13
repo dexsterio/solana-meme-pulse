@@ -133,8 +133,8 @@ const TokenTable = ({ tokens, isCryptoMarket = false }: TokenTableProps) => {
                 <>
                   <ChangeCell value={token.change1h} />
                   <ChangeCell value={token.change24h} />
-                  <ChangeCell value={token.change6h} />
-                  <ChangeCell value={token.change5m} />
+                  <ChangeCell value={token.change7d} />
+                  <ChangeCell value={token.change30d} />
                 </>
               ) : (
                 <>
