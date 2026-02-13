@@ -3,6 +3,7 @@ import { Token, formatPrice, formatNumber } from '@/data/mockTokens';
 import { Zap, Info } from 'lucide-react';
 import pumpfunLogo from '@/assets/pumpfun-logo.png';
 import bonkLogo from '@/assets/bonk-logo.png';
+import raydiumLogo from '@/assets/raydium-logo.png';
 
 interface TokenTableProps {
   tokens: Token[];
@@ -86,6 +87,8 @@ const TokenTable = ({ tokens }: TokenTableProps) => {
                       <img src={pumpfunLogo} alt="pump.fun" className="w-4 h-4 shrink-0" />
                     ) : (token.exchangeName === 'letsbonk.fun' || token.exchangeName === 'bonk') ? (
                       <img src={bonkLogo} alt="letsbonk.fun" className="w-4 h-4 shrink-0" />
+                    ) : (token.exchangeName?.toLowerCase().includes('raydium')) ? (
+                      <img src={raydiumLogo} alt="Raydium" className="w-4 h-4 shrink-0" />
                     ) : token.exchangeName ? (
                       <span className="text-[10px] px-1 py-0.5 rounded bg-secondary text-muted-foreground">{token.exchangeName}</span>
                     ) : null}
