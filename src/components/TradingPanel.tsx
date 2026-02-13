@@ -99,7 +99,7 @@ const TradingPanel = ({ token, initialMode, onBack }: TradingPanelProps) => {
             <span className="text-xs">1</span>
           </div>
           <div className="flex items-center gap-1 text-muted-foreground">
-            <SolanaIcon size={14} />
+            <SolanaIcon size={10} />
             <span className="text-xs">0</span>
           </div>
         </div>
