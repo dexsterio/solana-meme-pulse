@@ -31,11 +31,11 @@ const TradingPanel = ({ token, initialMode, onBack }: TradingPanelProps) => {
   const presetAmounts = ['0.01', '0.1', '1', '10'];
   const contractAddress = token.id || '5T17aqgJ8cM39SNuVBu2LK2cq5MWUpZxcQnnuwNjpump';
   const devAddress = '8F42B1C35D9E4A7BB2E19C3F4D5A6E7B';
-  const truncateCA = (addr: string) => addr.length > 20 ? `${addr.slice(0, 16)}...${addr.slice(-4)}` : addr;
-  const truncateDA = (addr: string) => addr.length > 12 ? `${addr.slice(0, 6)}...${addr.slice(-4)}` : addr;
+  const truncateCA = (addr: string) => addr.length > 10 ? `${addr.slice(0, 4)}...${addr.slice(-4)}` : addr;
+  const truncateDA = (addr: string) => addr.length > 10 ? `${addr.slice(0, 4)}...${addr.slice(-4)}` : addr;
 
   return (
-    <div className="flex flex-col h-full bg-card rounded-lg border border-border overflow-y-auto">
+    <div className="flex flex-col h-full bg-card rounded-lg border border-border overflow-y-auto overflow-x-hidden">
       {/* 5m Stats row */}
       <div className="grid grid-cols-4 gap-0 border-b border-border">
         {[
@@ -44,9 +44,9 @@ const TradingPanel = ({ token, initialMode, onBack }: TradingPanelProps) => {
           { label: 'Sells', value: formatCompact(sells), color: 'text-loss' },
           { label: 'Net Vol', value: formatCompact(netVol), color: netVol >= 0 ? 'text-profit' : 'text-loss' },
         ].map(({ label, value, color }) => (
-          <div key={label} className="text-center py-2.5 px-1">
-            <div className="text-xs text-muted-foreground">{label}</div>
-            <div className={`text-sm font-bold ${color || 'text-foreground'}`}>{value}</div>
+          <div key={label} className="text-center py-2.5 px-1 min-w-0">
+            <div className="text-xs text-muted-foreground truncate">{label}</div>
+            <div className={`text-sm font-bold truncate ${color || 'text-foreground'}`}>{value}</div>
           </div>
         ))}
       </div>
@@ -140,7 +140,7 @@ const TradingPanel = ({ token, initialMode, onBack }: TradingPanelProps) => {
 
       {/* Settings row */}
       <div className="px-3 py-2.5 border-b border-border">
-        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+        <div className="flex items-center gap-3 text-xs text-muted-foreground">
           <span className="flex items-center gap-1">⚙️ <span className="text-foreground font-medium">20%</span></span>
           <span className="flex items-center gap-1">⚠️ <span className="text-foreground font-medium">0.001</span></span>
           <span className="flex items-center gap-1">💰 <span className="text-foreground font-medium">0.01</span></span>
@@ -165,7 +165,7 @@ const TradingPanel = ({ token, initialMode, onBack }: TradingPanelProps) => {
               : 'bg-loss text-background hover:bg-loss/90'
           }`}
         >
-          {mode === 'buy' ? `Buy ${token.name}` : `Sell ${token.name}`}
+          <span className="block truncate">{mode === 'buy' ? `Buy ${token.name}` : `Sell ${token.name}`}</span>
         </button>
       </div>
 
@@ -180,10 +180,10 @@ const TradingPanel = ({ token, initialMode, onBack }: TradingPanelProps) => {
           ].map(({ label, value, color, isPnl }) => (
             <div key={label}>
               <div className="text-xs text-muted-foreground mb-0.5">{label}</div>
-              <div className={`text-sm font-bold ${color} flex items-center justify-center gap-0.5`}>
-                {!isPnl && <SolanaIcon size={12} />}
-                {value}
-                {isPnl && <RefreshCw className="w-3 h-3 text-muted-foreground ml-0.5" />}
+              <div className={`text-xs font-bold ${color} flex items-center justify-center gap-0.5 min-w-0 truncate`}>
+                {!isPnl && <SolanaIcon size={10} />}
+                <span className="truncate">{value}</span>
+                {isPnl && <RefreshCw className="w-2.5 h-2.5 text-muted-foreground ml-0.5 shrink-0" />}
               </div>
             </div>
           ))}
@@ -244,68 +244,68 @@ const TradingPanel = ({ token, initialMode, onBack }: TradingPanelProps) => {
 
             {/* Holders / Pro Traders / Dex Paid - clean row, no bg boxes */}
             <div className="grid grid-cols-3 gap-2 py-1">
-              <div className="text-center">
+              <div className="text-center min-w-0">
                 <div className="flex items-center justify-center gap-1 text-foreground mb-0.5">
-                  <Users className="w-4 h-4" />
-                  <span className="text-base font-bold">1,245</span>
+                  <Users className="w-3.5 h-3.5 shrink-0" />
+                  <span className="text-sm font-bold truncate">1,245</span>
                 </div>
                 <div className="text-xs text-muted-foreground">Holders</div>
               </div>
-              <div className="text-center">
+              <div className="text-center min-w-0">
                 <div className="flex items-center justify-center gap-1 text-foreground mb-0.5">
-                  <BarChart3 className="w-4 h-4" />
-                  <span className="text-base font-bold">12</span>
+                  <BarChart3 className="w-3.5 h-3.5 shrink-0" />
+                  <span className="text-sm font-bold truncate">12</span>
                 </div>
                 <div className="text-xs text-muted-foreground">Pro Traders</div>
               </div>
-              <div className="text-center">
+              <div className="text-center min-w-0">
                 <div className="flex items-center justify-center gap-1 text-loss mb-0.5">
-                  <CircleDot className="w-4 h-4" />
-                  <span className="text-base font-bold">Unpaid</span>
+                  <CircleDot className="w-3.5 h-3.5 shrink-0" />
+                  <span className="text-sm font-bold truncate">Unpaid</span>
                 </div>
                 <div className="text-xs text-muted-foreground">Dex Paid</div>
               </div>
             </div>
 
             {/* CA row - bigger, specific icon */}
-            <div className="flex items-center justify-between py-2.5 border-t border-border">
-              <div className="flex items-center gap-2">
-                <FileText className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground font-medium">CA:</span>
-                <span className="text-sm text-foreground font-mono">{truncateCA(contractAddress)}</span>
+            <div className="flex items-center justify-between py-2.5 border-t border-border min-w-0">
+              <div className="flex items-center gap-1.5 min-w-0">
+                <FileText className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                <span className="text-xs text-muted-foreground font-medium shrink-0">CA:</span>
+                <span className="text-xs text-foreground font-mono truncate">{truncateCA(contractAddress)}</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Copy className="w-4 h-4 text-muted-foreground cursor-pointer hover:text-foreground transition-colors" />
-                <ExternalLink className="w-4 h-4 text-muted-foreground cursor-pointer hover:text-foreground transition-colors" />
+              <div className="flex items-center gap-1.5 shrink-0">
+                <Copy className="w-3.5 h-3.5 text-muted-foreground cursor-pointer hover:text-foreground transition-colors" />
+                <ExternalLink className="w-3.5 h-3.5 text-muted-foreground cursor-pointer hover:text-foreground transition-colors" />
               </div>
             </div>
 
             {/* DA row - wallet icon, bigger */}
-            <div className="flex items-center justify-between py-2.5 border-t border-border">
-              <div className="flex items-center gap-2">
-                <CircleUser className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground font-medium">DA:</span>
-                <span className="text-sm text-foreground font-mono">{truncateDA(devAddress)}</span>
+            <div className="flex items-center justify-between py-2.5 border-t border-border min-w-0">
+              <div className="flex items-center gap-1.5 min-w-0">
+                <CircleUser className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                <span className="text-xs text-muted-foreground font-medium shrink-0">DA:</span>
+                <span className="text-xs text-foreground font-mono truncate">{truncateDA(devAddress)}</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Search className="w-4 h-4 text-muted-foreground cursor-pointer hover:text-foreground transition-colors" />
-                <ExternalLink className="w-4 h-4 text-muted-foreground cursor-pointer hover:text-foreground transition-colors" />
+              <div className="flex items-center gap-1.5 shrink-0">
+                <Search className="w-3.5 h-3.5 text-muted-foreground cursor-pointer hover:text-foreground transition-colors" />
+                <ExternalLink className="w-3.5 h-3.5 text-muted-foreground cursor-pointer hover:text-foreground transition-colors" />
               </div>
             </div>
 
             {/* Exchange info row */}
-            <div className="flex items-center justify-between py-2.5 border-t border-border">
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-foreground font-medium">{token.exchangeName || 'Raydium'}</span>
+            <div className="flex items-center justify-between py-2.5 border-t border-border min-w-0">
+              <div className="flex items-center gap-1.5 min-w-0">
+                <span className="text-xs text-foreground font-medium truncate">{token.exchangeName || 'Raydium'}</span>
               </div>
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-1">
-                  <SolanaIcon size={14} />
-                  <span className="text-sm text-foreground font-mono">{token.priceSOL?.toFixed(8) || '0.00000001'}</span>
+              <div className="flex items-center gap-2 shrink-0">
+                <div className="flex items-center gap-0.5">
+                  <SolanaIcon size={12} />
+                  <span className="text-xs text-foreground font-mono">{token.priceSOL?.toFixed(6) || '0.000001'}</span>
                 </div>
-                <div className="flex items-center gap-1 text-muted-foreground">
-                  <Clock className="w-3.5 h-3.5" />
-                  <span className="text-sm">{token.age || '2h'}</span>
+                <div className="flex items-center gap-0.5 text-muted-foreground">
+                  <Clock className="w-3 h-3" />
+                  <span className="text-xs">{token.age || '2h'}</span>
                 </div>
               </div>
             </div>
