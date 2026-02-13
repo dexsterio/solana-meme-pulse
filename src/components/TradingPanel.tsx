@@ -151,12 +151,12 @@ const TradingPanel = ({ token, initialMode, onBack }: TradingPanelProps) => {
       </div>
 
       {/* Advanced Trading Strategy */}
-      <div className="px-3 py-2.5 border-b border-border">
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input type="checkbox" className="rounded border-border bg-secondary accent-primary w-4 h-4" />
-          <span className="text-sm text-muted-foreground">Advanced Trading Strategy</span>
-        </label>
-      </div>
+      
+
+
+
+
+
 
       {/* Big action button */}
       <div className="px-3 py-3 border-b border-border">
