@@ -18,7 +18,13 @@ const TokenGrid = ({ tokens }: TokenGridProps) => {
           className="bg-card border border-border rounded-lg p-4 cursor-pointer hover:border-primary/50 transition-all hover:bg-accent/30"
         >
           <div className="flex items-center gap-3 mb-3">
-            <span className="text-4xl">{token.logo}</span>
+            {token.logoUrl ? (
+              <img src={token.logoUrl} alt={token.ticker} className="w-10 h-10 rounded-full" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+            ) : (
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary/60 to-accent flex items-center justify-center text-sm font-bold text-foreground">
+                {token.ticker?.charAt(0) || '?'}
+              </div>
+            )}
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="font-semibold text-foreground text-sm">{token.name}</span>
@@ -61,7 +67,6 @@ const TokenGrid = ({ tokens }: TokenGridProps) => {
               </div>
             </div>
 
-            {/* Mini change bars */}
             <div className="flex gap-1 pt-1">
               {[
                 { label: '5m', val: token.change5m },

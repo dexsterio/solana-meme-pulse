@@ -6,19 +6,23 @@ interface TokenInfoPanelProps {
 }
 
 const TokenInfoPanel = ({ token }: TokenInfoPanelProps) => {
-  const buys = Math.round(token.txns * 0.55);
-  const sells = token.txns - buys;
-  const buyVolume = token.volume * 0.58;
-  const sellVolume = token.volume - buyVolume;
-  const buyers = Math.round(token.makers * 0.52);
-  const sellers = token.makers - buyers;
+  const buys = token.buys24h ?? Math.round(token.txns * 0.55);
+  const sells = token.sells24h ?? (token.txns - buys);
+  const buyVolume = token.buyVolume24h ?? token.volume * 0.58;
+  const sellVolume = token.sellVolume24h ?? (token.volume - buyVolume);
+  const buyers = Math.round(buys * 0.6);
+  const sellers = Math.round(sells * 0.6);
 
   return (
     <div className="flex flex-col h-full bg-card rounded-lg border border-border overflow-y-auto text-xs">
       {/* Token name row */}
       <div className="flex items-center justify-between px-4 py-2.5 border-b border-border">
         <div className="flex items-center gap-2">
-          <span className="text-2xl">{token.logo}</span>
+          {token.logoUrl ? (
+            <img src={token.logoUrl} alt={token.name} className="w-7 h-7 rounded-full" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+          ) : (
+            <span className="text-2xl">🪙</span>
+          )}
           <span className="font-bold text-foreground text-sm">{token.name}</span>
         </div>
         <div className="flex items-center gap-1.5">
@@ -34,17 +38,15 @@ const TokenInfoPanel = ({ token }: TokenInfoPanelProps) => {
           <span className="text-muted-foreground">/</span>
           <span className="text-muted-foreground">SOL</span>
           {token.boosts && (
-            <>
-              <span className="text-yellow-500 text-[10px] flex items-center gap-0.5">
-                <Zap className="w-3 h-3" /> {token.boosts}
-              </span>
-            </>
+            <span className="text-yellow-500 text-[10px] flex items-center gap-0.5">
+              <Zap className="w-3 h-3" /> {token.boosts}
+            </span>
           )}
         </div>
         <div className="flex items-center justify-center gap-2 mt-1 text-[10px] text-muted-foreground">
           <span className="flex items-center gap-1">🟣 Solana</span>
           <span>&gt;</span>
-          <span>Raydium</span>
+          <span>{token.exchangeName || 'Raydium'}</span>
         </div>
       </div>
 
@@ -52,17 +54,17 @@ const TokenInfoPanel = ({ token }: TokenInfoPanelProps) => {
       <div className="px-4 py-2 border-b border-border">
         <div className="flex gap-2">
           {token.twitter && (
-            <a href={token.twitter} className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md bg-secondary text-foreground hover:bg-accent transition-colors text-xs font-medium">
+            <a href={token.twitter} target="_blank" rel="noopener noreferrer" className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md bg-secondary text-foreground hover:bg-accent transition-colors text-xs font-medium">
               <Twitter className="w-3.5 h-3.5" /> Twitter
             </a>
           )}
           {token.telegram && (
-            <a href={token.telegram} className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md bg-secondary text-foreground hover:bg-accent transition-colors text-xs font-medium">
+            <a href={token.telegram} target="_blank" rel="noopener noreferrer" className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md bg-secondary text-foreground hover:bg-accent transition-colors text-xs font-medium">
               <MessageCircle className="w-3.5 h-3.5" /> Telegram
             </a>
           )}
-          {!token.twitter && !token.telegram && token.website && (
-            <a href={token.website} className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md bg-secondary text-foreground hover:bg-accent transition-colors text-xs font-medium">
+          {token.website && (
+            <a href={token.website} target="_blank" rel="noopener noreferrer" className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md bg-secondary text-foreground hover:bg-accent transition-colors text-xs font-medium">
               <Globe className="w-3.5 h-3.5" /> Website
             </a>
           )}
@@ -119,7 +121,7 @@ const TokenInfoPanel = ({ token }: TokenInfoPanelProps) => {
             >
               <div className="text-[10px] text-muted-foreground mb-1">{label}</div>
               <div className={`text-xs font-bold font-mono ${val >= 0 ? 'text-profit' : 'text-loss'}`}>
-                {val >= 0 ? '' : ''}{val.toFixed(2)}%
+                {val.toFixed(2)}%
               </div>
             </div>
           ))}
@@ -128,7 +130,6 @@ const TokenInfoPanel = ({ token }: TokenInfoPanelProps) => {
 
       {/* TXNS / BUYS / SELLS row */}
       <div className="px-4 py-3 border-b border-border space-y-3">
-        {/* TXNS row */}
         <div className="grid grid-cols-3 gap-2 items-end">
           <div>
             <div className="text-[10px] text-muted-foreground uppercase">TXNS</div>
@@ -146,7 +147,6 @@ const TokenInfoPanel = ({ token }: TokenInfoPanelProps) => {
           </div>
         </div>
 
-        {/* VOLUME row */}
         <div className="grid grid-cols-3 gap-2 items-end">
           <div>
             <div className="text-[10px] text-muted-foreground uppercase">VOLUME</div>
@@ -164,7 +164,6 @@ const TokenInfoPanel = ({ token }: TokenInfoPanelProps) => {
           </div>
         </div>
 
-        {/* MAKERS row */}
         <div className="grid grid-cols-3 gap-2 items-end">
           <div>
             <div className="text-[10px] text-muted-foreground uppercase">MAKERS</div>
@@ -191,7 +190,6 @@ const TokenInfoPanel = ({ token }: TokenInfoPanelProps) => {
             <Bell className="w-3.5 h-3.5" /> Alerts
           </button>
         </div>
-        {/* Buy / Sell */}
         <div className="flex gap-2">
           <button className="flex-1 flex items-center justify-center gap-1.5 px-3 py-3 text-sm font-semibold bg-profit/20 text-profit rounded-md border border-profit/30 hover:bg-profit/30 transition-colors">
             🟢 Buy

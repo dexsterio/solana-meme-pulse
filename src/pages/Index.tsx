@@ -5,6 +5,7 @@ import TokenTable from '@/components/TokenTable';
 import TokenGrid from '@/components/TokenGrid';
 import TrendingBar from '@/components/TrendingBar';
 import { useTokens } from '@/hooks/useTokens';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const Index = () => {
   const [timeFilter, setTimeFilter] = useState<TimeFilter>('24h');
@@ -16,15 +17,6 @@ const Index = () => {
 
   const sortedTokens = useMemo(() => {
     let list = [...tokens];
-
-    if (category === 'gainers') {
-      list = list.filter((t) => t.change24h > 0);
-    } else if (category === 'new') {
-      list = list.filter((t) => {
-        const age = t.age;
-        return age.includes('m') || age.includes('h');
-      });
-    }
 
     switch (rankBy) {
       case 'volume':
@@ -44,7 +36,7 @@ const Index = () => {
     }
 
     return list;
-  }, [tokens, category, rankBy]);
+  }, [tokens, rankBy]);
 
   return (
     <div className="flex flex-col h-screen bg-background">
@@ -62,12 +54,29 @@ const Index = () => {
       />
       <div className="flex-1 overflow-auto">
         {isLoading && tokens.length === 0 ? (
-          <div className="flex items-center justify-center h-40 text-muted-foreground text-sm">
-            Loading live data...
+          <div className="space-y-0">
+            {Array.from({ length: 15 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-3 px-3 py-2.5 border-b border-border/30">
+                <Skeleton className="w-6 h-4" />
+                <Skeleton className="w-6 h-6 rounded-full" />
+                <Skeleton className="w-24 h-4" />
+                <div className="flex-1" />
+                <Skeleton className="w-16 h-4" />
+                <Skeleton className="w-12 h-4" />
+                <Skeleton className="w-16 h-4" />
+                <Skeleton className="w-16 h-4" />
+                <Skeleton className="w-12 h-4" />
+                <Skeleton className="w-12 h-4" />
+                <Skeleton className="w-12 h-4" />
+                <Skeleton className="w-12 h-4" />
+                <Skeleton className="w-16 h-4" />
+                <Skeleton className="w-16 h-4" />
+              </div>
+            ))}
           </div>
         ) : isError && tokens.length === 0 ? (
           <div className="flex items-center justify-center h-40 text-loss text-sm">
-            Failed to load data. Showing mock data.
+            Failed to load data from DexTools API. Check console for details.
           </div>
         ) : viewMode === 'list' ? (
           <TokenTable tokens={sortedTokens} />

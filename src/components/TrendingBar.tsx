@@ -27,7 +27,11 @@ const TrendingBar = ({ tokens = [] }: TrendingBarProps) => {
           className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-secondary hover:bg-accent transition-colors shrink-0"
         >
           <span className="text-[11px] text-muted-foreground">#{i + 1}</span>
-          <span className="text-[14px]">{token.logo}</span>
+          {token.logoUrl ? (
+            <img src={token.logoUrl} alt={token.ticker} className="w-4 h-4 rounded-full" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+          ) : (
+            <span className="text-[14px]">🪙</span>
+          )}
           <span className="text-[13px] font-medium text-foreground">{token.ticker}</span>
           <span className={`text-[11px] ${token.change24h >= 0 ? 'text-profit' : 'text-loss'}`}>
             {token.change24h >= 0 ? '+' : ''}{token.change24h.toFixed(0)}%
