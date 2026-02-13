@@ -1,4 +1,4 @@
-import { Info } from 'lucide-react';
+import { InfoOctagonIcon } from '@/components/icons/TablerIcons';
 import {
   Tooltip,
   TooltipContent,
@@ -17,7 +17,7 @@ const InfoTooltip = ({ text, className = '', iconSize = 12 }: InfoTooltipProps) 
     <Tooltip>
       <TooltipTrigger asChild>
         <span className={`inline-flex items-center cursor-help ${className}`}>
-          <Info className="text-muted-foreground/50 hover:text-muted-foreground transition-colors" style={{ width: iconSize, height: iconSize }} />
+          <InfoOctagonIcon className="hover:opacity-80 transition-opacity" style={{ width: iconSize, height: iconSize }} />
         </span>
       </TooltipTrigger>
       <TooltipContent side="top" className="max-w-[250px] text-[12px] leading-relaxed">
