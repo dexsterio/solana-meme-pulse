@@ -20,21 +20,30 @@ function getTTLSeconds(path: string): number {
   return 60;
 }
 
-// ── Rate limiter: simple in-memory tracker (best-effort, resets on cold start) ──
-let lastDexToolsRequest = 0;
-const MIN_GAP_MS = 2200;
+// ── Fetch with exponential backoff on 429 ──
+async function fetchWithRetry(url: string, apiKey: string, maxRetries = 3): Promise<{ body: string; status: number }> {
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    const response = await fetch(url, {
+      headers: { 'X-API-Key': apiKey, 'accept': 'application/json' },
+    });
 
-async function throttledFetch(url: string, apiKey: string): Promise<{ body: string; status: number }> {
-  const now = Date.now();
-  const wait = MIN_GAP_MS - (now - lastDexToolsRequest);
-  if (wait > 0) await new Promise(r => setTimeout(r, wait));
-  lastDexToolsRequest = Date.now();
+    if (response.status === 429) {
+      if (attempt < maxRetries - 1) {
+        const retryAfter = response.headers.get('Retry-After');
+        const waitMs = retryAfter
+          ? parseInt(retryAfter, 10) * 1000
+          : Math.pow(2, attempt + 1) * 2000 + Math.random() * 1000;
+        console.log(`429 on attempt ${attempt + 1}, waiting ${Math.round(waitMs / 1000)}s...`);
+        await new Promise(r => setTimeout(r, waitMs));
+        continue;
+      }
+    }
 
-  const response = await fetch(url, {
-    headers: { 'X-API-Key': apiKey, 'accept': 'application/json' },
-  });
-  const body = await response.text();
-  return { body, status: response.status };
+    const body = await response.text();
+    return { body, status: response.status };
+  }
+
+  return { body: JSON.stringify({ message: 'Max retries exceeded' }), status: 429 };
 }
 
 Deno.serve(async (req) => {
@@ -120,7 +129,7 @@ Deno.serve(async (req) => {
     const targetUrl = `${DEXTOOLS_BASE}${path}`;
     console.log(`CACHE MISS: ${path} -> fetching from DexTools`);
 
-    const { body, status } = await throttledFetch(targetUrl, apiKey);
+    const { body, status } = await fetchWithRetry(targetUrl, apiKey);
 
     if (status >= 200 && status < 300) {
       // Success → cache it (overwrites any previous entry including 429s)
