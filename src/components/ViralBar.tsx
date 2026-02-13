@@ -95,10 +95,10 @@ const ViralBar = ({ clusters, selectedCluster, onSelect, onClear, viralSortBy = 
           </div>
           <button
             onClick={onClear}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[12px] text-muted-foreground hover:text-foreground hover:bg-accent transition-colors border border-border/30"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12px] font-medium bg-secondary hover:bg-accent text-foreground transition-colors border border-border/40"
           >
-            <X className="w-3.5 h-3.5" />
-            <span>Back to all</span>
+            <X className="w-4 h-4" />
+            <span>Back</span>
           </button>
         </div>
       )}
