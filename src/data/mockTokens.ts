@@ -33,6 +33,7 @@ export interface Token {
   sellVolume24h?: number;
   headerImage?: string;
   description?: string;
+  liquidityLocked?: boolean;
 }
 
 export interface Transaction {
