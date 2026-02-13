@@ -1,6 +1,7 @@
 import { ViralCluster } from '@/services/viralDetectionService';
 import { formatNumber } from '@/data/mockTokens';
-import { Flame, X, Crown, TrendingUp, Clock, BarChart3 } from 'lucide-react';
+import { X, Clock, BarChart3 } from 'lucide-react';
+import { FlameFilledIcon, CrownFilledIcon, CaretUpFilledIcon } from '@/components/icons/TablerIcons';
 import { ViralSortBy } from '@/hooks/useViralClusters';
 import InfoTooltip from '@/components/InfoTooltip';
 
@@ -15,7 +16,7 @@ interface ViralBarProps {
 
 const sortOptions: { value: ViralSortBy; label: string; icon: React.ReactNode }[] = [
   { value: 'created', label: 'First Created', icon: <Clock className="w-3.5 h-3.5" /> },
-  { value: 'mcap', label: 'Highest MCap', icon: <TrendingUp className="w-3.5 h-3.5" /> },
+  { value: 'mcap', label: 'Highest MCap', icon: <CaretUpFilledIcon className="w-3.5 h-3.5" /> },
   { value: 'volume', label: 'Highest Volume', icon: <BarChart3 className="w-3.5 h-3.5" /> },
 ];
 
@@ -29,7 +30,7 @@ const ViralBar = ({ clusters, selectedCluster, onSelect, onClear, viralSortBy = 
       {/* Cluster pills row */}
       <div className="flex items-center gap-3 px-4 py-2.5 overflow-x-auto scrollbar-hide">
         <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground uppercase tracking-wider shrink-0 pr-1">
-          <Flame className="w-4 h-4 text-orange-400" />
+          <FlameFilledIcon className="w-4 h-4" />
           <span className="font-semibold">Viral Memes</span>
           <InfoTooltip text="Meme-tokens som just nu går viralt — troligtvis uppmärksammade av en influencer eller trendar på sociala medier." />
         </div>
@@ -76,7 +77,7 @@ const ViralBar = ({ clusters, selectedCluster, onSelect, onClear, viralSortBy = 
             </button>
             <div className="w-px h-5 bg-border/40" />
             <div className="flex items-center gap-1.5">
-              <Crown className="w-4 h-4 text-yellow-400" />
+              <CrownFilledIcon className="w-4 h-4" />
               <span className="text-foreground font-bold text-sm">{selected.displayName}</span>
             </div>
             <span className="text-muted-foreground text-[13px]">

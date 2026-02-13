@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { Token, formatPrice, formatNumber } from '@/data/mockTokens';
-import { Zap, Crown, TrendingUp } from 'lucide-react';
+import { Zap } from 'lucide-react';
+import { CrownFilledIcon, CaretUpFilledIcon } from '@/components/icons/TablerIcons';
 import InfoTooltip from '@/components/InfoTooltip';
 import pumpfunLogo from '@/assets/pumpfun-logo.png';
 import bonkLogo from '@/assets/bonk-logo.png';
@@ -50,13 +51,13 @@ const ChangeCell = ({ value }: { value: number }) => (
 
 const OgBadge = () => (
   <span className="inline-flex items-center gap-0.5 text-[10px] text-yellow-400 font-bold shrink-0 ml-1.5" title="The first token created with this name">
-    <Crown className="w-3 h-3" /> OG
+    <CrownFilledIcon className="w-3 h-3" /> OG
   </span>
 );
 
 const TopBadge = () => (
   <span className="inline-flex items-center gap-0.5 text-[10px] text-emerald-400 font-bold shrink-0 ml-1.5" title="The token with the highest market cap in this cluster">
-    <TrendingUp className="w-3 h-3" /> TOP
+    <CaretUpFilledIcon className="w-3 h-3" /> TOP
   </span>
 );
 
@@ -170,11 +171,11 @@ const TokenTable = ({ tokens, isCryptoMarket = false, ogTokenId, topTokenId, sho
                 <td className="px-3 py-2 text-right">
                   {ogTokenId === token.id ? (
                     <span className="inline-flex items-center gap-1 text-[10px] text-yellow-400 font-bold">
-                      <Crown className="w-3 h-3" /> First Created
+                      <CrownFilledIcon className="w-3 h-3" /> First Created
                     </span>
                   ) : topTokenId === token.id ? (
                     <span className="inline-flex items-center gap-1 text-[10px] text-emerald-400 font-bold">
-                      <TrendingUp className="w-3 h-3" /> Highest MCap
+                      <CaretUpFilledIcon className="w-3 h-3" /> Highest MCap
                     </span>
                   ) : (
                     <span className="text-[10px] text-muted-foreground">Clone</span>

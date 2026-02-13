@@ -1,4 +1,5 @@
-import { Search, Globe } from 'lucide-react';
+import { Search } from 'lucide-react';
+import { WorldIcon } from '@/components/icons/TablerIcons';
 import { Token, formatNumber } from '@/data/mockTokens';
 import InfoTooltip from '@/components/InfoTooltip';
 
@@ -51,7 +52,7 @@ const StatsBar = ({ tokens = [], onSearch, searchQuery = '', onSearchChange, isC
             : 'bg-secondary text-muted-foreground border-border hover:text-foreground'
         }`}
       >
-        <Globe className="w-3.5 h-3.5" />
+        <WorldIcon className="w-3.5 h-3.5" />
         {isCryptoMarket ? 'Meme Zone' : 'Market View'}
       </button>
     </div>

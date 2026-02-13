@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Filter, LayoutList, LayoutGrid, Clock, Flame, Trophy, TrendingUp, Sparkles, User, Rocket, Megaphone, Settings, ChevronDown } from 'lucide-react';
+import { Filter, LayoutList, LayoutGrid, Clock, Trophy, TrendingUp, Sparkles, User, Rocket, Megaphone, Settings, ChevronDown } from 'lucide-react';
+import { FlameFilledIcon } from '@/components/icons/TablerIcons';
 import InfoTooltip from '@/components/InfoTooltip';
 
 export type TimeFilter = '5m' | '1h' | '6h' | '24h';
@@ -55,7 +56,7 @@ const TokenFilters = ({
             'bg-secondary text-muted-foreground hover:text-foreground'}`
             }>
 
-            <Flame className="w-3.5 h-3.5" />
+            <FlameFilledIcon className="w-3.5 h-3.5" />
             Trending
             <InfoTooltip text="Tokens with the most activity and attention right now." iconSize={11} />
           </button>
