@@ -4,6 +4,8 @@ import { Zap, Info } from 'lucide-react';
 import pumpfunLogo from '@/assets/pumpfun-logo.png';
 import bonkLogo from '@/assets/bonk-logo.png';
 import raydiumLogo from '@/assets/raydium-logo.png';
+import meteoraLogo from '@/assets/meteora-logo.png';
+import orcaLogo from '@/assets/orca-logo.png';
 
 interface TokenTableProps {
   tokens: Token[];
@@ -89,6 +91,10 @@ const TokenTable = ({ tokens }: TokenTableProps) => {
                       <img src={bonkLogo} alt="letsbonk.fun" className="w-4 h-4 shrink-0" />
                     ) : (token.exchangeName?.toLowerCase().includes('raydium')) ? (
                       <img src={raydiumLogo} alt="Raydium" className="w-4 h-4 shrink-0" />
+                    ) : (token.exchangeName?.toLowerCase().includes('meteora')) ? (
+                      <img src={meteoraLogo} alt="Meteora" className="w-4 h-4 shrink-0" />
+                    ) : (token.exchangeName?.toLowerCase().includes('orca')) ? (
+                      <img src={orcaLogo} alt="Orca" className="w-4 h-4 shrink-0" />
                     ) : token.exchangeName ? (
                       <span className="text-[10px] px-1 py-0.5 rounded bg-secondary text-muted-foreground">{token.exchangeName}</span>
                     ) : null}
