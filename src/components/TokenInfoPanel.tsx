@@ -1,9 +1,10 @@
 import { Token, formatPrice, formatNumber, formatCompact } from '@/data/mockTokens';
 import pumpfunLogo from '@/assets/pumpfun-logo.png';
-import { Globe, Star, Bell, Zap, Copy, ChevronDown, ChevronUp, Info } from 'lucide-react';
+import { Globe, Star, Bell, Zap, Copy, ChevronDown, ChevronUp } from 'lucide-react';
 import SolanaIcon from '@/components/SolanaIcon';
 import { toast } from 'sonner';
 import { useState } from 'react';
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 
 const XIcon = ({ className = '' }: { className?: string }) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -32,6 +33,12 @@ function formatPercent(val: number): string {
   if (abs >= 100) return prefix + Math.round(val) + '%';
   if (abs >= 10) return prefix + val.toFixed(1) + '%';
   return prefix + val.toFixed(2) + '%';
+}
+
+function formatSOLPrice(val: number): string {
+  if (val >= 1) return val.toFixed(4);
+  if (val >= 0.001) return val.toFixed(6);
+  return val.toFixed(8);
 }
 
 function RatioBar({ buyValue, sellValue }: { buyValue: number; sellValue: number }) {
@@ -76,8 +83,8 @@ const TokenInfoPanel = ({ token, onBuyClick, onSellClick }: TokenInfoPanelProps)
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-1.5">
-              <span className="font-bold text-foreground text-sm truncate">{token.name}</span>
-              <span className="text-muted-foreground text-xs">({token.ticker})</span>
+              <span className="font-bold text-foreground text-sm shrink-0">{token.ticker}</span>
+              <span className="text-muted-foreground text-xs truncate">{token.name}</span>
               <button
                 onClick={() => copyToClipboard(token.id || '', 'Token address')}
                 className="p-0.5 rounded hover:bg-accent text-muted-foreground shrink-0"
@@ -101,13 +108,13 @@ const TokenInfoPanel = ({ token, onBuyClick, onSellClick }: TokenInfoPanelProps)
                 return (
                   <span className="flex items-center gap-0.5">
                     {isYoung && (
-                      <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#26a269" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--profit))" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
                         <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                         <path d="M4.711 17.875c-.534 -1.339 -1.35 -4.178 .129 -6.47c1.415 -2.193 3.769 -3.608 5.099 -4.278l-5.229 10.748l.001 0" />
                         <path d="M19.715 12.508c-.54 3.409 -2.094 6.156 -4.155 7.348c-4.069 2.353 -8.144 .45 -9.297 -.188c.877 -1.436 4.433 -7.22 6.882 -10.591c2.714 -3.737 5.864 -5.978 6.565 -6.077c0 .201 .03 .55 .071 1.03c.144 1.709 .443 5.264 -.066 8.478" />
                       </svg>
                     )}
-                    <span className={isYoung ? 'text-[#26a269] font-bold' : 'text-muted-foreground'}>{ageStr}</span>
+                    <span className={isYoung ? 'text-profit font-bold' : 'text-muted-foreground'}>{ageStr}</span>
                   </span>
                 );
               })()}
@@ -126,7 +133,6 @@ const TokenInfoPanel = ({ token, onBuyClick, onSellClick }: TokenInfoPanelProps)
 
       {/* Banner / Header Image + overlapping social buttons */}
       <div className="border-b border-border">
-        {/* Banner - wide rectangle ~5:2 aspect ratio like reference */}
         <div className="w-full overflow-hidden relative" style={{ aspectRatio: '5 / 2' }}>
           {token.headerImage ? (
             <img src={token.headerImage} alt={`${token.name} banner`} className="w-full h-full object-cover" />
@@ -143,19 +149,19 @@ const TokenInfoPanel = ({ token, onBuyClick, onSellClick }: TokenInfoPanelProps)
 
         {/* Token description */}
         {token.description && (
-          <div className="py-1.5">
+          <div className="py-1.5 px-4">
             <p className={`text-[11px] text-muted-foreground leading-relaxed ${!descExpanded ? 'line-clamp-2' : ''}`}>
               {token.description}
             </p>
             {token.description.length > 80 && (
-              <button onClick={() => setDescExpanded(!descExpanded)} className="text-[10px] text-primary hover:underline mt-0.5">
+              <button onClick={() => setDescExpanded(!descExpanded)} className="text-[10px] text-primary font-medium hover:underline mt-0.5">
                 {descExpanded ? 'Show less' : 'Read more'}
               </button>
             )}
           </div>
         )}
 
-        {/* Social buttons - overlapping banner bottom edge */}
+        {/* Social buttons */}
         {hasSocials && (
           <div className="flex gap-2 -mt-4 relative z-10 pb-3 px-4">
             {token.website && (
@@ -191,7 +197,7 @@ const TokenInfoPanel = ({ token, onBuyClick, onSellClick }: TokenInfoPanelProps)
           <div className="bg-[hsl(0,0%,16%)] rounded-md p-2.5 text-center border border-border">
             <div className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1">Price SOL</div>
             <div className="text-sm font-bold tracking-tight text-foreground flex items-center justify-center gap-1">
-              {(token.priceSOL ?? 0).toFixed(8)} <SolanaIcon size={12} />
+              {formatSOLPrice(token.priceSOL ?? 0)} <SolanaIcon size={12} />
             </div>
           </div>
         </div>
@@ -205,12 +211,12 @@ const TokenInfoPanel = ({ token, onBuyClick, onSellClick }: TokenInfoPanelProps)
             { label: 'FDV', value: token.fdv ? formatNumber(token.fdv) : '—' },
             { label: 'MKT CAP', value: formatNumber(token.mcap) },
           ].map(({ label, value, icon }) => (
-            <div key={label} className="bg-[hsl(0,0%,16%)] rounded-md p-2 text-center border border-border">
+            <div key={label} className="bg-[hsl(0,0%,16%)] rounded-md p-2 text-center border border-border overflow-hidden">
               <div className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1">{label}</div>
-              <div className="text-xs font-bold text-foreground flex items-center justify-center gap-1">
+              <div className="text-xs font-bold text-foreground flex items-center justify-center gap-1 truncate">
                 {value}
                 {icon && (token.liquidityLocked !== false ? (
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#26a269" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--profit))" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
                     <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                     <path d="M11.5 21h-4.5a2 2 0 0 1 -2 -2v-6a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v.5" />
                     <path d="M11 16a1 1 0 1 0 2 0a1 1 0 0 0 -2 0" />
@@ -218,7 +224,7 @@ const TokenInfoPanel = ({ token, onBuyClick, onSellClick }: TokenInfoPanelProps)
                     <path d="M15 19l2 2l4 -4" />
                   </svg>
                 ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a51d2d" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--loss))" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
                     <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                     <path d="M5 13a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v6a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2l0 -6" />
                     <path d="M11 16a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
@@ -318,27 +324,37 @@ const TokenInfoPanel = ({ token, onBuyClick, onSellClick }: TokenInfoPanelProps)
       {/* Watchlist + Alerts + Buy/Sell */}
       <div className="px-4 py-3 space-y-2">
         <div className="flex gap-2">
-          <button
-            onClick={() => toast.info('Watchlist coming soon')}
-            className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 text-xs font-medium bg-[hsl(0,0%,16%)] text-foreground rounded-md border border-border hover:bg-accent transition-colors"
-            aria-label="Add to watchlist"
-          >
-            <Star className="w-3.5 h-3.5" /> Watchlist
-          </button>
-          <button
-            onClick={() => toast.info('Alerts coming soon')}
-            className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 text-xs font-medium bg-[hsl(0,0%,16%)] text-foreground rounded-md border border-border hover:bg-accent transition-colors"
-            aria-label="Set price alert"
-          >
-            <Bell className="w-3.5 h-3.5" /> Alerts
-          </button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                disabled
+                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 text-xs font-medium bg-[hsl(0,0%,16%)] text-muted-foreground rounded-md border border-border cursor-not-allowed opacity-60"
+                aria-label="Add to watchlist"
+              >
+                <Star className="w-3.5 h-3.5" /> Watchlist
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>Coming soon</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                disabled
+                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 text-xs font-medium bg-[hsl(0,0%,16%)] text-muted-foreground rounded-md border border-border cursor-not-allowed opacity-60"
+                aria-label="Set price alert"
+              >
+                <Bell className="w-3.5 h-3.5" /> Alerts
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>Coming soon</TooltipContent>
+          </Tooltip>
         </div>
         <div className="flex gap-2">
           <button onClick={onBuyClick} className="flex-1 flex items-center justify-center gap-1.5 px-3 py-3 text-sm font-semibold bg-profit/20 text-profit rounded-md border border-profit/30 hover:bg-profit/30 transition-colors">
-            <div className="w-2 h-2 rounded-full bg-profit" /> Buy
+            Buy
           </button>
           <button onClick={onSellClick} className="flex-1 flex items-center justify-center gap-1.5 px-3 py-3 text-sm font-semibold bg-loss/20 text-loss rounded-md border border-loss/30 hover:bg-loss/30 transition-colors">
-            <div className="w-2 h-2 rounded-full bg-loss" /> Sell
+            Sell
           </button>
         </div>
       </div>
@@ -352,7 +368,7 @@ const TokenInfoPanel = ({ token, onBuyClick, onSellClick }: TokenInfoPanelProps)
           <div className="flex items-center gap-2">
             <span className="text-xs font-bold text-foreground">Audit</span>
             <span className="text-xs text-muted-foreground">No issues</span>
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="#26a269" stroke="none" className="shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="hsl(var(--profit))" stroke="none" className="shrink-0">
               <path d="M17 3.34a10 10 0 1 1 -14.995 8.984l-.005 -.324l.005 -.324a10 10 0 0 1 14.995 -8.336zm-1.293 5.953a1 1 0 0 0 -1.32 -.083l-.094 .083l-3.293 3.292l-1.293 -1.292l-.094 -.083a1 1 0 0 0 -1.403 1.403l.083 .094l2 2l.094 .083a1 1 0 0 0 1.226 0l.094 -.083l4 -4l.083 -.094a1 1 0 0 0 -.083 -1.32z" />
             </svg>
           </div>
@@ -362,24 +378,18 @@ const TokenInfoPanel = ({ token, onBuyClick, onSellClick }: TokenInfoPanelProps)
         {auditExpanded && (
           <div className="mt-1 rounded-md bg-[hsl(0,0%,16%)] border border-border overflow-hidden">
             <div className="flex items-center justify-between px-3 py-2 border-b border-border">
-              <div className="flex items-center gap-1.5">
-                <Info className="w-3 h-3 text-muted-foreground" />
-                <span className="text-xs text-foreground">Mintable</span>
-              </div>
+              <span className="text-xs text-foreground">Mintable</span>
               <div className="flex items-center gap-1">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="#26a269" stroke="none" className="shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="hsl(var(--profit))" stroke="none" className="shrink-0">
                   <path d="M17 3.34a10 10 0 1 1 -14.995 8.984l-.005 -.324l.005 -.324a10 10 0 0 1 14.995 -8.336zm-1.293 5.953a1 1 0 0 0 -1.32 -.083l-.094 .083l-3.293 3.292l-1.293 -1.292l-.094 -.083a1 1 0 0 0 -1.403 1.403l.083 .094l2 2l.094 .083a1 1 0 0 0 1.226 0l.094 -.083l4 -4l.083 -.094a1 1 0 0 0 -.083 -1.32z" />
                 </svg>
                 <span className="text-xs font-medium text-foreground">No</span>
               </div>
             </div>
             <div className="flex items-center justify-between px-3 py-2">
-              <div className="flex items-center gap-1.5">
-                <Info className="w-3 h-3 text-muted-foreground" />
-                <span className="text-xs text-foreground">Freezable</span>
-              </div>
+              <span className="text-xs text-foreground">Freezable</span>
               <div className="flex items-center gap-1">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="#26a269" stroke="none" className="shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="hsl(var(--profit))" stroke="none" className="shrink-0">
                   <path d="M17 3.34a10 10 0 1 1 -14.995 8.984l-.005 -.324l.005 -.324a10 10 0 0 1 14.995 -8.336zm-1.293 5.953a1 1 0 0 0 -1.32 -.083l-.094 .083l-3.293 3.292l-1.293 -1.292l-.094 -.083a1 1 0 0 0 -1.403 1.403l.083 .094l2 2l.094 .083a1 1 0 0 0 1.226 0l.094 -.083l4 -4l.083 -.094a1 1 0 0 0 -.083 -1.32z" />
                 </svg>
                 <span className="text-xs font-medium text-foreground">No</span>
@@ -389,7 +399,7 @@ const TokenInfoPanel = ({ token, onBuyClick, onSellClick }: TokenInfoPanelProps)
         )}
 
         <p className="text-[10px] text-muted-foreground mt-2">
-          <span className="text-yellow-500 font-medium">Warning!</span> Audits may not be 100% accurate! <button className="text-primary hover:underline">More</button>.
+          <span className="text-yellow-500 font-medium">Warning!</span> Audits may not be 100% accurate.
         </p>
       </div>
 

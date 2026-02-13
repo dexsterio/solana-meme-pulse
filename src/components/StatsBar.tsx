@@ -1,4 +1,4 @@
-import { Search } from 'lucide-react';
+import { Search, X } from 'lucide-react';
 import { WorldIcon } from '@/components/icons/TablerIcons';
 import { Token, formatNumber } from '@/data/mockTokens';
 
@@ -30,6 +30,15 @@ const StatsBar = ({ tokens = [], onSearch, searchQuery = '', onSearchChange, isC
           className="bg-transparent px-2 py-1.5 text-[13px] text-foreground placeholder:text-muted-foreground outline-none w-full"
           aria-label="Search tokens"
         />
+        {searchQuery && (
+          <button
+            onClick={() => { onSearchChange?.(''); onSearch?.(''); }}
+            className="p-1 mr-1 rounded hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
+            aria-label="Clear search"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        )}
       </div>
 
       <div className="flex items-center gap-2 px-4 py-1.5 border border-border rounded bg-[hsl(0,0%,16%)]">
@@ -51,7 +60,7 @@ const StatsBar = ({ tokens = [], onSearch, searchQuery = '', onSearchChange, isC
         }`}
       >
         <WorldIcon className="w-3.5 h-3.5" />
-        {isCryptoMarket ? 'Meme Zone' : 'Market View'}
+        {isCryptoMarket ? 'Back to Memes' : 'Market View'}
       </button>
     </div>
   );

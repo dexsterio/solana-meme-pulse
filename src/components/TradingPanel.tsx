@@ -3,12 +3,13 @@ import { Token, formatCompact, formatNumber } from '@/data/mockTokens';
 import {
   ChevronDown, ChevronUp, ChevronRight, Pencil, Wallet, RefreshCw,
   Users, BarChart3, Copy, ExternalLink, Search, Clock,
-  Target, Lock, Link2, Flame, Crown, Menu, FileText, CircleUser, CircleDot,
+  Target, Lock, Link2, Flame, Crown, FileText, CircleUser, CircleDot,
   Settings, AlertTriangle, DollarSign, ToggleLeft } from
 'lucide-react';
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible';
 import SolanaIcon from '@/components/SolanaIcon';
 import { toast } from 'sonner';
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 
 interface TradingPanelProps {
   token: Token;
@@ -95,13 +96,18 @@ const TradingPanel = ({ token, initialMode, onBack }: TradingPanelProps) => {
         </button>
         )}
         <div className="ml-auto flex items-center gap-3">
-          <div className="flex items-center gap-1 text-muted-foreground">
-            <Wallet className="w-3.5 h-3.5" />
-            <span className="text-xs">1</span>
-          </div>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="flex items-center gap-1 text-muted-foreground cursor-help">
+                <Wallet className="w-3.5 h-3.5" />
+                <span className="text-xs">—</span>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>Connect wallet to trade</TooltipContent>
+          </Tooltip>
           <div className="flex items-center gap-1 text-muted-foreground">
             <SolanaIcon size={10} />
-            <span className="text-xs">0</span>
+            <span className="text-xs">—</span>
           </div>
         </div>
       </div>
@@ -113,8 +119,12 @@ const TradingPanel = ({ token, initialMode, onBack }: TradingPanelProps) => {
           <input
             type="number"
             inputMode="decimal"
+            min="0"
             value={amount}
-            onChange={(e) => setAmount(e.target.value)}
+            onChange={(e) => {
+              const val = e.target.value;
+              if (val === '' || parseFloat(val) >= 0) setAmount(val);
+            }}
             placeholder="0.00"
             className="flex-1 min-w-0 bg-transparent text-sm font-bold text-foreground outline-none text-right placeholder:text-muted-foreground [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
             aria-label="Trade amount in SOL"
@@ -147,63 +157,63 @@ const TradingPanel = ({ token, initialMode, onBack }: TradingPanelProps) => {
       {/* Settings row */}
       <div className="px-3 py-2.5 border-b border-border">
         <div className="flex items-center gap-3 text-xs text-muted-foreground">
-          <span className="flex items-center gap-1"><Settings className="w-3 h-3" /> <span className="text-foreground font-medium">20%</span></span>
-          <span className="flex items-center gap-1"><AlertTriangle className="w-3 h-3" /> <span className="text-foreground font-medium">0.001</span></span>
-          <span className="flex items-center gap-1"><DollarSign className="w-3 h-3" /> <span className="text-foreground font-medium">0.01</span></span>
-          <span className="flex items-center gap-1"><ToggleLeft className="w-3 h-3" /> <span className="text-foreground font-medium">Off</span></span>
+          <Tooltip><TooltipTrigger asChild>
+            <span className="flex items-center gap-1 cursor-help"><Settings className="w-3 h-3" /> <span className="text-foreground font-medium">20%</span></span>
+          </TooltipTrigger><TooltipContent>Slippage tolerance</TooltipContent></Tooltip>
+          <Tooltip><TooltipTrigger asChild>
+            <span className="flex items-center gap-1 cursor-help"><AlertTriangle className="w-3 h-3" /> <span className="text-foreground font-medium">0.001</span></span>
+          </TooltipTrigger><TooltipContent>Priority fee (SOL)</TooltipContent></Tooltip>
+          <Tooltip><TooltipTrigger asChild>
+            <span className="flex items-center gap-1 cursor-help"><DollarSign className="w-3 h-3" /> <span className="text-foreground font-medium">0.01</span></span>
+          </TooltipTrigger><TooltipContent>Tip amount (SOL)</TooltipContent></Tooltip>
+          <Tooltip><TooltipTrigger asChild>
+            <span className="flex items-center gap-1 cursor-help"><ToggleLeft className="w-3 h-3" /> <span className="text-foreground font-medium">Off</span></span>
+          </TooltipTrigger><TooltipContent>MEV Protection</TooltipContent></Tooltip>
         </div>
       </div>
 
       {/* Big action button */}
       <div className="px-3 py-3 border-b border-border">
-        <button
-          onClick={() => toast.info('Trading not yet connected')}
-          className={`w-full py-3.5 rounded-full text-base font-bold transition-colors ${
-          mode === 'buy' ?
-          'bg-profit text-background hover:bg-profit/90' :
-          'bg-loss text-background hover:bg-loss/90'}`}
-        >
-          <span className="block truncate">{mode === 'buy' ? `Buy ${token.name}` : `Sell ${token.name}`}</span>
-        </button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              disabled
+              className={`w-full py-3.5 rounded-full text-base font-bold transition-colors cursor-not-allowed opacity-60 ${
+              mode === 'buy' ?
+              'bg-profit text-background' :
+              'bg-loss text-background'}`}
+            >
+              <span className="block truncate">Connect Wallet to {mode === 'buy' ? 'Buy' : 'Sell'}</span>
+            </button>
+          </TooltipTrigger>
+          <TooltipContent>Wallet connection coming soon</TooltipContent>
+        </Tooltip>
       </div>
 
       {/* Portfolio row */}
       <div className="px-3 py-3 border-b border-border">
-        <div className="grid grid-cols-4 gap-1 text-center">
-          {[
-          { label: 'Bought', value: '0', color: 'text-foreground' },
-          { label: 'Sold', value: '0', color: 'text-loss' },
-          { label: 'Holding', value: '0', color: 'text-foreground' },
-          { label: 'PnL', value: '+0', color: 'text-foreground', isPnl: true }].
-          map(({ label, value, color, isPnl }) =>
-          <div key={label}>
-              <div className="text-xs text-muted-foreground mb-0.5">{label}</div>
-              <div className={`text-xs font-bold ${color} flex items-center justify-center gap-0.5 min-w-0 truncate`}>
-                {!isPnl && <SolanaIcon size={10} />}
-                <span className="truncate">{value}</span>
-                {isPnl && (
-                  <button onClick={() => toast.info('Portfolio refresh coming soon')} aria-label="Refresh portfolio">
-                    <RefreshCw className="w-2.5 h-2.5 text-muted-foreground ml-0.5 shrink-0 hover:text-foreground transition-colors" />
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
+        <div className="text-center py-2">
+          <Wallet className="w-5 h-5 text-muted-foreground/40 mx-auto mb-1" />
+          <p className="text-xs text-muted-foreground">Connect wallet to view portfolio</p>
         </div>
       </div>
 
       {/* Preset tabs */}
       <div className="flex border-b border-border">
         {[0, 1, 2].map((i) => (
-          <button
-            key={i}
-            onClick={() => setActivePreset(i)}
-            className={`flex-1 py-2 text-center text-xs transition-colors border-r border-border last:border-r-0 ${
-              activePreset === i ? 'text-foreground bg-accent' : 'text-muted-foreground hover:bg-accent'
-            }`}
-          >
-            Preset {i + 1}
-          </button>
+          <Tooltip key={i}>
+            <TooltipTrigger asChild>
+              <button
+                onClick={() => setActivePreset(i)}
+                className={`flex-1 py-2 text-center text-xs transition-colors border-r border-border last:border-r-0 ${
+                  activePreset === i ? 'text-foreground bg-accent' : 'text-muted-foreground hover:bg-accent'
+                }`}
+              >
+                Preset {i + 1}
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>Quick trade preset {i + 1}</TooltipContent>
+          </Tooltip>
         ))}
       </div>
 
@@ -226,7 +236,7 @@ const TradingPanel = ({ token, initialMode, onBack }: TradingPanelProps) => {
         </CollapsibleTrigger>
         <CollapsibleContent>
           <div className="px-3 py-3 space-y-3 border-b border-border">
-            {/* 2x3 grid - icon + colored value on top, label below */}
+            {/* 2x3 grid */}
             <div className="grid grid-cols-3 gap-2">
               {(() => {
                 const top10 = 32.5,dev = 0,snipers = 4.2,insiders = 2.1,bundlers = 0.8;
@@ -336,7 +346,9 @@ const TradingPanel = ({ token, initialMode, onBack }: TradingPanelProps) => {
           <ChevronRight className={`w-4 h-4 text-muted-foreground transition-transform ${reusedOpen ? 'rotate-90' : ''}`} />
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <div className="px-3 py-2 text-xs text-muted-foreground">No reused image tokens found.</div>
+          <div className="px-3 py-4 text-center">
+            <p className="text-xs text-muted-foreground">No reused image tokens found</p>
+          </div>
         </CollapsibleContent>
       </Collapsible>
 
@@ -347,7 +359,9 @@ const TradingPanel = ({ token, initialMode, onBack }: TradingPanelProps) => {
           <ChevronRight className={`w-4 h-4 text-muted-foreground transition-transform ${similarOpen ? 'rotate-90' : ''}`} />
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <div className="px-3 py-2 text-xs text-muted-foreground">No similar tokens found.</div>
+          <div className="px-3 py-4 text-center">
+            <p className="text-xs text-muted-foreground">No similar tokens found</p>
+          </div>
         </CollapsibleContent>
       </Collapsible>
 

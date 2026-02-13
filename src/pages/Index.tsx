@@ -1,7 +1,7 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import StatsBar from '@/components/StatsBar';
-import TokenFilters, { TimeFilter, Category, RankBy, ViewMode } from '@/components/TokenFilters';
+import TokenFilters, { TimeFilter, Category, RankBy, ViewMode, FilterValues } from '@/components/TokenFilters';
 import TokenTable from '@/components/TokenTable';
 import TokenGrid from '@/components/TokenGrid';
 import TrendingBar from '@/components/TrendingBar';
@@ -21,6 +21,9 @@ const Index = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [isCryptoMarket, setIsCryptoMarket] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [filterValues, setFilterValues] = useState<FilterValues>({ minVolume: '', minLiquidity: '', minMcap: '', maxAge: '' });
+
+  useEffect(() => { document.title = 'SolScope — Solana Token Screener'; }, []);
 
   const { data: apiTokens = [], isLoading: apiLoading, isError: apiError, error: apiErrorObj } = useTokens(category);
   const { tokens: newPairTokens, isConnected: wsConnected } = usePumpPortalNewTokens();
@@ -58,7 +61,6 @@ const Index = () => {
   const isViralView = selectedCluster !== null;
 
   const sortedTokens = useMemo(() => {
-    // If a viral cluster is selected, use those tokens (already sorted by mcap)
     if (isViralView) return selectedTokens;
 
     let list = [...tokens];
@@ -72,6 +74,14 @@ const Index = () => {
         t.address.toLowerCase().includes(q)
       );
     }
+
+    // Apply numeric filters
+    const minVol = parseFloat(filterValues.minVolume);
+    const minLiq = parseFloat(filterValues.minLiquidity);
+    const minMcap = parseFloat(filterValues.minMcap);
+    if (!isNaN(minVol) && minVol > 0) list = list.filter(t => t.volume >= minVol);
+    if (!isNaN(minLiq) && minLiq > 0) list = list.filter(t => t.liquidity >= minLiq);
+    if (!isNaN(minMcap) && minMcap > 0) list = list.filter(t => t.mcap >= minMcap);
 
     switch (rankBy) {
       case 'volume':
@@ -91,7 +101,7 @@ const Index = () => {
     }
 
     return list;
-  }, [tokens, rankBy, searchQuery, isViralView, selectedTokens]);
+  }, [tokens, rankBy, searchQuery, isViralView, selectedTokens, filterValues]);
 
   return (
     <div className="flex flex-col h-screen bg-background">
@@ -114,6 +124,8 @@ const Index = () => {
           setRankBy={setRankBy}
           viewMode={viewMode}
           setViewMode={setViewMode}
+          filterValues={filterValues}
+          onFilterChange={setFilterValues}
         />
       )}
       {isCryptoMarket && <MarketSentimentBar data={globalData} isLoading={globalLoading} />}

@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { generateMockTransactions, formatPrice, formatCompact } from '@/data/mockTokens';
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, Users, BarChart3 } from 'lucide-react';
 import SolanaIcon from '@/components/SolanaIcon';
 
 interface TransactionListProps {
@@ -8,6 +8,18 @@ interface TransactionListProps {
 }
 
 const tabs = ['Transactions', 'Top Traders', 'Holders'] as const;
+
+function formatRelativeTime(dateStr: string): string {
+  const now = Date.now();
+  const diff = now - new Date(dateStr).getTime();
+  const seconds = Math.floor(diff / 1000);
+  if (seconds < 60) return `${seconds}s ago`;
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  return `${Math.floor(hours / 24)}d ago`;
+}
 
 const TransactionList = ({ tokenId }: TransactionListProps) => {
   const [activeTab, setActiveTab] = useState<typeof tabs[number]>('Transactions');
@@ -30,42 +42,54 @@ const TransactionList = ({ tokenId }: TransactionListProps) => {
       </div>
 
       <div className="flex-1 overflow-auto">
-        <table className="w-full text-[11px]">
-          <thead className="sticky top-0 bg-card border-b border-border z-10">
-            <tr className="text-muted-foreground">
-              <th className="px-2 py-1.5 text-left font-medium">DATE</th>
-              <th className="px-2 py-1.5 text-left font-medium">TYPE</th>
-              <th className="px-2 py-1.5 text-right font-medium">USD</th>
-              <th className="px-2 py-1.5 text-right font-medium">AMOUNT</th>
-              <th className="px-2 py-1.5 text-right font-medium"><span className="flex items-center justify-end gap-1"><SolanaIcon size={10} /></span></th>
-              <th className="px-2 py-1.5 text-right font-medium">PRICE</th>
-              <th className="px-2 py-1.5 text-right font-medium">MAKER</th>
-              <th className="px-2 py-1.5 text-center font-medium">TXN</th>
-            </tr>
-          </thead>
-          <tbody>
-            {transactions.map((tx) => (
-              <tr key={tx.id} className="border-b border-border/30 hover:bg-accent/30">
-                <td className="px-2 py-1.5 text-muted-foreground">
-                  {new Date(tx.date).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-                </td>
-                <td className={`px-2 py-1.5 font-medium ${tx.type === 'buy' ? 'text-profit' : 'text-loss'}`}>
-                  {tx.type === 'buy' ? 'Buy' : 'Sell'}
-                </td>
-                <td className="px-2 py-1.5 text-right text-foreground">${tx.usd.toFixed(2)}</td>
-                <td className="px-2 py-1.5 text-right text-foreground">{formatCompact(tx.tokenAmount)}</td>
-                <td className="px-2 py-1.5 text-right text-muted-foreground">
-                  <span className="flex items-center justify-end gap-0.5"><SolanaIcon size={10} />{tx.sol.toFixed(3)}</span>
-                </td>
-                <td className="px-2 py-1.5 text-right font-mono text-foreground">{formatPrice(tx.price)}</td>
-                <td className="px-2 py-1.5 text-right text-primary font-mono">{tx.maker}</td>
-                <td className="px-2 py-1.5 text-center">
-                  <ExternalLink className="w-3 h-3 text-muted-foreground hover:text-primary inline cursor-pointer" />
-                </td>
+        {activeTab === 'Transactions' ? (
+          <table className="w-full text-[11px]">
+            <thead className="sticky top-0 bg-card border-b border-border z-10">
+              <tr className="text-muted-foreground">
+                <th className="px-2 py-1.5 text-left font-medium">DATE</th>
+                <th className="px-2 py-1.5 text-left font-medium">TYPE</th>
+                <th className="px-2 py-1.5 text-right font-medium">USD</th>
+                <th className="px-2 py-1.5 text-right font-medium">AMOUNT</th>
+                <th className="px-2 py-1.5 text-right font-medium" aria-label="SOL amount"><span className="flex items-center justify-end gap-1"><SolanaIcon size={10} /></span></th>
+                <th className="px-2 py-1.5 text-right font-medium">PRICE</th>
+                <th className="px-2 py-1.5 text-right font-medium">MAKER</th>
+                <th className="px-2 py-1.5 text-center font-medium">TXN</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {transactions.map((tx) => (
+                <tr key={tx.id} className="border-b border-border/30 hover:bg-accent/30">
+                  <td className="px-2 py-1.5 text-muted-foreground" title={new Date(tx.date).toLocaleString()}>
+                    {formatRelativeTime(tx.date)}
+                  </td>
+                  <td className={`px-2 py-1.5 font-medium ${tx.type === 'buy' ? 'text-profit' : 'text-loss'}`}>
+                    {tx.type === 'buy' ? 'Buy' : 'Sell'}
+                  </td>
+                  <td className="px-2 py-1.5 text-right text-foreground">${tx.usd.toFixed(2)}</td>
+                  <td className="px-2 py-1.5 text-right text-foreground">{formatCompact(tx.tokenAmount)}</td>
+                  <td className="px-2 py-1.5 text-right text-muted-foreground">
+                    <span className="flex items-center justify-end gap-0.5"><SolanaIcon size={10} />{tx.sol.toFixed(3)}</span>
+                  </td>
+                  <td className="px-2 py-1.5 text-right font-mono text-foreground">{formatPrice(tx.price)}</td>
+                  <td className="px-2 py-1.5 text-right text-primary font-mono">{tx.maker}</td>
+                  <td className="px-2 py-1.5 text-center">
+                    <ExternalLink className="w-3 h-3 text-muted-foreground hover:text-primary inline cursor-pointer" />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : activeTab === 'Top Traders' ? (
+          <div className="flex flex-col items-center justify-center h-full gap-2 py-8">
+            <BarChart3 className="w-8 h-8 text-muted-foreground/30" />
+            <p className="text-xs text-muted-foreground">Top traders data coming soon</p>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center h-full gap-2 py-8">
+            <Users className="w-8 h-8 text-muted-foreground/30" />
+            <p className="text-xs text-muted-foreground">Holders data coming soon</p>
+          </div>
+        )}
       </div>
     </div>
   );

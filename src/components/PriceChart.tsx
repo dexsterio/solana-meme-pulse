@@ -8,16 +8,34 @@ interface PriceChartProps {
 
 const timeframes = ['1s', '1m', '5m', '15m', '1h', '4h', 'D'];
 
+const tfMinutes: Record<string, number> = {
+  '1s': 1 / 60,
+  '1m': 1,
+  '5m': 5,
+  '15m': 15,
+  '1h': 60,
+  '4h': 240,
+  'D': 1440,
+};
+
+function formatTimeLabel(index: number, tf: string): string {
+  const now = new Date();
+  const minutesPerPoint = tfMinutes[tf] || 15;
+  const totalMinutesBack = (100 - index) * minutesPerPoint;
+  const date = new Date(now.getTime() - totalMinutesBack * 60000);
+  if (tf === 'D') return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  if (tf === '4h' || tf === '1h') return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+}
+
 const PriceChart = ({ token }: PriceChartProps) => {
   const [selectedTf, setSelectedTf] = useState('15m');
   const [showMcap, setShowMcap] = useState(false);
 
-  // Stabilize on token.id + selectedTf + showMcap to avoid regenerating on every render
   const data = useMemo(() => {
     const points = 100;
     const basePrice = showMcap ? token.mcap : token.price;
     const result = [];
-    // Use a seeded-ish approach based on token id hash
     let seed = 0;
     for (let i = 0; i < (token.id || '').length; i++) {
       seed = ((seed << 5) - seed + (token.id || '').charCodeAt(i)) | 0;
@@ -31,26 +49,27 @@ const PriceChart = ({ token }: PriceChartProps) => {
       price = Math.max(price + change, basePrice * 0.3);
       result.push({
         time: i,
+        timeLabel: formatTimeLabel(i, selectedTf),
         price: price,
         volume: random * token.volume * 0.05,
       });
     }
     return result;
-  }, [token.id, token.mcap, token.price, token.volume, showMcap]);
+  }, [token.id, token.mcap, token.price, token.volume, showMcap, selectedTf]);
 
   const isUp = data[data.length - 1].price > data[0].price;
 
   return (
-    <div className="flex flex-col h-full bg-card rounded-lg border border-border">
+    <div className="flex flex-col h-full bg-card rounded-lg border border-border min-h-[250px]">
       {/* Chart controls */}
       <div className="flex items-center justify-between px-3 py-2 border-b border-border">
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-0.5">
           {timeframes.map((tf) => (
             <button
               key={tf}
               onClick={() => setSelectedTf(tf)}
-              className={`px-2 py-1 text-[10px] font-medium rounded transition-colors ${
-                selectedTf === tf ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
+              className={`px-2.5 py-1.5 text-[11px] font-medium rounded transition-colors min-h-[28px] ${
+                selectedTf === tf ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-accent'
               }`}
             >
               {tf}
@@ -60,13 +79,13 @@ const PriceChart = ({ token }: PriceChartProps) => {
         <div className="flex items-center bg-[hsl(0,0%,16%)] rounded p-0.5 border border-border">
           <button
             onClick={() => setShowMcap(false)}
-            className={`px-2 py-1 text-[10px] rounded ${!showMcap ? 'bg-accent text-foreground' : 'text-muted-foreground'}`}
+            className={`px-2.5 py-1.5 text-[11px] rounded min-h-[28px] ${!showMcap ? 'bg-accent text-foreground' : 'text-muted-foreground'}`}
           >
             Price
           </button>
           <button
             onClick={() => setShowMcap(true)}
-            className={`px-2 py-1 text-[10px] rounded ${showMcap ? 'bg-accent text-foreground' : 'text-muted-foreground'}`}
+            className={`px-2.5 py-1.5 text-[11px] rounded min-h-[28px] ${showMcap ? 'bg-accent text-foreground' : 'text-muted-foreground'}`}
           >
             MCap
           </button>
@@ -74,7 +93,7 @@ const PriceChart = ({ token }: PriceChartProps) => {
       </div>
 
       {/* Chart */}
-      <div className="flex-1 min-h-0 p-2">
+      <div className="flex-1 min-h-0 p-2 cursor-crosshair">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={data}>
             <defs>
@@ -94,7 +113,11 @@ const PriceChart = ({ token }: PriceChartProps) => {
               }}
               labelStyle={{ color: 'hsl(var(--muted-foreground))' }}
               itemStyle={{ color: 'hsl(var(--foreground))' }}
-              formatter={(value: number) => showMcap ? `$${value.toFixed(0)}` : `$${value.toFixed(8)}`}
+              labelFormatter={(value) => {
+                const point = data[value as number];
+                return point?.timeLabel || '';
+              }}
+              formatter={(value: number) => [showMcap ? `$${value.toFixed(0)}` : `$${value.toFixed(8)}`, showMcap ? 'MCap' : 'Price']}
             />
             <Area
               type="monotone"
@@ -105,10 +128,6 @@ const PriceChart = ({ token }: PriceChartProps) => {
             />
           </AreaChart>
         </ResponsiveContainer>
-      </div>
-
-      <div className="px-3 py-1.5 border-t border-border text-[10px] text-muted-foreground text-center">
-        Chart placeholder — OHLCV data will be connected later
       </div>
     </div>
   );

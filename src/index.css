@@ -59,7 +59,7 @@
   }
 }
 
-/* Custom scrollbar */
+/* Custom scrollbar - WebKit */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -73,6 +73,12 @@
 }
 ::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--muted-foreground));
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--border)) hsl(var(--background));
 }
 
 /* Hide scrollbar utility */
