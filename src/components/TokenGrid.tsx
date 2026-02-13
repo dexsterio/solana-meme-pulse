@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { Token, formatPrice, formatNumber } from '@/data/mockTokens';
 import { Zap } from 'lucide-react';
+import InfoTooltip from '@/components/InfoTooltip';
 import pumpfunLogo from '@/assets/pumpfun-logo.png';
 import bonkLogo from '@/assets/bonk-logo.png';
 import raydiumLogo from '@/assets/raydium-logo.png';
@@ -83,13 +84,13 @@ const TokenGrid = ({ tokens }: TokenGridProps) => {
             {/* Stats grid */}
             <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 mb-3">
               {[
-                { label: 'Vol', value: formatNumber(token.volume) },
-                { label: 'MCap', value: formatNumber(token.mcap) },
-                { label: 'Liq', value: formatNumber(token.liquidity) },
-                { label: 'Age', value: token.age },
-              ].map(({ label, value }) => (
+                { label: 'Vol', value: formatNumber(token.volume), tip: 'Total USD value traded' },
+                { label: 'MCap', value: formatNumber(token.mcap), tip: 'Market cap = price × total supply' },
+                { label: 'Liq', value: formatNumber(token.liquidity), tip: 'Available liquidity in the pool' },
+                { label: 'Age', value: token.age, tip: 'Time since the token was created' },
+              ].map(({ label, value, tip }) => (
                 <div key={label} className="flex justify-between">
-                  <span className="text-[12px] text-muted-foreground">{label}</span>
+                  <span className="text-[12px] text-muted-foreground inline-flex items-center gap-0.5">{label} <InfoTooltip text={tip} iconSize={10} /></span>
                   <span className="text-[13px] font-semibold text-foreground">{value}</span>
                 </div>
               ))}
