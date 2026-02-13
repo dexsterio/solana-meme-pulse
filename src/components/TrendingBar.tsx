@@ -1,12 +1,18 @@
 import { useNavigate } from 'react-router-dom';
-import { mockTokens } from '@/data/mockTokens';
+import { Token } from '@/data/mockTokens';
 import { Flame } from 'lucide-react';
 
-const TrendingBar = () => {
+interface TrendingBarProps {
+  tokens?: Token[];
+}
+
+const TrendingBar = ({ tokens = [] }: TrendingBarProps) => {
   const navigate = useNavigate();
-  const trending = [...mockTokens]
+  const trending = [...tokens]
     .sort((a, b) => b.change24h - a.change24h)
     .slice(0, 10);
+
+  if (trending.length === 0) return null;
 
   return (
     <div className="flex items-center gap-2 px-3 py-1.5 border-b border-border overflow-x-auto">

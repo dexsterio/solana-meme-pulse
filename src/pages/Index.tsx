@@ -4,7 +4,7 @@ import TokenFilters, { TimeFilter, Category, RankBy, ViewMode } from '@/componen
 import TokenTable from '@/components/TokenTable';
 import TokenGrid from '@/components/TokenGrid';
 import TrendingBar from '@/components/TrendingBar';
-import { mockTokens } from '@/data/mockTokens';
+import { useTokens } from '@/hooks/useTokens';
 
 const Index = () => {
   const [timeFilter, setTimeFilter] = useState<TimeFilter>('24h');
@@ -12,45 +12,44 @@ const Index = () => {
   const [rankBy, setRankBy] = useState<RankBy>('trending');
   const [viewMode, setViewMode] = useState<ViewMode>('list');
 
-  const sortedTokens = useMemo(() => {
-    let tokens = [...mockTokens];
+  const { data: tokens = [], isLoading, isError } = useTokens(category);
 
-    // Category filter
+  const sortedTokens = useMemo(() => {
+    let list = [...tokens];
+
     if (category === 'gainers') {
-      tokens = tokens.filter((t) => t.change24h > 0);
+      list = list.filter((t) => t.change24h > 0);
     } else if (category === 'new') {
-      tokens = tokens.filter((t) => {
+      list = list.filter((t) => {
         const age = t.age;
         return age.includes('m') || age.includes('h');
       });
     }
 
-    // Sort
     switch (rankBy) {
       case 'volume':
-        tokens.sort((a, b) => b.volume - a.volume);
+        list.sort((a, b) => b.volume - a.volume);
         break;
       case 'priceChange':
-        tokens.sort((a, b) => b.change24h - a.change24h);
+        list.sort((a, b) => b.change24h - a.change24h);
         break;
       case 'txns':
-        tokens.sort((a, b) => b.txns - a.txns);
+        list.sort((a, b) => b.txns - a.txns);
         break;
       case 'mcap':
-        tokens.sort((a, b) => b.mcap - a.mcap);
+        list.sort((a, b) => b.mcap - a.mcap);
         break;
       default:
-        // trending = default rank
         break;
     }
 
-    return tokens;
-  }, [category, rankBy]);
+    return list;
+  }, [tokens, category, rankBy]);
 
   return (
     <div className="flex flex-col h-screen bg-background">
-      <TrendingBar />
-      <StatsBar onSearch={(addr) => console.log('Search:', addr)} />
+      <TrendingBar tokens={tokens} />
+      <StatsBar tokens={tokens} onSearch={(addr) => console.log('Search:', addr)} />
       <TokenFilters
         timeFilter={timeFilter}
         setTimeFilter={setTimeFilter}
@@ -62,7 +61,15 @@ const Index = () => {
         setViewMode={setViewMode}
       />
       <div className="flex-1 overflow-auto">
-        {viewMode === 'list' ? (
+        {isLoading && tokens.length === 0 ? (
+          <div className="flex items-center justify-center h-40 text-muted-foreground text-sm">
+            Loading live data...
+          </div>
+        ) : isError && tokens.length === 0 ? (
+          <div className="flex items-center justify-center h-40 text-loss text-sm">
+            Failed to load data. Showing mock data.
+          </div>
+        ) : viewMode === 'list' ? (
           <TokenTable tokens={sortedTokens} />
         ) : (
           <TokenGrid tokens={sortedTokens} />
