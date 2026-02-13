@@ -1,107 +1,92 @@
 
 
-# Comprehensive Trading Panel & Token Page Polish
+# Pixel-Perfect Trading Panel Polish
 
 ## Summary
-Major overhaul of the TradingPanel to match the reference image exactly, plus add the Solana logo SVG as an inline icon replacing "SOL" text throughout. Also add all missing sections: Holders, CA, DA, Pro Traders, Dex Paid, Reused Image Tokens, Similar Tokens.
+Comprehensive micro-detail overhaul of `TradingPanel.tsx` to match the reference image exactly. Every font size, icon, color, and spacing will be corrected.
 
 ---
 
-## 1. Add Solana Logo SVG to project
+## Detailed Changes (all in `src/components/TradingPanel.tsx`)
 
-Copy `user-uploads://solanaLogoMark.svg` to `src/assets/solana-logo.svg` and create a reusable `SolanaIcon` component that renders it inline at any size (default 14px).
+### 1. Font Sizes - Scale Up Everything
+The current panel uses `text-[10px]` and `text-xs` (12px) everywhere. The reference uses noticeably larger text:
+- Order type tabs (Market, Limit, Adv.): `text-sm` (14px), not `text-xs`
+- AMOUNT label and value: `text-sm` for label, `text-base` for value
+- Preset buttons (0.01, 0.1, 1, 10): `text-sm`
+- Settings row icons/values: `text-xs` (currently `text-[10px]`)
+- "Advanced Trading Strategy" label: `text-sm`
+- Buy button text: `text-base font-bold`
+- Portfolio labels (Bought, Sold, etc.): `text-xs`
+- Portfolio values: `text-sm font-bold`
+- Token Info title: `text-sm font-semibold`
+- Token Info stat values: `text-sm font-bold`
+- Token Info stat labels: `text-xs`
+- Holders/Pro Traders/Dex Paid values: `text-base font-bold`
+- Holders/Pro Traders/Dex Paid labels: `text-xs`
+- CA/DA text: `text-sm` for addresses (currently `text-[10px]`)
+- Exchange row: `text-sm`
 
-## 2. Rewrite `src/components/TradingPanel.tsx`
+### 2. Token Info Stat Colors
+In the reference, the percentage values are **cyan/teal colored** (matching the primary color), not white:
+- Top 10 H., Dev H., Snipers H., Insiders, Bundlers values: `text-primary` (cyan)
+- LP Burned 100%: `text-profit` (green) - already correct
+- Remove background boxes from the stat cards - reference shows them without heavy borders
 
-Complete overhaul matching the reference image top-to-bottom:
+### 3. Token Info Grid Layout
+Reference shows: icon + colored value on one line, label text below in muted gray. Currently we have icon + label on top, value below. Flip the layout:
+```
+  [icon] 0%        [icon] 0%        [icon] 0%
+  Top 10 H.        Dev H.           Snipers H.
+```
 
-### Order Type Tabs (Market / Limit / Adv.)
-- Underlined active tab style (not pill)
-- Right side: wallet icon with count "1" and hamburger menu icon "0"
+### 4. CA Row - Larger & Specific Icon
+- Use a clipboard/document icon (from Lucide: `ClipboardList` or `FileText`) before "CA:"
+- Address text: `text-sm font-mono` (bigger than current `text-[10px]`)
+- Show more of the address: `22hE2VcTPDAkGCm...pump` format
+- External link icon on the right
+- Remove the secondary background box - reference shows a cleaner borderless row with just a subtle separator
 
-### Amount Input
-- Label "AMOUNT" left-aligned, value right-aligned
-- Solana logo icon replaces "SOL" text next to the amount
-- Right side: hamburger/list icon
+### 5. DA Row - Specific Icons
+- Use a wallet/user icon before "DA:"
+- Address text: `text-sm font-mono`
+- Three icons on the right: search (magnifying glass), external link, and a Q icon
+- Same larger sizing as CA
 
-### Preset Buttons Row
-- 0.01, 0.1, 1, 10 with bordered pills
-- Edit (pencil) icon on the far right
+### 6. Holders / Pro Traders / Dex Paid Row
+Reference shows these WITHOUT background cards - they're in a clean row with larger text:
+- Icon + large number on one line
+- Label below in muted text
+- "Unpaid" in red with a circle icon prefix
+- Remove `bg-secondary` and `border` from these items
 
-### Settings Row
-- Icons-based: slippage gear "20%", warning triangle "0.001", tip icon "0.01", checkbox "Off"
-- All inline with small icons
+### 7. Portfolio Row - Solana Hamburger Icon
+Reference shows a triple-bar icon (hamburger/list `≡`) before each value, colored:
+- Bought: `≡ 0` (white)
+- Sold: `≡ 0` (red/loss color)
+- Holding: `≡ 0` (white)
+- PnL: `≡ +0 (+0%)` with refresh icon
+- Use `Menu` or `AlignJustify` Lucide icon as the `≡` symbol, or just use the text character `≡`
 
-### Advanced Trading Strategy
-- Checkbox with label, same as now
+### 8. Exchange Row
+- Show exchange logo/icon + name ("Changenow")
+- Solana icon + price in SOL (`≡ 2.09`)
+- Clock icon + age (`1h`)
+- Slightly larger text
 
-### Big Action Button
-- Full-width rounded pill, gradient green for Buy, red for Sell
-- Text: "Buy {TokenName}" or "Sell {TokenName}"
+### 9. Reused Image Tokens & Similar Tokens
+- Use `>` chevron right instead of up/down
+- Text should be `text-sm`
 
-### Portfolio Row
-- 4 columns: Bought, Sold, Holding, PnL
-- Each value prefixed with Solana logo icon (not "SOL" text)
-- PnL shows "+0 (+0%)" format with refresh icon
+---
 
-### Preset Tabs
-- PRESET 1, PRESET 2, PRESET 3 - underlined active
+## Files Modified
+| File | Changes |
+|------|---------|
+| `src/components/TradingPanel.tsx` | Full rewrite with corrected sizes, colors, icons, and layout |
 
-### Token Info Section (collapsible, open by default)
-- Title "Token Info" with dropdown arrow and refresh icon
-- 2x3 grid of stat cards:
-  - Top 10 H. (person icon, percentage)
-  - Dev H. (crown icon, percentage)
-  - Snipers H. (target icon, percentage)
-  - Insiders (lock icon, percentage)
-  - Bundlers (link icon, percentage)
-  - LP Burned (fire icon, percentage, green for 100%)
-
-### Holders / Pro Traders / Dex Paid Row
-- 3 columns with icons:
-  - Holders: person-group icon + count
-  - Pro Traders: chart icon + count
-  - Dex Paid: colored badge "Unpaid" (red) or "Paid" (green)
-
-### CA (Contract Address) Row
-- Label "CA:" + truncated address + copy/external-link icon
-
-### DA (Dev Address) Row
-- Label "DA:" + truncated address + search/external-link icons
-
-### Exchange Info Row
-- Exchange logo + name (e.g., "Changenow")
-- Solana logo + price in SOL
-- Clock icon + age
-
-### Reused Image Tokens
-- Collapsible section "Reused Image Tokens (0)" with arrow
-
-### Similar Tokens
-- Collapsible section "Similar Tokens" with arrow
-
-## 3. Solana Logo Replacement Throughout
-
-Replace "SOL" text with inline Solana logo icon in:
-- TradingPanel: amount input, portfolio values (Bought, Sold, Holding)
-- TokenInfoPanel: Price SOL display
-- TransactionList: SOL column values
-- Token detail header: replace "SOL" badge with Solana logo
-
-## 4. Files Changed
-
-| File | Action |
-|------|--------|
-| `src/assets/solana-logo.svg` | Copy from upload |
-| `src/components/SolanaIcon.tsx` | New - reusable inline SVG component |
-| `src/components/TradingPanel.tsx` | Full rewrite matching reference |
-| `src/components/TokenInfoPanel.tsx` | Replace "SOL" text with SolanaIcon |
-| `src/components/TransactionList.tsx` | Replace SOL column text with SolanaIcon |
-| `src/pages/TokenDetail.tsx` | Replace SOL badge with SolanaIcon in header |
-
-## Technical Details
-- No new dependencies needed
-- Solana SVG is ~1KB, inlined as React component for crisp rendering at any size
-- All data in new sections is mock/placeholder (no API calls needed)
-- Token address truncation: first 16 chars + "..." + last 4 chars
+## Technical Notes
+- No new dependencies
+- All changes are CSS/layout/icon swaps
+- No structural or logic changes
 
