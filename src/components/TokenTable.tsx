@@ -34,10 +34,11 @@ const TokenLogo = ({ token }: { token: Token }) => {
 };
 
 const ChangeCell = ({ value }: { value: number }) => (
-  <td className={`px-3 py-2 text-right text-[13px] ${value >= 0 ? 'text-profit' : 'text-loss'}`}>
+  <td className={`px-3 py-2 text-right text-[13px] font-bold tracking-tight ${value >= 0 ? 'text-profit' : 'text-loss'}`}>
+    {value >= 0 ? '+' : ''}
     {Math.abs(value) >= 1000
       ? `${value.toLocaleString(undefined, { maximumFractionDigits: 0 })}%`
-      : `${Math.abs(value).toFixed(2)}%`
+      : `${value.toFixed(2)}%`
     }
   </td>
 );

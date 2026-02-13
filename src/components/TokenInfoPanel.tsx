@@ -76,11 +76,11 @@ const TokenInfoPanel = ({ token }: TokenInfoPanelProps) => {
         <div className="grid grid-cols-2 gap-2">
           <div className="bg-secondary rounded-md p-2.5 text-center border border-border">
             <div className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1">Price USD</div>
-            <div className="text-sm font-bold font-mono text-foreground">{formatPrice(token.price)}</div>
+            <div className="text-sm font-bold tracking-tight text-foreground">{formatPrice(token.price)}</div>
           </div>
           <div className="bg-secondary rounded-md p-2.5 text-center border border-border">
             <div className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1">Price</div>
-            <div className="text-sm font-bold font-mono text-foreground">{token.priceSOL.toFixed(8)} SOL</div>
+            <div className="text-sm font-bold tracking-tight text-foreground">{token.priceSOL.toFixed(8)} SOL</div>
           </div>
         </div>
       </div>
@@ -120,8 +120,8 @@ const TokenInfoPanel = ({ token }: TokenInfoPanelProps) => {
               }`}
             >
               <div className="text-[10px] text-muted-foreground mb-1">{label}</div>
-              <div className={`text-xs font-bold font-mono ${val >= 0 ? 'text-profit' : 'text-loss'}`}>
-                {val.toFixed(2)}%
+              <div className={`text-sm font-bold tracking-tight ${val >= 0 ? 'text-profit' : 'text-loss'}`}>
+                {val >= 0 ? '+' : ''}{val.toFixed(2)}%
               </div>
             </div>
           ))}
