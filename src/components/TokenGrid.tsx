@@ -1,89 +1,123 @@
 import { useNavigate } from 'react-router-dom';
 import { Token, formatPrice, formatNumber } from '@/data/mockTokens';
 import { Zap, TrendingUp, TrendingDown } from 'lucide-react';
+import pumpfunLogo from '@/assets/pumpfun-logo.png';
+import bonkLogo from '@/assets/bonk-logo.png';
+import raydiumLogo from '@/assets/raydium-logo.png';
+import meteoraLogo from '@/assets/meteora-logo.png';
+import orcaLogo from '@/assets/orca-logo.png';
 
 interface TokenGridProps {
   tokens: Token[];
 }
 
+const getExchangeLogo = (exchangeName?: string) => {
+  if (!exchangeName) return null;
+  const name = exchangeName.toLowerCase();
+  if (name.includes('pump') || name.includes('pumpfun')) return { src: pumpfunLogo, alt: 'Pump.fun' };
+  if (name.includes('bonk') || name.includes('letsbonk')) return { src: bonkLogo, alt: 'Bonk' };
+  if (name.includes('raydium')) return { src: raydiumLogo, alt: 'Raydium' };
+  if (name.includes('meteora')) return { src: meteoraLogo, alt: 'Meteora' };
+  if (name.includes('orca')) return { src: orcaLogo, alt: 'Orca' };
+  return null;
+};
+
 const TokenGrid = ({ tokens }: TokenGridProps) => {
   const navigate = useNavigate();
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 p-4">
-      {tokens.map((token) => (
-        <div
-          key={token.id}
-          onClick={() => navigate(`/token/${token.id}`)}
-          className="bg-card border border-border rounded-lg p-4 cursor-pointer hover:border-primary/50 transition-all hover:bg-accent/30"
-        >
-          <div className="flex items-center gap-3 mb-3">
-            {token.logoUrl ? (
-              <img src={token.logoUrl} alt={token.ticker} className="w-10 h-10 rounded-full" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
-            ) : (
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary/60 to-accent flex items-center justify-center text-sm font-bold text-foreground">
-                {token.ticker?.charAt(0) || '?'}
-              </div>
-            )}
-            <div>
-              <div className="flex items-center gap-1.5">
-                <span className="font-semibold text-foreground text-sm">{token.name}</span>
-                {token.boosts && (
-                  <span className="flex items-center gap-0.5 text-[10px] text-yellow-500">
-                    <Zap className="w-3 h-3" />
-                    {token.boosts}
-                  </span>
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 p-4">
+      {tokens.map((token) => {
+        const exchange = getExchangeLogo(token.exchangeName);
+        return (
+          <div
+            key={token.id}
+            onClick={() => navigate(`/token/${token.id}`)}
+            className="bg-[hsl(var(--surface-2))] border border-border/50 rounded-xl p-5 group cursor-pointer hover:border-primary/40 hover:bg-[hsl(var(--surface-3))] transition-all duration-200 hover:shadow-lg hover:shadow-primary/5"
+          >
+            {/* Header: Logo + Name + DEX */}
+            <div className="flex items-center gap-3 mb-4">
+              <div className="relative shrink-0">
+                {token.logoUrl ? (
+                  <img
+                    src={token.logoUrl}
+                    alt={token.ticker}
+                    className="w-12 h-12 rounded-lg object-cover transition-transform duration-200 group-hover:scale-110"
+                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                  />
+                ) : (
+                  <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-primary/60 to-accent flex items-center justify-center text-base font-bold text-foreground transition-transform duration-200 group-hover:scale-110">
+                    {token.ticker?.charAt(0) || '?'}
+                  </div>
                 )}
               </div>
-              <span className="text-xs text-muted-foreground">{token.ticker}</span>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-1.5">
+                  <span className="font-semibold text-foreground text-[15px] truncate">{token.name}</span>
+                  {exchange && (
+                    <img src={exchange.src} alt={exchange.alt} className="w-4 h-4 shrink-0" />
+                  )}
+                  {token.boosts && (
+                    <span className="flex items-center gap-0.5 text-[10px] text-yellow-500">
+                      <Zap className="w-3 h-3" />
+                      {token.boosts}
+                    </span>
+                  )}
+                </div>
+                <span className="text-[13px] text-muted-foreground">{token.ticker}</span>
+              </div>
             </div>
-          </div>
 
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-lg font-mono font-semibold text-foreground">{formatPrice(token.price)}</span>
-              <div className={`flex items-center gap-1 text-xs font-medium ${token.change24h >= 0 ? 'text-profit' : 'text-loss'}`}>
-                {token.change24h >= 0 ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
+            {/* Price + 24h change */}
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-lg font-bold text-foreground">{formatPrice(token.price)}</span>
+              <div className={`flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium ${
+                token.change24h >= 0
+                  ? 'bg-[hsl(var(--profit)/0.12)] text-profit'
+                  : 'bg-[hsl(var(--loss)/0.12)] text-loss'
+              }`}>
+                {token.change24h >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
                 {token.change24h >= 0 ? '+' : ''}{token.change24h.toFixed(1)}%
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-[11px]">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Vol</span>
-                <span className="text-foreground">{formatNumber(token.volume)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">MCap</span>
-                <span className="text-foreground">{formatNumber(token.mcap)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Liq</span>
-                <span className="text-foreground">{formatNumber(token.liquidity)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Age</span>
-                <span className="text-foreground">{token.age}</span>
-              </div>
+            {/* Stats grid */}
+            <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 mb-3">
+              {[
+                { label: 'Vol', value: formatNumber(token.volume) },
+                { label: 'MCap', value: formatNumber(token.mcap) },
+                { label: 'Liq', value: formatNumber(token.liquidity) },
+                { label: 'Age', value: token.age },
+              ].map(({ label, value }) => (
+                <div key={label} className="flex justify-between">
+                  <span className="text-[12px] text-muted-foreground">{label}</span>
+                  <span className="text-[13px] text-foreground">{value}</span>
+                </div>
+              ))}
             </div>
 
-            <div className="flex gap-1 pt-1">
+            {/* Time-frame changes */}
+            <div className="flex gap-1 pt-2 border-t border-border/30">
               {[
                 { label: '5m', val: token.change5m },
                 { label: '1h', val: token.change1h },
                 { label: '6h', val: token.change6h },
               ].map(({ label, val }) => (
                 <div key={label} className="flex-1 text-center">
-                  <div className="text-[9px] text-muted-foreground mb-0.5">{label}</div>
-                  <div className={`text-[10px] font-mono ${val >= 0 ? 'text-profit' : 'text-loss'}`}>
+                  <div className="text-[10px] text-muted-foreground mb-0.5">{label}</div>
+                  <div className={`text-[11px] font-medium px-1.5 py-0.5 rounded-md ${
+                    val >= 0
+                      ? 'bg-[hsl(var(--profit)/0.1)] text-profit'
+                      : 'bg-[hsl(var(--loss)/0.1)] text-loss'
+                  }`}>
                     {val >= 0 ? '+' : ''}{val.toFixed(1)}%
                   </div>
                 </div>
               ))}
             </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 };
