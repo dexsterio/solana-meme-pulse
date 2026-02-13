@@ -31,8 +31,8 @@ const TransactionList = ({ tokenId }: TransactionListProps) => {
 
       <div className="flex-1 overflow-auto">
         <table className="w-full text-[11px]">
-          <thead className="sticky top-0 bg-card">
-            <tr className="border-b border-border text-muted-foreground">
+          <thead className="sticky top-0 bg-card border-b border-border z-10">
+            <tr className="text-muted-foreground">
               <th className="px-2 py-1.5 text-left font-medium">DATE</th>
               <th className="px-2 py-1.5 text-left font-medium">TYPE</th>
               <th className="px-2 py-1.5 text-right font-medium">USD</th>

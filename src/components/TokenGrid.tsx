@@ -27,25 +27,34 @@ const TokenGrid = ({ tokens }: TokenGridProps) => {
   const navigate = useNavigate();
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 p-4">
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 p-4 max-w-[1920px] mx-auto">
       {tokens.map((token) => {
         const exchange = getExchangeLogo(token.exchangeName);
         return (
           <div
             key={token.id}
             onClick={() => navigate(`/token/${token.id}`)}
-            className="bg-[hsl(var(--surface-2))] border border-border/50 rounded-xl p-5 group cursor-pointer hover:border-primary/40 hover:bg-[hsl(var(--surface-3))] transition-all duration-200 hover:shadow-lg hover:shadow-primary/5"
+            className="bg-[hsl(0,0%,14%)] border border-border rounded-xl p-5 group cursor-pointer hover:border-primary/40 hover:bg-[hsl(0,0%,16%)] transition-all duration-200 hover:shadow-lg hover:shadow-primary/5"
           >
             {/* Header: Logo + Name + DEX */}
             <div className="flex items-center gap-3 mb-4">
               <div className="relative shrink-0">
                 {token.logoUrl ? (
-                  <img
-                    src={token.logoUrl}
-                    alt={token.ticker}
-                    className="w-12 h-12 rounded-lg object-cover transition-transform duration-200 group-hover:scale-110"
-                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                  />
+                  <>
+                    <img
+                      src={token.logoUrl}
+                      alt={token.ticker}
+                      className="w-12 h-12 rounded-lg object-cover transition-transform duration-200 group-hover:scale-110"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                        const fallback = e.currentTarget.nextElementSibling;
+                        if (fallback) (fallback as HTMLElement).style.display = 'flex';
+                      }}
+                    />
+                    <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-primary/60 to-accent items-center justify-center text-base font-bold text-foreground transition-transform duration-200 group-hover:scale-110 hidden">
+                      {token.ticker?.charAt(0) || '?'}
+                    </div>
+                  </>
                 ) : (
                   <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-primary/60 to-accent flex items-center justify-center text-base font-bold text-foreground transition-transform duration-200 group-hover:scale-110">
                     {token.ticker?.charAt(0) || '?'}

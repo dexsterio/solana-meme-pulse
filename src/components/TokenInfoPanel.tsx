@@ -1,6 +1,7 @@
 import { Token, formatPrice, formatNumber, formatCompact } from '@/data/mockTokens';
 import { Globe, Twitter, MessageCircle, Star, Bell, ExternalLink, Zap, Copy, Shield } from 'lucide-react';
 import SolanaIcon from '@/components/SolanaIcon';
+import { toast } from 'sonner';
 
 interface TokenInfoPanelProps {
   token: Token;
@@ -16,6 +17,14 @@ const TokenInfoPanel = ({ token, onBuyClick, onSellClick }: TokenInfoPanelProps)
   const buyers = Math.round(buys * 0.6);
   const sellers = Math.round(sells * 0.6);
 
+  const hasSocials = token.twitter || token.telegram || token.website;
+
+  const copyToClipboard = (text: string, label: string) => {
+    navigator.clipboard.writeText(text).then(() => {
+      toast.success(`${label} copied to clipboard`);
+    });
+  };
+
   return (
     <div className="flex flex-col h-full bg-card rounded-lg border border-border overflow-y-auto text-xs">
       {/* Token name row */}
@@ -24,20 +33,30 @@ const TokenInfoPanel = ({ token, onBuyClick, onSellClick }: TokenInfoPanelProps)
           {token.logoUrl ? (
             <img src={token.logoUrl} alt={token.name} className="w-7 h-7 rounded-full" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
           ) : (
-            <span className="text-2xl">🪙</span>
+            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-primary/60 to-accent flex items-center justify-center text-[10px] text-foreground font-bold">
+              {token.ticker?.charAt(0) || '?'}
+            </div>
           )}
           <span className="font-bold text-foreground text-sm">{token.name}</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <button className="p-1 rounded hover:bg-accent text-muted-foreground"><Copy className="w-3.5 h-3.5" /></button>
+          <button
+            onClick={() => copyToClipboard(token.id || '', 'Token address')}
+            className="p-1 rounded hover:bg-accent text-muted-foreground"
+            aria-label="Copy token address"
+          >
+            <Copy className="w-3.5 h-3.5" />
+          </button>
         </div>
       </div>
 
-      {/* Ticker / SOL / badges */}
+      {/* Ticker / badges */}
       <div className="px-4 py-2 border-b border-border text-center">
         <div className="flex items-center justify-center gap-1.5">
           <span className="font-semibold text-foreground">{token.ticker}</span>
-          <Copy className="w-3 h-3 text-muted-foreground cursor-pointer" />
+          <button onClick={() => copyToClipboard(token.ticker || '', 'Ticker')} aria-label="Copy ticker">
+            <Copy className="w-3 h-3 text-muted-foreground cursor-pointer hover:text-foreground transition-colors" />
+          </button>
           {token.boosts && (
             <span className="text-yellow-500 text-[10px] flex items-center gap-0.5">
               <Zap className="w-3 h-3" /> {token.boosts}
@@ -51,37 +70,41 @@ const TokenInfoPanel = ({ token, onBuyClick, onSellClick }: TokenInfoPanelProps)
         </div>
       </div>
 
-      {/* Social buttons */}
-      <div className="px-4 py-2 border-b border-border">
-        <div className="flex gap-2">
-          {token.twitter && (
-            <a href={token.twitter} target="_blank" rel="noopener noreferrer" className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md bg-secondary text-foreground hover:bg-accent transition-colors text-xs font-medium">
-              <Twitter className="w-3.5 h-3.5" /> Twitter
-            </a>
-          )}
-          {token.telegram && (
-            <a href={token.telegram} target="_blank" rel="noopener noreferrer" className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md bg-secondary text-foreground hover:bg-accent transition-colors text-xs font-medium">
-              <MessageCircle className="w-3.5 h-3.5" /> Telegram
-            </a>
-          )}
-          {token.website && (
-            <a href={token.website} target="_blank" rel="noopener noreferrer" className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md bg-secondary text-foreground hover:bg-accent transition-colors text-xs font-medium">
-              <Globe className="w-3.5 h-3.5" /> Website
-            </a>
-          )}
+      {/* Social buttons - only show if socials exist */}
+      {hasSocials && (
+        <div className="px-4 py-2 border-b border-border">
+          <div className="flex gap-2">
+            {token.twitter && (
+              <a href={token.twitter} target="_blank" rel="noopener noreferrer" className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md bg-[hsl(0,0%,16%)] text-foreground hover:bg-accent transition-colors text-xs font-medium border border-border">
+                <Twitter className="w-3.5 h-3.5" /> Twitter
+              </a>
+            )}
+            {token.telegram && (
+              <a href={token.telegram} target="_blank" rel="noopener noreferrer" className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md bg-[hsl(0,0%,16%)] text-foreground hover:bg-accent transition-colors text-xs font-medium border border-border">
+                <MessageCircle className="w-3.5 h-3.5" /> Telegram
+              </a>
+            )}
+            {token.website && (
+              <a href={token.website} target="_blank" rel="noopener noreferrer" className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md bg-[hsl(0,0%,16%)] text-foreground hover:bg-accent transition-colors text-xs font-medium border border-border">
+                <Globe className="w-3.5 h-3.5" /> Website
+              </a>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Price USD + Price SOL side by side */}
       <div className="px-4 py-3 border-b border-border">
         <div className="grid grid-cols-2 gap-2">
-          <div className="bg-secondary rounded-md p-2.5 text-center border border-border">
+          <div className="bg-[hsl(0,0%,16%)] rounded-md p-2.5 text-center border border-border">
             <div className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1">Price USD</div>
             <div className="text-sm font-bold tracking-tight text-foreground">{formatPrice(token.price)}</div>
           </div>
-          <div className="bg-secondary rounded-md p-2.5 text-center border border-border">
+          <div className="bg-[hsl(0,0%,16%)] rounded-md p-2.5 text-center border border-border">
             <div className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1">Price</div>
-            <div className="text-sm font-bold tracking-tight text-foreground flex items-center justify-center gap-1">{token.priceSOL.toFixed(8)} <SolanaIcon size={12} /></div>
+            <div className="text-sm font-bold tracking-tight text-foreground flex items-center justify-center gap-1">
+              {(token.priceSOL ?? 0).toFixed(8)} <SolanaIcon size={12} />
+            </div>
           </div>
         </div>
       </div>
@@ -91,10 +114,10 @@ const TokenInfoPanel = ({ token, onBuyClick, onSellClick }: TokenInfoPanelProps)
         <div className="grid grid-cols-3 gap-2">
           {[
             { label: 'LIQUIDITY', value: formatNumber(token.liquidity), icon: true },
-            { label: 'FDV', value: formatNumber(token.fdv) },
+            { label: 'FDV', value: token.fdv ? formatNumber(token.fdv) : '—' },
             { label: 'MKT CAP', value: formatNumber(token.mcap) },
           ].map(({ label, value, icon }) => (
-            <div key={label} className="bg-secondary rounded-md p-2 text-center border border-border">
+            <div key={label} className="bg-[hsl(0,0%,16%)] rounded-md p-2 text-center border border-border">
               <div className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1">{label}</div>
               <div className="text-xs font-bold text-foreground flex items-center justify-center gap-1">
                 {value}
@@ -117,12 +140,12 @@ const TokenInfoPanel = ({ token, onBuyClick, onSellClick }: TokenInfoPanelProps)
             <div
               key={label}
               className={`rounded-md p-2 text-center border ${
-                label === '24H' ? 'border-primary/40 bg-primary/10' : 'border-border bg-secondary'
+                label === '24H' ? 'border-primary/40 bg-primary/10' : 'border-border bg-[hsl(0,0%,16%)]'
               }`}
             >
               <div className="text-[10px] text-muted-foreground mb-1">{label}</div>
-              <div className={`text-sm font-bold tracking-tight ${val >= 0 ? 'text-profit' : 'text-loss'}`}>
-                {val >= 0 ? '+' : ''}{val.toFixed(2)}%
+              <div className={`text-sm font-bold tracking-tight ${(val ?? 0) >= 0 ? 'text-profit' : 'text-loss'}`}>
+                {(val ?? 0) >= 0 ? '+' : ''}{(val ?? 0).toFixed(2)}%
               </div>
             </div>
           ))}
@@ -184,10 +207,18 @@ const TokenInfoPanel = ({ token, onBuyClick, onSellClick }: TokenInfoPanelProps)
       {/* Watchlist + Alerts */}
       <div className="px-4 py-3 space-y-2">
         <div className="flex gap-2">
-          <button className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 text-xs font-medium bg-secondary text-foreground rounded-md border border-border hover:bg-accent transition-colors">
+          <button
+            onClick={() => toast.info('Watchlist coming soon')}
+            className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 text-xs font-medium bg-[hsl(0,0%,16%)] text-foreground rounded-md border border-border hover:bg-accent transition-colors"
+            aria-label="Add to watchlist"
+          >
             <Star className="w-3.5 h-3.5" /> Watchlist
           </button>
-          <button className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 text-xs font-medium bg-secondary text-foreground rounded-md border border-border hover:bg-accent transition-colors">
+          <button
+            onClick={() => toast.info('Alerts coming soon')}
+            className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 text-xs font-medium bg-[hsl(0,0%,16%)] text-foreground rounded-md border border-border hover:bg-accent transition-colors"
+            aria-label="Set price alert"
+          >
             <Bell className="w-3.5 h-3.5" /> Alerts
           </button>
         </div>

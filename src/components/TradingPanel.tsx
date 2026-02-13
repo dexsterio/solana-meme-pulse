@@ -3,10 +3,12 @@ import { Token, formatCompact, formatNumber } from '@/data/mockTokens';
 import {
   ChevronDown, ChevronUp, ChevronRight, Pencil, Wallet, RefreshCw,
   Users, BarChart3, Copy, ExternalLink, Search, Clock,
-  Target, Lock, Link2, Flame, Crown, Menu, FileText, CircleUser, CircleDot } from
+  Target, Lock, Link2, Flame, Crown, Menu, FileText, CircleUser, CircleDot,
+  Settings, AlertTriangle, DollarSign, ToggleLeft } from
 'lucide-react';
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible';
 import SolanaIcon from '@/components/SolanaIcon';
+import { toast } from 'sonner';
 
 interface TradingPanelProps {
   token: Token;
@@ -16,7 +18,7 @@ interface TradingPanelProps {
 
 const TradingPanel = ({ token, initialMode, onBack }: TradingPanelProps) => {
   const [mode, setMode] = useState<'buy' | 'sell'>(initialMode);
-  const [orderType, setOrderType] = useState<'market' | 'limit' | 'adv'>('market');
+  const [orderType, setOrderType] = useState<'market' | 'limit'>('market');
   const [amount, setAmount] = useState('0.1');
   const [activePreset, setActivePreset] = useState(0);
   const [tokenInfoOpen, setTokenInfoOpen] = useState(true);
@@ -31,8 +33,13 @@ const TradingPanel = ({ token, initialMode, onBack }: TradingPanelProps) => {
   const presetAmounts = ['0.01', '0.1', '1', '10'];
   const contractAddress = token.id || '5T17aqgJ8cM39SNuVBu2LK2cq5MWUpZxcQnnuwNjpump';
   const devAddress = '8F42B1C35D9E4A7BB2E19C3F4D5A6E7B';
-  const truncateCA = (addr: string) => addr.length > 10 ? `${addr.slice(0, 4)}...${addr.slice(-4)}` : addr;
-  const truncateDA = (addr: string) => addr.length > 10 ? `${addr.slice(0, 4)}...${addr.slice(-4)}` : addr;
+  const truncateAddr = (addr: string) => addr.length > 10 ? `${addr.slice(0, 4)}...${addr.slice(-4)}` : addr;
+
+  const copyToClipboard = (text: string, label: string) => {
+    navigator.clipboard.writeText(text).then(() => {
+      toast.success(`${label} copied to clipboard`);
+    });
+  };
 
   return (
     <div className="flex flex-col h-full bg-card rounded-lg border border-border overflow-y-auto overflow-x-hidden">
@@ -58,9 +65,8 @@ const TradingPanel = ({ token, initialMode, onBack }: TradingPanelProps) => {
           className={`flex-1 py-3 text-sm font-bold text-center transition-colors ${
           mode === 'buy' ?
           'text-profit border-b-2 border-profit bg-profit/10' :
-          'text-muted-foreground hover:text-foreground'}`
-          }>
-
+          'text-muted-foreground hover:text-foreground'}`}
+        >
           Buy
         </button>
         <button
@@ -68,30 +74,25 @@ const TradingPanel = ({ token, initialMode, onBack }: TradingPanelProps) => {
           className={`flex-1 py-3 text-sm font-bold text-center transition-colors ${
           mode === 'sell' ?
           'text-loss border-b-2 border-loss bg-loss/10' :
-          'text-muted-foreground hover:text-foreground'}`
-          }>
-
+          'text-muted-foreground hover:text-foreground'}`}
+        >
           Sell
         </button>
-        
-
-
       </div>
 
-      {/* Market / Limit / Adv tabs */}
+      {/* Market / Limit tabs */}
       <div className="flex items-center px-3 border-b border-border">
-        {(['market', 'limit', 'adv'] as const).map((t) =>
+        {(['market', 'limit'] as const).map((t) =>
         <button
           key={t}
           onClick={() => setOrderType(t)}
           className={`px-3 py-2.5 text-sm font-medium capitalize transition-colors border-b-2 ${
           orderType === t ?
           'text-foreground border-primary' :
-          'text-muted-foreground hover:text-foreground border-transparent'}`
-          }>
-
-            {t === 'adv' ? 'Adv.' : t.charAt(0).toUpperCase() + t.slice(1)}
-          </button>
+          'text-muted-foreground hover:text-foreground border-transparent'}`}
+        >
+          {t.charAt(0).toUpperCase() + t.slice(1)}
+        </button>
         )}
         <div className="ml-auto flex items-center gap-3">
           <div className="flex items-center gap-1 text-muted-foreground">
@@ -106,19 +107,19 @@ const TradingPanel = ({ token, initialMode, onBack }: TradingPanelProps) => {
       </div>
 
       {/* Amount input */}
-      {/* Amount input */}
       <div className="px-3 py-3 border-b border-border space-y-2">
         <div className="flex items-center gap-2 rounded-md border border-border bg-[hsl(0,0%,16%)] px-3 py-2.5 min-w-0">
           <span className="text-xs text-muted-foreground uppercase tracking-wide shrink-0">Amount</span>
           <input
-            type="text"
+            type="number"
+            inputMode="decimal"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
             placeholder="0.00"
-            className="flex-1 min-w-0 bg-transparent text-sm font-bold text-foreground outline-none text-right placeholder:text-muted-foreground" />
-
+            className="flex-1 min-w-0 bg-transparent text-sm font-bold text-foreground outline-none text-right placeholder:text-muted-foreground [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+            aria-label="Trade amount in SOL"
+          />
           <SolanaIcon size={14} className="shrink-0" />
-          
         </div>
         <div className="flex gap-1.5 min-w-0">
           {presetAmounts.map((val) =>
@@ -128,13 +129,16 @@ const TradingPanel = ({ token, initialMode, onBack }: TradingPanelProps) => {
             className={`flex-1 py-1.5 rounded text-xs font-medium transition-colors min-w-0 truncate ${
             amount === val ?
             'bg-[hsl(0,0%,20%)] text-foreground border border-primary/50' :
-            'bg-[hsl(0,0%,16%)] text-muted-foreground border border-border hover:text-foreground'}`
-            }>
-
-              {val}
-            </button>
+            'bg-[hsl(0,0%,16%)] text-muted-foreground border border-border hover:text-foreground'}`}
+          >
+            {val}
+          </button>
           )}
-          <button className="px-2 py-1.5 rounded bg-[hsl(0,0%,16%)] border border-border text-muted-foreground hover:text-foreground shrink-0">
+          <button
+            className="px-2 py-1.5 rounded bg-[hsl(0,0%,16%)] border border-border text-muted-foreground hover:text-foreground shrink-0"
+            aria-label="Edit preset amounts"
+            onClick={() => toast.info('Custom presets coming soon')}
+          >
             <Pencil className="w-3 h-3" />
           </button>
         </div>
@@ -143,30 +147,22 @@ const TradingPanel = ({ token, initialMode, onBack }: TradingPanelProps) => {
       {/* Settings row */}
       <div className="px-3 py-2.5 border-b border-border">
         <div className="flex items-center gap-3 text-xs text-muted-foreground">
-          <span className="flex items-center gap-1">⚙️ <span className="text-foreground font-medium">20%</span></span>
-          <span className="flex items-center gap-1">⚠️ <span className="text-foreground font-medium">0.001</span></span>
-          <span className="flex items-center gap-1">💰 <span className="text-foreground font-medium">0.01</span></span>
-          <span className="flex items-center gap-1">☐ <span className="text-foreground font-medium">Off</span></span>
+          <span className="flex items-center gap-1"><Settings className="w-3 h-3" /> <span className="text-foreground font-medium">20%</span></span>
+          <span className="flex items-center gap-1"><AlertTriangle className="w-3 h-3" /> <span className="text-foreground font-medium">0.001</span></span>
+          <span className="flex items-center gap-1"><DollarSign className="w-3 h-3" /> <span className="text-foreground font-medium">0.01</span></span>
+          <span className="flex items-center gap-1"><ToggleLeft className="w-3 h-3" /> <span className="text-foreground font-medium">Off</span></span>
         </div>
       </div>
-
-      {/* Advanced Trading Strategy */}
-      
-
-
-
-
-
 
       {/* Big action button */}
       <div className="px-3 py-3 border-b border-border">
         <button
+          onClick={() => toast.info('Trading not yet connected')}
           className={`w-full py-3.5 rounded-full text-base font-bold transition-colors ${
           mode === 'buy' ?
           'bg-profit text-background hover:bg-profit/90' :
-          'bg-loss text-background hover:bg-loss/90'}`
-          }>
-
+          'bg-loss text-background hover:bg-loss/90'}`}
+        >
           <span className="block truncate">{mode === 'buy' ? `Buy ${token.name}` : `Sell ${token.name}`}</span>
         </button>
       </div>
@@ -178,14 +174,18 @@ const TradingPanel = ({ token, initialMode, onBack }: TradingPanelProps) => {
           { label: 'Bought', value: '0', color: 'text-foreground' },
           { label: 'Sold', value: '0', color: 'text-loss' },
           { label: 'Holding', value: '0', color: 'text-foreground' },
-          { label: 'PnL', value: '+0 (+0%)', color: 'text-foreground', isPnl: true }].
+          { label: 'PnL', value: '+0', color: 'text-foreground', isPnl: true }].
           map(({ label, value, color, isPnl }) =>
           <div key={label}>
               <div className="text-xs text-muted-foreground mb-0.5">{label}</div>
               <div className={`text-xs font-bold ${color} flex items-center justify-center gap-0.5 min-w-0 truncate`}>
                 {!isPnl && <SolanaIcon size={10} />}
                 <span className="truncate">{value}</span>
-                {isPnl && <RefreshCw className="w-2.5 h-2.5 text-muted-foreground ml-0.5 shrink-0" />}
+                {isPnl && (
+                  <button onClick={() => toast.info('Portfolio refresh coming soon')} aria-label="Refresh portfolio">
+                    <RefreshCw className="w-2.5 h-2.5 text-muted-foreground ml-0.5 shrink-0 hover:text-foreground transition-colors" />
+                  </button>
+                )}
               </div>
             </div>
           )}
@@ -195,7 +195,13 @@ const TradingPanel = ({ token, initialMode, onBack }: TradingPanelProps) => {
       {/* Preset tabs */}
       <div className="flex border-b border-border">
         {[0, 1, 2].map((i) => (
-          <button key={i} className="flex-1 py-2 text-center text-xs text-muted-foreground hover:bg-accent transition-colors border-r border-border last:border-r-0">
+          <button
+            key={i}
+            onClick={() => setActivePreset(i)}
+            className={`flex-1 py-2 text-center text-xs transition-colors border-r border-border last:border-r-0 ${
+              activePreset === i ? 'text-foreground bg-accent' : 'text-muted-foreground hover:bg-accent'
+            }`}
+          >
             Preset {i + 1}
           </button>
         ))}
@@ -206,10 +212,14 @@ const TradingPanel = ({ token, initialMode, onBack }: TradingPanelProps) => {
         <CollapsibleTrigger className="flex items-center justify-between w-full px-3 py-3 hover:bg-accent transition-colors border-b border-border">
           <span className="text-sm font-semibold text-foreground">Token Info</span>
           <div className="flex items-center gap-2">
-            <RefreshCw className="w-3.5 h-3.5 text-muted-foreground" />
+            <button
+              onClick={(e) => { e.stopPropagation(); toast.info('Token info refresh coming soon'); }}
+              aria-label="Refresh token info"
+            >
+              <RefreshCw className="w-3.5 h-3.5 text-muted-foreground hover:text-foreground transition-colors" />
+            </button>
             {tokenInfoOpen ?
             <ChevronUp className="w-4 h-4 text-muted-foreground" /> :
-
             <ChevronDown className="w-4 h-4 text-muted-foreground" />
             }
           </div>
@@ -229,7 +239,6 @@ const TradingPanel = ({ token, initialMode, onBack }: TradingPanelProps) => {
                 { label: 'Insiders', value: `${insiders}%`, icon: <Lock className="w-3.5 h-3.5" />, color: getColor(insiders, 6) },
                 { label: 'Bundlers', value: `${bundlers}%`, icon: <Link2 className="w-3.5 h-3.5" />, color: getColor(bundlers, 10) },
                 { label: 'LP Burned', value: lpBurned ? '100%' : 'No', icon: <Flame className="w-3.5 h-3.5" />, color: lpBurned ? 'text-profit' : 'text-loss' }];
-
               })().map(({ label, value, icon, color }) =>
               <div key={label} className="text-center py-1.5">
                   <div className={`flex items-center justify-center gap-1 ${color} mb-0.5`}>
@@ -241,54 +250,62 @@ const TradingPanel = ({ token, initialMode, onBack }: TradingPanelProps) => {
               )}
             </div>
 
-            {/* Holders / Pro Traders / Dex Paid - clean row, no bg boxes */}
+            {/* Holders / Pro Traders / Dex Paid */}
             <div className="grid grid-cols-3 gap-2 py-1">
               <div className="text-center min-w-0">
                 <div className="flex items-center justify-center gap-1 text-foreground mb-0.5">
                   <Users className="w-3.5 h-3.5 shrink-0" />
-                  <span className="text-sm font-bold truncate">1,245</span>
+                  <span className="text-sm font-bold truncate">—</span>
                 </div>
                 <div className="text-xs text-muted-foreground">Holders</div>
               </div>
               <div className="text-center min-w-0">
                 <div className="flex items-center justify-center gap-1 text-foreground mb-0.5">
                   <BarChart3 className="w-3.5 h-3.5 shrink-0" />
-                  <span className="text-sm font-bold truncate">12</span>
+                  <span className="text-sm font-bold truncate">—</span>
                 </div>
                 <div className="text-xs text-muted-foreground">Pro Traders</div>
               </div>
               <div className="text-center min-w-0">
-                <div className="flex items-center justify-center gap-1 text-loss mb-0.5">
+                <div className="flex items-center justify-center gap-1 text-muted-foreground mb-0.5">
                   <CircleDot className="w-3.5 h-3.5 shrink-0" />
-                  <span className="text-sm font-bold truncate">Unpaid</span>
+                  <span className="text-sm font-bold truncate">—</span>
                 </div>
                 <div className="text-xs text-muted-foreground">Dex Paid</div>
               </div>
             </div>
 
-            {/* CA row - bigger, specific icon */}
+            {/* CA row */}
             <div className="flex items-center justify-between py-2.5 border-t border-border min-w-0">
               <div className="flex items-center gap-1.5 min-w-0">
                 <FileText className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
                 <span className="text-xs text-muted-foreground font-medium shrink-0">CA:</span>
-                <span className="text-xs text-foreground font-mono truncate">{truncateCA(contractAddress)}</span>
+                <span className="text-xs text-foreground font-mono truncate">{truncateAddr(contractAddress)}</span>
               </div>
               <div className="flex items-center gap-1.5 shrink-0">
-                <Copy className="w-3.5 h-3.5 text-muted-foreground cursor-pointer hover:text-foreground transition-colors" />
-                <ExternalLink className="w-3.5 h-3.5 text-muted-foreground cursor-pointer hover:text-foreground transition-colors" />
+                <button onClick={() => copyToClipboard(contractAddress, 'Contract address')} aria-label="Copy contract address">
+                  <Copy className="w-3.5 h-3.5 text-muted-foreground cursor-pointer hover:text-foreground transition-colors" />
+                </button>
+                <a href={`https://solscan.io/token/${contractAddress}`} target="_blank" rel="noopener noreferrer" aria-label="View on Solscan">
+                  <ExternalLink className="w-3.5 h-3.5 text-muted-foreground cursor-pointer hover:text-foreground transition-colors" />
+                </a>
               </div>
             </div>
 
-            {/* DA row - wallet icon, bigger */}
+            {/* DA row */}
             <div className="flex items-center justify-between py-2.5 border-t border-border min-w-0">
               <div className="flex items-center gap-1.5 min-w-0">
                 <CircleUser className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
                 <span className="text-xs text-muted-foreground font-medium shrink-0">DA:</span>
-                <span className="text-xs text-foreground font-mono truncate">{truncateDA(devAddress)}</span>
+                <span className="text-xs text-foreground font-mono truncate">{truncateAddr(devAddress)}</span>
               </div>
               <div className="flex items-center gap-1.5 shrink-0">
-                <Search className="w-3.5 h-3.5 text-muted-foreground cursor-pointer hover:text-foreground transition-colors" />
-                <ExternalLink className="w-3.5 h-3.5 text-muted-foreground cursor-pointer hover:text-foreground transition-colors" />
+                <a href={`https://solscan.io/account/${devAddress}`} target="_blank" rel="noopener noreferrer" aria-label="Search dev address">
+                  <Search className="w-3.5 h-3.5 text-muted-foreground cursor-pointer hover:text-foreground transition-colors" />
+                </a>
+                <a href={`https://solscan.io/account/${devAddress}`} target="_blank" rel="noopener noreferrer" aria-label="View dev on Solscan">
+                  <ExternalLink className="w-3.5 h-3.5 text-muted-foreground cursor-pointer hover:text-foreground transition-colors" />
+                </a>
               </div>
             </div>
 
@@ -300,7 +317,7 @@ const TradingPanel = ({ token, initialMode, onBack }: TradingPanelProps) => {
               <div className="flex items-center gap-2 shrink-0">
                 <div className="flex items-center gap-0.5">
                   <SolanaIcon size={12} />
-                  <span className="text-xs text-foreground font-mono">{token.priceSOL?.toFixed(6) || '0.000001'}</span>
+                  <span className="text-xs text-foreground font-mono">{token.priceSOL?.toFixed(6) ?? '0.000001'}</span>
                 </div>
                 <div className="flex items-center gap-0.5 text-muted-foreground">
                   <Clock className="w-3 h-3" />
@@ -339,12 +356,10 @@ const TradingPanel = ({ token, initialMode, onBack }: TradingPanelProps) => {
         <button
           onClick={onBack}
           className="w-full py-2 text-sm font-medium text-primary hover:text-primary/80 transition-colors text-center">
-
           ← Token Info
         </button>
       </div>
     </div>);
-
 };
 
 export default TradingPanel;
