@@ -103,11 +103,14 @@ function mapEventToToken(event: PumpPortalTokenEvent, logoUrl: string, index: nu
 
 // --- Singleton State ---
 
+type NewTokenCallback = (token: Token) => void;
+
 let tokens: Token[] = [];
 let connected = false;
 let ws: WebSocket | null = null;
 let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 const listeners = new Set<Listener>();
+const newTokenCallbacks = new Set<NewTokenCallback>();
 
 function notifyListeners() {
   const snapshot = [...tokens];
@@ -117,6 +120,7 @@ function notifyListeners() {
 function addToken(token: Token) {
   if (tokens.some((t) => t.id === token.id)) return;
   tokens = [token, ...tokens].slice(0, MAX_TOKENS).map((t, i) => ({ ...t, rank: i + 1 }));
+  newTokenCallbacks.forEach((cb) => cb(token));
   notifyListeners();
 }
 
@@ -181,6 +185,12 @@ export function subscribe(listener: Listener): () => void {
   return () => {
     listeners.delete(listener);
   };
+}
+
+/** Register a callback for every new token added */
+export function onNewToken(callback: NewTokenCallback): () => void {
+  newTokenCallbacks.add(callback);
+  return () => { newTokenCallbacks.delete(callback); };
 }
 
 /** Call once at app startup to begin collecting tokens */

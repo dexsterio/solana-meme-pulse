@@ -6,8 +6,10 @@ import TokenTable from '@/components/TokenTable';
 import TokenGrid from '@/components/TokenGrid';
 import TrendingBar from '@/components/TrendingBar';
 import MarketSentimentBar from '@/components/MarketSentimentBar';
+import ViralBar from '@/components/ViralBar';
 import { useTokens } from '@/hooks/useTokens';
 import { usePumpPortalNewTokens } from '@/hooks/usePumpPortalNewTokens';
+import { useViralClusters } from '@/hooks/useViralClusters';
 import { fetchCryptoMarket, fetchCryptoGlobal } from '@/services/coingeckoApi';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -22,6 +24,7 @@ const Index = () => {
 
   const { data: apiTokens = [], isLoading: apiLoading, isError: apiError, error: apiErrorObj } = useTokens(category);
   const { tokens: newPairTokens, isConnected: wsConnected } = usePumpPortalNewTokens();
+  const { clusters, selectedCluster, setSelectedCluster, clearSelection, selectedTokens } = useViralClusters();
 
   const { data: cryptoTokens = [], isLoading: cryptoLoading, isError: cryptoError } = useQuery({
     queryKey: ['cryptoMarket'],
@@ -52,7 +55,12 @@ const Index = () => {
   const isError = isCryptoMarket ? cryptoError : isNewCategory ? false : apiError;
   const error = isCryptoMarket ? null : isNewCategory ? null : apiErrorObj;
 
+  const isViralView = selectedCluster !== null;
+
   const sortedTokens = useMemo(() => {
+    // If a viral cluster is selected, use those tokens (already sorted by mcap)
+    if (isViralView) return selectedTokens;
+
     let list = [...tokens];
 
     // Apply search filter
@@ -83,7 +91,7 @@ const Index = () => {
     }
 
     return list;
-  }, [tokens, rankBy, searchQuery]);
+  }, [tokens, rankBy, searchQuery, isViralView, selectedTokens]);
 
   return (
     <div className="flex flex-col h-screen bg-background">
@@ -109,6 +117,14 @@ const Index = () => {
         />
       )}
       {isCryptoMarket && <MarketSentimentBar data={globalData} isLoading={globalLoading} />}
+      {!isCryptoMarket && (
+        <ViralBar
+          clusters={clusters}
+          selectedCluster={selectedCluster}
+          onSelect={setSelectedCluster}
+          onClear={clearSelection}
+        />
+      )}
       <div className="flex-1 overflow-auto">
         {!isCryptoMarket && isNewCategory && wsConnected && tokens.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-40 gap-2">
@@ -157,7 +173,13 @@ const Index = () => {
             </button>
           </div>
         ) : viewMode === 'list' ? (
-          <TokenTable tokens={sortedTokens} isCryptoMarket={isCryptoMarket} />
+          <TokenTable
+            tokens={sortedTokens}
+            isCryptoMarket={isCryptoMarket}
+            ogTokenId={isViralView ? clusters.find(c => c.name === selectedCluster)?.ogToken?.id : null}
+            topTokenId={isViralView ? clusters.find(c => c.name === selectedCluster)?.topToken?.id : null}
+            showCreatedColumn={isViralView}
+          />
         ) : (
           <TokenGrid tokens={sortedTokens} />
         )}
