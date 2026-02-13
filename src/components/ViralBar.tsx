@@ -3,7 +3,7 @@ import { formatNumber } from '@/data/mockTokens';
 import { X, Clock, BarChart3 } from 'lucide-react';
 import { FlameFilledIcon, CrownFilledIcon, CaretUpFilledIcon } from '@/components/icons/TablerIcons';
 import { ViralSortBy } from '@/hooks/useViralClusters';
-import InfoTooltip from '@/components/InfoTooltip';
+
 
 interface ViralBarProps {
   clusters: ViralCluster[];
@@ -32,7 +32,6 @@ const ViralBar = ({ clusters, selectedCluster, onSelect, onClear, viralSortBy = 
         <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground uppercase tracking-wider shrink-0 pr-1">
           <FlameFilledIcon className="w-4 h-4" />
           <span className="font-semibold">Viral Memes</span>
-          <InfoTooltip text="meme tokens currently going viral — likely spotted by an influencer or trending on social media." />
         </div>
         <div className="w-px h-5 bg-border/50 shrink-0" />
         <div className="flex items-center gap-2">
@@ -83,7 +82,6 @@ const ViralBar = ({ clusters, selectedCluster, onSelect, onClear, viralSortBy = 
             <span className="text-muted-foreground text-[13px]">
               {selected.count} tokens
             </span>
-            <InfoTooltip text="these tokens share the same meme name. OG = first created. TOP = highest market cap." />
             <div className="w-px h-4 bg-border/40" />
             {/* Sort buttons */}
             <div className="flex items-center gap-1">

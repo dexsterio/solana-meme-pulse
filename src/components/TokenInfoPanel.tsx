@@ -38,8 +38,6 @@ const TokenInfoPanel = ({ token, onBuyClick, onSellClick }: TokenInfoPanelProps)
         <div className="flex items-center justify-center gap-1.5">
           <span className="font-semibold text-foreground">{token.ticker}</span>
           <Copy className="w-3 h-3 text-muted-foreground cursor-pointer" />
-          <span className="text-muted-foreground">/</span>
-          <SolanaIcon size={12} />
           {token.boosts && (
             <span className="text-yellow-500 text-[10px] flex items-center gap-0.5">
               <Zap className="w-3 h-3" /> {token.boosts}

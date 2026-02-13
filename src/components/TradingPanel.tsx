@@ -194,19 +194,11 @@ const TradingPanel = ({ token, initialMode, onBack }: TradingPanelProps) => {
 
       {/* Preset tabs */}
       <div className="flex border-b border-border">
-        {[0, 1, 2].map((i) => {}
-
-
-
-
-
-
-
-
-
-
-
-        )}
+        {[0, 1, 2].map((i) => (
+          <button key={i} className="flex-1 py-2 text-center text-xs text-muted-foreground hover:bg-accent transition-colors border-r border-border last:border-r-0">
+            Preset {i + 1}
+          </button>
+        ))}
       </div>
 
       {/* Token Info collapsible */}

@@ -79,8 +79,8 @@ const TokenDetail = () => {
           <span className="text-2xl">🪙</span>
         )}
         <div>
-          <span className="font-semibold text-foreground">{token.name}</span>
-          <span className="text-muted-foreground ml-1.5 text-sm">/ {token.ticker}</span>
+          <span className="font-semibold text-foreground">{token.ticker}</span>
+          <span className="text-muted-foreground ml-1.5 text-sm">{token.name}</span>
         </div>
         <SolanaIcon size={16} />
       </div>
