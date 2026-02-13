@@ -90,14 +90,15 @@ const TokenInfoPanel = ({ token, onBuyClick, onSellClick }: TokenInfoPanelProps)
         </div>
       </div>
 
-      {/* Banner / Header Image */}
-      <div className="px-4 pt-3 pb-1">
-        <div className="w-full rounded-lg overflow-hidden" style={{ aspectRatio: '2 / 1' }}>
+      {/* Banner / Header Image + overlapping social buttons */}
+      <div className="px-4 pt-3 pb-0 border-b border-border">
+        {/* Banner - wide rectangle ~5:2 aspect ratio like reference */}
+        <div className="w-full rounded-lg overflow-hidden relative" style={{ aspectRatio: '5 / 2' }}>
           {token.headerImage ? (
             <img src={token.headerImage} alt={`${token.name} banner`} className="w-full h-full object-cover" />
           ) : token.logoUrl ? (
-            <div className="w-full h-full bg-gradient-to-br from-[hsl(0,0%,14%)] to-[hsl(0,0%,10%)] flex items-center justify-center">
-              <img src={token.logoUrl} alt={token.name} className="w-16 h-16 rounded-full opacity-60" />
+            <div className="w-full h-full bg-gradient-to-br from-[hsl(140,60%,20%)] to-[hsl(160,40%,10%)] flex items-center justify-center">
+              <img src={token.logoUrl} alt={token.name} className="w-16 h-16 rounded-full opacity-80" />
             </div>
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-[hsl(0,0%,14%)] to-[hsl(0,0%,10%)] flex items-center justify-center">
@@ -105,47 +106,41 @@ const TokenInfoPanel = ({ token, onBuyClick, onSellClick }: TokenInfoPanelProps)
             </div>
           )}
         </div>
-      </div>
 
-      {/* Token description */}
-      {token.description && (
-        <div className="px-4 py-1.5">
-          <p className={`text-[11px] text-muted-foreground leading-relaxed ${!descExpanded ? 'line-clamp-2' : ''}`}>
-            {token.description}
-          </p>
-          {token.description.length > 80 && (
-            <button onClick={() => setDescExpanded(!descExpanded)} className="text-[10px] text-primary hover:underline mt-0.5">
-              {descExpanded ? 'Show less' : 'Read more'}
-            </button>
-          )}
-        </div>
-      )}
+        {/* Token description */}
+        {token.description && (
+          <div className="py-1.5">
+            <p className={`text-[11px] text-muted-foreground leading-relaxed ${!descExpanded ? 'line-clamp-2' : ''}`}>
+              {token.description}
+            </p>
+            {token.description.length > 80 && (
+              <button onClick={() => setDescExpanded(!descExpanded)} className="text-[10px] text-primary hover:underline mt-0.5">
+                {descExpanded ? 'Show less' : 'Read more'}
+              </button>
+            )}
+          </div>
+        )}
 
-      {/* Social buttons */}
-      {hasSocials && (
-        <div className="px-4 py-2 border-b border-border">
-          <div className="flex gap-2">
-            {token.twitter && (
-              <a href={token.twitter} target="_blank" rel="noopener noreferrer" className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md bg-[hsl(0,0%,16%)] text-foreground hover:bg-accent transition-colors text-xs font-medium border border-border">
-                <Twitter className="w-3.5 h-3.5" /> Twitter
-              </a>
-            )}
-            {token.telegram && (
-              <a href={token.telegram} target="_blank" rel="noopener noreferrer" className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md bg-[hsl(0,0%,16%)] text-foreground hover:bg-accent transition-colors text-xs font-medium border border-border">
-                <MessageCircle className="w-3.5 h-3.5" /> Telegram
-              </a>
-            )}
+        {/* Social buttons - overlapping banner bottom edge */}
+        {hasSocials && (
+          <div className="flex gap-2 -mt-4 relative z-10 pb-3">
             {token.website && (
-              <a href={token.website} target="_blank" rel="noopener noreferrer" className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md bg-[hsl(0,0%,16%)] text-foreground hover:bg-accent transition-colors text-xs font-medium border border-border">
+              <a href={token.website} target="_blank" rel="noopener noreferrer" className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md bg-[hsl(0,0%,16%)] backdrop-blur-sm text-foreground hover:bg-accent transition-colors text-xs font-medium border border-border">
                 <Globe className="w-3.5 h-3.5" /> Website
               </a>
             )}
-            <button className="p-2 rounded-md bg-[hsl(0,0%,16%)] text-muted-foreground hover:bg-accent transition-colors border border-border shrink-0">
+            {token.twitter && (
+              <a href={token.twitter} target="_blank" rel="noopener noreferrer" className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md bg-[hsl(0,0%,16%)] backdrop-blur-sm text-foreground hover:bg-accent transition-colors text-xs font-medium border border-border">
+                <Twitter className="w-3.5 h-3.5" /> Twitter
+              </a>
+            )}
+            <button className="p-2 rounded-md bg-[hsl(0,0%,16%)] backdrop-blur-sm text-muted-foreground hover:bg-accent transition-colors border border-border shrink-0">
               <ChevronDown className="w-3.5 h-3.5" />
             </button>
           </div>
-        </div>
-      )}
+        )}
+        {!hasSocials && <div className="pb-3" />}
+      </div>
 
       {/* Price USD + Price SOL side by side */}
       <div className="px-4 py-3 border-b border-border">
