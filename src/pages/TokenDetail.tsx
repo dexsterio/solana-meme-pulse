@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { fetchTokenDetails } from '@/services/dextoolsApi';
+import { fetchTokenDetailsDexScreener } from '@/services/dexscreenerApi';
 import PriceChart from '@/components/PriceChart';
 import TransactionList from '@/components/TransactionList';
 import TokenInfoPanel from '@/components/TokenInfoPanel';
@@ -14,7 +15,11 @@ const TokenDetail = () => {
 
   const { data: token, isLoading, isError } = useQuery({
     queryKey: ['token-detail', id],
-    queryFn: () => fetchTokenDetails(id || ''),
+    queryFn: async () => {
+      const ds = await fetchTokenDetailsDexScreener(id || '');
+      if (ds) return ds;
+      return fetchTokenDetails(id || '');
+    },
     enabled: !!id,
     retry: 2,
   });
