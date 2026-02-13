@@ -62,6 +62,10 @@ function mapEventToToken(event: PumpPortalTokenEvent, logoUrl: string, index: nu
   const priceUsd = event.vTokensInBondingCurve > 0
     ? (event.vSolInBondingCurve / event.vTokensInBondingCurve) * solPrice
     : 0;
+  // initialBuy is in token amount, not SOL — compute volume from it
+  const volumeUsd = event.initialBuy > 0 && event.vTokensInBondingCurve > 0
+    ? (event.initialBuy / event.vTokensInBondingCurve) * event.vSolInBondingCurve * solPrice
+    : 0;
 
   return {
     id: event.mint,
@@ -78,7 +82,7 @@ function mapEventToToken(event: PumpPortalTokenEvent, logoUrl: string, index: nu
       : 0,
     age: 'just now',
     txns: 1,
-    volume: (event.initialBuy || 0) * solPrice,
+    volume: volumeUsd,
     makers: 1,
     change5m: 0,
     change1h: 0,
