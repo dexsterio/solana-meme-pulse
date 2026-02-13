@@ -8,6 +8,13 @@ export type Category = 'trending' | 'top' | 'gainers' | 'new';
 export type RankBy = 'trending' | 'volume' | 'priceChange' | 'txns' | 'mcap';
 export type ViewMode = 'list' | 'grid';
 
+export interface FilterValues {
+  minVolume: string;
+  minLiquidity: string;
+  minMcap: string;
+  maxAge: string;
+}
+
 interface TokenFiltersProps {
   timeFilter: TimeFilter;
   setTimeFilter: (t: TimeFilter) => void;
@@ -17,17 +24,28 @@ interface TokenFiltersProps {
   setRankBy: (r: RankBy) => void;
   viewMode: ViewMode;
   setViewMode: (v: ViewMode) => void;
+  filterValues?: FilterValues;
+  onFilterChange?: (filters: FilterValues) => void;
 }
 
 const TokenFilters = ({
   timeFilter, setTimeFilter,
   category, setCategory,
   rankBy, setRankBy,
-  viewMode, setViewMode
+  viewMode, setViewMode,
+  filterValues,
+  onFilterChange,
 }: TokenFiltersProps) => {
   const [showFilters, setShowFilters] = useState(false);
+  const filters = filterValues || { minVolume: '', minLiquidity: '', minMcap: '', maxAge: '' };
 
   const timeOptions: TimeFilter[] = ['5m', '1h', '6h', '24h'];
+
+  const updateFilter = (key: keyof FilterValues, value: string) => {
+    // Only allow numbers, dots, and empty string
+    if (value !== '' && !/^\d*\.?\d*$/.test(value)) return;
+    onFilterChange?.({ ...filters, [key]: value });
+  };
 
   return (
     <div className="px-3 py-1.5 border-b border-border">
@@ -90,12 +108,13 @@ const TokenFilters = ({
 
         {/* Rank by dropdown */}
         <div className="flex items-center gap-1.5">
-          <span className="text-[13px] text-muted-foreground">Rank by:</span>
+          <label htmlFor="rank-by-select" className="text-[13px] text-muted-foreground">Rank by:</label>
           <div className="relative">
             <select
+              id="rank-by-select"
               value={rankBy}
               onChange={(e) => setRankBy(e.target.value as RankBy)}
-              className="appearance-none bg-[hsl(0,0%,16%)] text-foreground text-[13px] rounded border border-border px-3 py-1.5 pr-7 outline-none cursor-pointer"
+              className="appearance-none bg-[hsl(0,0%,16%)] text-foreground text-[13px] rounded border border-border px-3 py-1.5 pr-7 outline-none cursor-pointer focus:ring-1 focus:ring-ring"
               aria-label="Rank tokens by"
             >
               <option value="trending">Trending {timeFilter.toUpperCase()}</option>
@@ -151,20 +170,51 @@ const TokenFilters = ({
       {showFilters &&
       <div className="flex items-center gap-4 p-3 bg-[hsl(0,0%,14%)] rounded border border-border mt-1.5 text-[13px]">
           <div className="flex items-center gap-2">
-            <span className="text-muted-foreground">Min Volume:</span>
-            <input type="text" placeholder="$0" className="w-20 bg-[hsl(0,0%,16%)] border border-border rounded px-2 py-1 text-foreground text-[13px]" />
+            <label htmlFor="filter-volume" className="text-muted-foreground">Min Volume:</label>
+            <input
+              id="filter-volume"
+              type="text"
+              inputMode="numeric"
+              placeholder="$0"
+              value={filters.minVolume}
+              onChange={(e) => updateFilter('minVolume', e.target.value)}
+              className="w-20 bg-[hsl(0,0%,16%)] border border-border rounded px-2 py-1 text-foreground text-[13px] outline-none focus:ring-1 focus:ring-ring"
+            />
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-muted-foreground">Min Liquidity:</span>
-            <input type="text" placeholder="$0" className="w-20 bg-[hsl(0,0%,16%)] border border-border rounded px-2 py-1 text-foreground text-[13px]" />
+            <label htmlFor="filter-liquidity" className="text-muted-foreground">Min Liquidity:</label>
+            <input
+              id="filter-liquidity"
+              type="text"
+              inputMode="numeric"
+              placeholder="$0"
+              value={filters.minLiquidity}
+              onChange={(e) => updateFilter('minLiquidity', e.target.value)}
+              className="w-20 bg-[hsl(0,0%,16%)] border border-border rounded px-2 py-1 text-foreground text-[13px] outline-none focus:ring-1 focus:ring-ring"
+            />
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-muted-foreground">Min MCAP:</span>
-            <input type="text" placeholder="$0" className="w-20 bg-[hsl(0,0%,16%)] border border-border rounded px-2 py-1 text-foreground text-[13px]" />
+            <label htmlFor="filter-mcap" className="text-muted-foreground">Min MCAP:</label>
+            <input
+              id="filter-mcap"
+              type="text"
+              inputMode="numeric"
+              placeholder="$0"
+              value={filters.minMcap}
+              onChange={(e) => updateFilter('minMcap', e.target.value)}
+              className="w-20 bg-[hsl(0,0%,16%)] border border-border rounded px-2 py-1 text-foreground text-[13px] outline-none focus:ring-1 focus:ring-ring"
+            />
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-muted-foreground">Max Age:</span>
-            <input type="text" placeholder="Any" className="w-20 bg-[hsl(0,0%,16%)] border border-border rounded px-2 py-1 text-foreground text-[13px]" />
+            <label htmlFor="filter-age" className="text-muted-foreground">Max Age:</label>
+            <input
+              id="filter-age"
+              type="text"
+              placeholder="Any"
+              value={filters.maxAge}
+              onChange={(e) => onFilterChange?.({ ...filters, maxAge: e.target.value })}
+              className="w-20 bg-[hsl(0,0%,16%)] border border-border rounded px-2 py-1 text-foreground text-[13px] outline-none focus:ring-1 focus:ring-ring"
+            />
           </div>
         </div>
       }

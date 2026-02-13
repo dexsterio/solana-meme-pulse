@@ -69,10 +69,19 @@ const TopBadge = () => (
 const TokenTable = ({ tokens, isCryptoMarket = false, ogTokenId, topTokenId, showCreatedColumn }: TokenTableProps) => {
   const navigate = useNavigate();
 
+  if (tokens.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center h-40 gap-2">
+        <p className="text-muted-foreground text-sm">No tokens found</p>
+        <p className="text-muted-foreground/60 text-xs">Try adjusting your search or filters</p>
+      </div>
+    );
+  }
+
   return (
     <div className="overflow-x-auto">
       <table className="w-full table-fixed">
-        <thead>
+        <thead className="sticky top-0 bg-background z-10">
           <tr className="text-muted-foreground/80 text-[11px] uppercase tracking-wider border-b border-border">
             <th className="w-10 px-3 py-2 text-left font-medium">#</th>
             <th className={`${showCreatedColumn ? 'w-[280px]' : isCryptoMarket ? 'w-[200px]' : 'w-[260px]'} px-3 py-2 text-left font-medium`}>TOKEN</th>
@@ -106,26 +115,28 @@ const TokenTable = ({ tokens, isCryptoMarket = false, ogTokenId, topTokenId, sho
             <tr
               key={token.id}
               onClick={() => navigate(`/token/${token.id}`)}
-              className="border-b border-border/30 hover:bg-accent/40 cursor-pointer transition-colors text-[13px]"
+              onKeyDown={(e) => { if (e.key === 'Enter') navigate(`/token/${token.id}`); }}
+              tabIndex={0}
+              role="button"
+              className="border-b border-border/30 hover:bg-accent/40 cursor-pointer transition-colors text-[13px] focus-visible:bg-accent/40 outline-none"
             >
               {/* Rank */}
-              <td className="px-3 py-2 text-muted-foreground/70">
+              <td className={`px-3 py-2 font-bold ${token.rank <= 5 ? 'text-[#e5a50a]' : 'text-muted-foreground/70'}`}>
                 #{token.rank}
               </td>
 
-              {/* Token name + badges inline */}
+              {/* Token name: ticker first, then name */}
               <td className="px-3 py-2 min-w-0">
                 <div className="flex items-center gap-2 min-w-0">
                   <TokenLogo token={token} />
                   <div className="flex items-center gap-1.5 min-w-0 overflow-hidden">
-                    <span className="font-semibold text-foreground truncate max-w-[140px]">{token.name}</span>
-                    
-                    <span className="text-muted-foreground text-[12px] shrink-0">{token.ticker}</span>
+                    <span className="font-semibold text-foreground shrink-0">{token.ticker}</span>
+                    <span className="text-muted-foreground text-[12px] truncate max-w-[120px]" title={token.name}>{token.name}</span>
                     {ogTokenId === token.id && <OgBadge />}
                     {topTokenId === token.id && topTokenId !== ogTokenId && <TopBadge />}
                     {!isCryptoMarket && (
                       <>
-                        {(token.exchangeName === 'pump.fun' || token.exchangeName === 'pumpfun') ? (
+                        {(token.exchangeName === 'pump.fun' || token.exchangeName === 'pumpfun' || token.exchangeName?.toLowerCase().includes('pump')) ? (
                           <img src={pumpfunLogo} alt="pump.fun" className="w-4 h-4 shrink-0" />
                         ) : (token.exchangeName === 'letsbonk.fun' || token.exchangeName === 'bonk') ? (
                           <img src={bonkLogo} alt="letsbonk.fun" className="w-4 h-4 shrink-0" />

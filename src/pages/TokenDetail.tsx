@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { fetchTokenDetails } from '@/services/dextoolsApi';
@@ -18,7 +18,6 @@ const TokenDetail = () => {
   const navigate = useNavigate();
   const [panelMode, setPanelMode] = useState<'info' | 'buy' | 'sell'>('info');
 
-  // Fetch trending tokens for TrendingBar
   const { data: trendingTokens = [] } = useTokens('trending');
 
   const { data: token, isLoading, isError } = useQuery({
@@ -32,12 +31,20 @@ const TokenDetail = () => {
     retry: 2,
   });
 
+  useEffect(() => {
+    if (token) {
+      document.title = `${token.ticker} ${token.name} — SolScope`;
+    } else {
+      document.title = 'Token Detail — SolScope';
+    }
+  }, [token]);
+
   if (isLoading) {
     return (
       <div className="flex flex-col h-screen bg-background">
         <TrendingBar tokens={trendingTokens} />
         <div className="flex items-center gap-3 px-4 py-2 border-b border-border">
-          <button onClick={() => navigate('/')} className="p-1.5 rounded hover:bg-accent transition-colors" aria-label="Go back">
+          <button onClick={() => navigate('/')} className="p-1.5 rounded hover:bg-accent transition-colors" aria-label="Go back" title="Go back">
             <ArrowLeft className="w-4 h-4 text-muted-foreground" />
           </button>
           <Skeleton className="w-8 h-8 rounded-full" />
@@ -78,7 +85,7 @@ const TokenDetail = () => {
 
       {/* Header */}
       <div className="flex items-center gap-3 px-4 py-2 border-b border-border">
-        <button onClick={() => navigate('/')} className="p-1.5 rounded hover:bg-accent transition-colors" aria-label="Go back">
+        <button onClick={() => navigate('/')} className="p-1.5 rounded hover:bg-accent transition-colors" aria-label="Go back" title="Go back">
           <ArrowLeft className="w-4 h-4 text-muted-foreground" />
         </button>
         {token.logoUrl ? (

@@ -13,7 +13,6 @@ const TrendingBar = ({ tokens = [] }: TrendingBarProps) => {
   slice(0, 10);
 
   if (trending.length === 0) {
-    // Show placeholder bar when no data
     return (
       <div className="flex items-center border-b border-border overflow-hidden">
         <div className="flex items-center gap-1 text-[13px] text-muted-foreground shrink-0 px-3 py-1.5 border-r border-border bg-[hsl(0,0%,14%)]">
@@ -24,7 +23,6 @@ const TrendingBar = ({ tokens = [] }: TrendingBarProps) => {
           <span className="text-xs text-muted-foreground">Loading trending tokens...</span>
         </div>
       </div>);
-
   }
 
   const renderItems = (keyPrefix: string) =>
@@ -34,7 +32,7 @@ const TrendingBar = ({ tokens = [] }: TrendingBarProps) => {
     onClick={() => navigate(`/token/${token.id}`)}
     className="flex items-center gap-2 px-3 py-1 rounded bg-[hsl(0,0%,14%)] hover:bg-accent transition-colors shrink-0 border border-border/30">
 
-        <span className="text-[11px] text-muted-foreground font-medium">#{i + 1}</span>
+        <span className={`text-[11px] font-medium ${i < 3 ? 'trending-gold' : 'text-muted-foreground'}`}>#{i + 1}</span>
         {token.logoUrl ?
     <img
       src={token.logoUrl}
@@ -45,14 +43,12 @@ const TrendingBar = ({ tokens = [] }: TrendingBarProps) => {
         const fallback = e.currentTarget.nextElementSibling;
         if (fallback) (fallback as HTMLElement).style.display = 'flex';
       }} /> :
-
     null}
         <div className="w-5 h-5 rounded-full bg-gradient-to-br from-primary/60 to-accent items-center justify-center text-[8px] text-foreground font-bold" style={{ display: token.logoUrl ? 'none' : 'flex' }}>
           {token.ticker?.charAt(0) || '?'}
         </div>
         <span
       className={`text-[13px] font-bold ${i < 3 ? 'trending-gold' : 'text-foreground'}`}>
-
           {token.ticker}
         </span>
         <span className="text-[11px] text-muted-foreground">
@@ -66,9 +62,11 @@ const TrendingBar = ({ tokens = [] }: TrendingBarProps) => {
 
   return (
     <div className="flex items-center border-b border-border overflow-hidden">
-      
-
-
+      {/* Trending label */}
+      <div className="flex items-center gap-1 text-[13px] shrink-0 px-3 py-1.5 border-r border-border bg-[hsl(0,0%,14%)]">
+        <FlameFilledIcon className="w-3.5 h-3.5" />
+        <span className="font-medium text-foreground">Trending</span>
+      </div>
 
       <div className="overflow-hidden flex-1">
         <div className="flex items-center gap-2 py-1.5 animate-marquee hover:[animation-play-state:paused]">
@@ -77,7 +75,6 @@ const TrendingBar = ({ tokens = [] }: TrendingBarProps) => {
         </div>
       </div>
     </div>);
-
 };
 
 export default TrendingBar;

@@ -26,6 +26,15 @@ const getExchangeLogo = (exchangeName?: string) => {
 const TokenGrid = ({ tokens }: TokenGridProps) => {
   const navigate = useNavigate();
 
+  if (tokens.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center h-40 gap-2">
+        <p className="text-muted-foreground text-sm">No tokens found</p>
+        <p className="text-muted-foreground/60 text-xs">Try adjusting your search or filters</p>
+      </div>
+    );
+  }
+
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 p-4 max-w-[1920px] mx-auto">
       {tokens.map((token) => {
@@ -34,9 +43,9 @@ const TokenGrid = ({ tokens }: TokenGridProps) => {
           <div
             key={token.id}
             onClick={() => navigate(`/token/${token.id}`)}
-            className="bg-[hsl(0,0%,14%)] border border-border rounded-xl p-5 group cursor-pointer hover:border-primary/40 hover:bg-[hsl(0,0%,16%)] transition-all duration-200 hover:shadow-lg hover:shadow-primary/5"
+            className="bg-[hsl(0,0%,14%)] border border-border rounded-xl p-5 group cursor-pointer hover:border-primary/40 hover:bg-[hsl(0,0%,16%)] transition-all duration-200 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5"
           >
-            {/* Header: Logo + Name + DEX */}
+            {/* Rank badge + Header */}
             <div className="flex items-center gap-3 mb-4">
               <div className="relative shrink-0">
                 {token.logoUrl ? (
@@ -63,7 +72,8 @@ const TokenGrid = ({ tokens }: TokenGridProps) => {
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5">
-                  <span className="font-semibold text-foreground text-[15px] truncate">{token.name}</span>
+                  <span className={`text-[11px] font-bold ${token.rank <= 5 ? 'text-[#e5a50a]' : 'text-muted-foreground'}`}>#{token.rank}</span>
+                  <span className="font-semibold text-foreground text-[15px] truncate">{token.ticker}</span>
                   {exchange && (
                     <img src={exchange.src} alt={exchange.alt} className="w-4 h-4 shrink-0" />
                   )}
@@ -74,13 +84,13 @@ const TokenGrid = ({ tokens }: TokenGridProps) => {
                     </span>
                   )}
                 </div>
-                <span className="text-[13px] text-muted-foreground">{token.ticker}</span>
+                <span className="text-[12px] text-muted-foreground truncate block">{token.name}</span>
               </div>
             </div>
 
             {/* Price + 24h change */}
             <div className="flex items-center justify-between mb-3">
-              <span className="text-lg font-bold text-foreground">{formatNumber(token.mcap)}</span>
+              <span className="text-lg font-bold text-foreground">{formatPrice(token.price)}</span>
               <div className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-[13px] font-bold tracking-tight ${
                 token.change24h >= 0
                   ? 'bg-[hsl(var(--profit)/0.18)] text-profit'
@@ -111,10 +121,11 @@ const TokenGrid = ({ tokens }: TokenGridProps) => {
                 { label: '5m', val: token.change5m },
                 { label: '1h', val: token.change1h },
                 { label: '6h', val: token.change6h },
+                { label: '24h', val: token.change24h },
               ].map(({ label, val }) => (
                 <div key={label} className="flex-1 text-center">
                   <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-0.5">{label}</div>
-                  <div className={`text-[13px] font-bold tracking-tight px-2 py-1 rounded-lg ${
+                  <div className={`text-[12px] font-bold tracking-tight px-1.5 py-0.5 rounded-lg ${
                     val >= 0
                       ? 'bg-[hsl(var(--profit)/0.15)] text-profit'
                       : 'bg-[hsl(var(--loss)/0.15)] text-loss'
