@@ -1,86 +1,124 @@
 
 
-# Integrera DexTools API for Live Token Data
+# Fix DexTools API Integration - Complete Overhaul
 
-## Oversikt
-Byta fran mock-data till riktig data fran DexTools API v2 for att hamta trending tokens, gainers, och token-detaljer pa Solana.
+## Problem
+The current API integration is completely broken:
+1. The CORS proxy (`corsproxy.io`) is failing on every request
+2. The API response mapping is wrong - hotpools returns pool metadata only (no price/volume)
+3. Token logos are not being fetched
+4. Header name is incorrect (`x-api-key` should be `X-API-Key`)
 
-## API-detaljer
-- **Base URL**: `https://public-api.dextools.io/trial/v2`
-- **Auth Header**: `x-api-key: {API_KEY}`
-- **Endpoints**:
-  - `GET /ranking/solana/hotpools` - Trending/hot pairs
-  - `GET /ranking/solana/gainers` - Top gainers
-  - `GET /ranking/solana/losers` - Top losers
-  - `GET /token/solana/{address}` - Token details
+## Root Cause Analysis from API Spec
 
-## CORS-utmaning
-DexTools API tillater troligen inte anrop direkt fran webblasaren (CORS-blockering). Darfor behover vi en **proxy-losning**. Tva alternativ:
+The DexTools API has a specific data structure:
 
-1. **Enkel CORS-proxy** (snabb losning): Anvanda en allcors/corsproxy-tjanst temporart
-2. **Lovable Cloud edge function** (korrekt losning): Skapa en edge function som proxar API-anrop
+- **`/v2/ranking/solana/hotpools`** returns `RankedPool[]` with: rank, address, exchangeName, creationTime, mainToken (address/symbol/name), sideToken - but NO price, volume, or variations
+- **`/v2/ranking/solana/gainers`** returns `GainersLosersPool[]` with: same as above PLUS price, price24h, variation24h
+- **`/v2/pool/solana/{poolAddress}/price`** returns `PoolPrice` with: price, priceChain, volume5m/1h/6h/24h, buys/sells, variation5m/1h/6h/24h - THIS is where the real data lives
+- **`/v2/token/solana/{tokenAddress}`** returns `TokenDescription` with: name, symbol, **logo** URL, description, socialInfo
+- **`/v2/token/solana/{tokenAddress}/info`** returns `TokenFinancialInfo` with: mcap, fdv, holders, circulatingSupply
+- **`/v2/pool/solana?sort=creationTime&order=desc&from=...&to=...`** for New Pairs
 
-Planen implementerar **bada**: forst en direkt-anrop med fallback, och forbereder for edge function om det behovs.
+## Solution
 
-## Tekniska andringar
+### 1. Fix CORS - Try multiple proxy services (`dextoolsApi.ts`)
+Replace the single `corsproxy.io` proxy with a fallback chain:
+- Try `https://api.allorigins.win/raw?url=` first
+- Fallback to `https://corsproxy.io/?url=`  
+- Fallback to direct call (in case DexTools allows it)
 
-### 1. Ny fil: `src/services/dextoolsApi.ts`
-- API-klient med base URL och API-nyckel
-- Funktioner: `fetchHotPools()`, `fetchGainers()`, `fetchLosers()`, `fetchTokenDetails(address)`
-- Mappar API-respons till var befintliga `Token`-interface
-- Hanterar felfall och retry-logik
+### 2. Correct API header (`dextoolsApi.ts`)
+Change header from `x-api-key` to `X-API-Key` per the OpenAPI spec security scheme.
 
-### 2. Ny fil: `src/hooks/useTokens.ts`
-- TanStack Query hook (`useQuery`) for att hamta tokens
-- Stodjer olika kategorier (trending, gainers, new)
-- Auto-refetch var 30:e sekund
-- Fallback till mock-data vid API-fel
+### 3. Implement proper multi-step data fetching (`dextoolsApi.ts`)
 
-### 3. Uppdatera: `src/data/mockTokens.ts`
-- Lagg till mapper-funktion `mapDexToolsToToken()` som konverterar API-respons till `Token`-interfacet
-- Behall mock-data som fallback
+For **Trending (hotpools)**:
+1. Call `/v2/ranking/solana/hotpools` to get pool list with addresses
+2. For each pool, call `/v2/pool/solana/{address}/price` to get price, volume, variations, buys/sells
+3. For each mainToken, call `/v2/token/solana/{mainToken.address}` to get logo URL
+4. Combine all data into Token interface
 
-### 4. Uppdatera: `src/pages/Index.tsx`
-- Byt fran `mockTokens` import till `useTokens()` hook
-- Visa laddnings-skeleton medan data hamtas
-- Visa felmeddelande om API:t inte svarar
+For **Gainers**:
+1. Call `/v2/ranking/solana/gainers` (already includes price + variation24h)
+2. Enrich with pool price endpoint for full variation data (5m, 1h, 6h)
+3. Fetch token logos
 
-### 5. Uppdatera: `src/components/TrendingBar.tsx`
-- Anvand live trending data istallet for mock
+For **New Pairs**:
+1. Call `/v2/pool/solana?sort=creationTime&order=desc&from={24hAgo}&to={now}`
+2. Enrich with price data and token logos
 
-### 6. Uppdatera: `src/components/StatsBar.tsx`
-- Visa aggregerade stats fran live data
+For **Token Detail**:
+1. Call `/v2/token/solana/{address}` for metadata + logo + socials
+2. Call `/v2/token/solana/{address}/info` for mcap, fdv, holders
+3. Call `/v2/token/solana/{address}/price` for price variations
 
-### 7. Uppdatera: `src/pages/TokenDetail.tsx`
-- Hamta detaljerad token-info via API vid navigering
+### 4. Rate limiting and batching (`dextoolsApi.ts`)
+The trial plan has rate limits. Implement:
+- Batch pool price requests (max 5-10 concurrent)
+- Cache token logos (they don't change often)
+- Only fetch detailed price data for visible pools (first 20)
 
-## Data-mappning
+### 5. Update Token interface (`mockTokens.ts`)
+Add `logoUrl` field (string URL) alongside existing `logo` emoji fallback.
 
-DexTools API returnerar data i ett annat format an vart `Token`-interface. Mapper-funktionen konverterar:
+### 6. Remove mock data dependency
+- Remove `mockTokens` array from being used as placeholder data
+- Show proper loading skeleton instead
+- Keep `mockTokens.ts` only for the Token interface and format utilities
+
+### 7. Update components
+- **TokenTable.tsx**: Display actual token logo image (from logoUrl) instead of colored squares
+- **TrendingBar.tsx**: Show token logo images
+- **StatsBar.tsx**: Aggregate real volume/txns from pool price data
+
+## Technical Details
+
+### File changes:
+
+**`src/services/dextoolsApi.ts`** - Complete rewrite:
+- Multi-proxy CORS bypass with fallback
+- Correct `X-API-Key` header
+- `fetchHotPools()`: fetch ranking + enrich with pool prices + token logos
+- `fetchGainers()`: fetch gainers + enrich with full price data
+- `fetchNewPairs()`: fetch recent pools sorted by creation time
+- `fetchTokenDetails()`: full token info with metadata, price, financials
+- Rate-limited batch fetcher for pool prices
+- Response caching for logos
+
+**`src/data/mockTokens.ts`**:
+- Add `logoUrl?: string` to Token interface
+- Keep format utilities
+- Remove or keep mockTokens array only as type reference (not for display)
+
+**`src/hooks/useTokens.ts`**:
+- Add `fetchNewPairs` to category switch
+- Remove mockTokens as placeholderData
+- Add proper error handling with retry
+
+**`src/components/TokenTable.tsx`**:
+- Replace colored square icons with `<img>` for token logo (with emoji fallback)
+
+**`src/components/TrendingBar.tsx`**:
+- Show real token logo images
+
+**`src/pages/Index.tsx`**:
+- Add loading skeleton
+- Remove mock data fallback display
+
+**`src/pages/TokenDetail.tsx`**:
+- Use live `fetchTokenDetails()` instead of finding in mockTokens array
+
+## Data Flow
 
 ```text
-DexTools response          -->  Token interface
-----------------------------------------------
-pair.baseToken.symbol      -->  ticker
-pair.baseToken.name        -->  name
-pair.price                 -->  price
-pair.volume24h             -->  volume
-pair.txCount24h            -->  txns
-pair.priceChange.h24       -->  change24h
-pair.priceChange.h6        -->  change6h
-pair.priceChange.h1        -->  change1h
-pair.priceChange.m5        -->  change5m
-pair.liquidity             -->  liquidity
-pair.fdv                   -->  fdv / mcap
-pair.baseToken.address     -->  address
-pair.creationTime          -->  age (beraknad)
+User opens page
+  --> useTokens('trending') fires
+    --> fetchHotPools()
+      --> GET /v2/ranking/solana/hotpools (pool list with addresses)
+      --> For top 20 pools: GET /v2/pool/solana/{addr}/price (price + volume + variations)
+      --> For top 20 tokens: GET /v2/token/solana/{tokenAddr} (logo + metadata)
+      --> Combine into Token[] and return
+    --> Display in TokenTable with real logos, prices, volumes
 ```
-
-## Implementeringsordning
-1. Skapa API-klient (`dextoolsApi.ts`)
-2. Skapa React Query hook (`useTokens.ts`)
-3. Uppdatera Index.tsx att anvanda hooken
-4. Uppdatera TrendingBar och StatsBar
-5. Uppdatera TokenDetail for live data
-6. Testa och verifiera att data visas korrekt
 
