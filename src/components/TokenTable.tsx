@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { Token, formatPrice, formatNumber } from '@/data/mockTokens';
 import { Zap, Info } from 'lucide-react';
+import pumpfunLogo from '@/assets/pumpfun-logo.png';
 
 interface TokenTableProps {
   tokens: Token[];
@@ -80,9 +81,11 @@ const TokenTable = ({ tokens }: TokenTableProps) => {
                     <span className="font-semibold text-foreground">{token.name}</span>
                     <span className="text-muted-foreground text-[12px]">/SOL</span>
                     <span className="text-muted-foreground text-[12px]">{token.ticker}</span>
-                    {token.exchangeName && (
+                    {(token.exchangeName === 'pump.fun' || token.exchangeName === 'pumpfun') ? (
+                      <img src={pumpfunLogo} alt="pump.fun" className="w-4 h-4 shrink-0" />
+                    ) : token.exchangeName ? (
                       <span className="text-[10px] px-1 py-0.5 rounded bg-secondary text-muted-foreground">{token.exchangeName}</span>
-                    )}
+                    ) : null}
                     {token.boosts && (
                       <span className="flex items-center gap-0.5 text-[11px] text-profit font-medium">
                         <Zap className="w-3 h-3" />
