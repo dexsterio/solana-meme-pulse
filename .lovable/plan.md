@@ -1,47 +1,42 @@
 
-
-# Improved Token Grid Card UI
+# Upgrade Percentage Typography Across Entire Project
 
 ## Overview
-Redesign the token grid cards to be visually polished and professional, with larger square logos, better typography, improved padding, refined colors, and a hover effect that enlarges the logo area.
+Upgrade all percentage number styling across every component in the project to use bold, tight-tracked, professional typography -- consistent everywhere, no thin or generic-looking numbers.
 
-## Changes
+## Components to Update
 
-### File: `src/components/TokenGrid.tsx` (Full Rewrite)
+### 1. `src/components/TokenGrid.tsx` (Grid Cards)
+**24h change badge (lines 73-81):**
+- Font: `text-[11px] font-medium` --> `text-[13px] font-bold tracking-tight`
+- Padding: `px-2 py-0.5` --> `px-2.5 py-1`
+- Icon: `w-3 h-3` --> `w-3.5 h-3.5`
+- Background opacity: `0.12` --> `0.18`
 
-**Visual Improvements:**
-- **Larger square token logos**: 48x48px (`w-12 h-12`) with `rounded-lg` instead of small round avatars
-- **Hover effect**: On card hover, the logo scales up smoothly (`group-hover:scale-110`) with a subtle glow
-- **Better typography**: Token name at 15px semibold, ticker at 13px, price at 18px bold -- all using Inter (no monospace)
-- **Improved padding**: Card padding increased from `p-4` to `p-5`
-- **Enhanced colors**: Subtle gradient border on hover (`border-primary/40`), slightly elevated card background (`bg-surface-2`), and a soft inner glow effect
-- **Clearer data labels**: Stats labels at 12px with better contrast, values at 13px
-- **Change indicators**: Larger percentage badges with colored backgrounds (`bg-profit/10` or `bg-loss/10`) instead of plain text
-- **Exchange logos**: Show platform logos (pump.fun, Raydium, Meteora, Orca, Bonk) in grid cards too, positioned near the token name
-- **Grid spacing**: Increased gap from `gap-3` to `gap-4`
+**Timeframe pills 5m/1h/6h (lines 100-114):**
+- Labels: `text-[10px]` --> `text-[11px] font-semibold uppercase tracking-wider`
+- Values: `text-[11px] font-medium` --> `text-[13px] font-bold tracking-tight`
+- Padding: `px-1.5 py-0.5` --> `px-2 py-1`
+- Background opacity: `0.1` --> `0.15`
+- Shape: `rounded-md` --> `rounded-lg`
 
-### Technical Details
+### 2. `src/components/TokenTable.tsx` (Table View)
+**ChangeCell component (lines 36-43):**
+- Font: `text-[13px]` --> `text-[13px] font-bold tracking-tight`
+- Add `+` prefix for positive values (currently missing)
 
-```text
-Card Layout (improved):
-+----------------------------------+
-|  [48x48 Logo]   Name   [DEX]    |
-|                 $TICK            |
-|                                  |
-|  $0.00001234         +12.5%     |
-|                                  |
-|  Vol  $1.2M    MCap  $4.5M     |
-|  Liq  $800K    Age   2h        |
-|                                  |
-|  [5m +2.1%] [1h -0.5%] [6h +8%]|
-+----------------------------------+
-```
+### 3. `src/components/TrendingBar.tsx` (Trending Strip)
+**Percentage span (line 36-38):**
+- Font: `text-[11px]` (no weight) --> `text-[12px] font-bold tracking-tight`
 
-Key class changes:
-- Card: `bg-[hsl(var(--surface-2))] border border-border/50 rounded-xl p-5 group cursor-pointer hover:border-primary/40 hover:bg-[hsl(var(--surface-3))] transition-all duration-200 hover:shadow-lg hover:shadow-primary/5`
-- Logo: `w-12 h-12 rounded-lg transition-transform duration-200 group-hover:scale-110`
-- Token name: `font-semibold text-foreground text-[15px]`
-- Price: `text-lg font-bold text-foreground` (no font-mono)
-- Stats grid: `text-[12px]` labels, `text-[13px]` values
-- Change pills: Rounded background pills with `px-2 py-0.5 rounded-md text-[11px] font-medium`
+### 4. `src/components/TokenInfoPanel.tsx` (Token Detail Page)
+**Price change boxes (line 123):**
+- Remove `font-mono` (violates project style rule -- Inter only)
+- Font: `text-xs font-bold font-mono` --> `text-sm font-bold tracking-tight`
 
+## Consistency Rules Applied
+- All percentage numbers: `font-bold tracking-tight`
+- No `font-mono` anywhere (project rule: Inter only)
+- Positive values always prefixed with `+`
+- Colored backgrounds with sufficient opacity for readability
+- Minimum `text-[12px]` for any percentage display
