@@ -1,9 +1,24 @@
 import { Token, formatPrice, formatNumber, formatCompact } from '@/data/mockTokens';
 import pumpfunLogo from '@/assets/pumpfun-logo.png';
-import { Globe, Twitter, MessageCircle, Star, Bell, ExternalLink, Zap, Copy, ChevronDown } from 'lucide-react';
+import { Globe, Star, Bell, Zap, Copy, ChevronDown, ChevronUp, Info } from 'lucide-react';
 import SolanaIcon from '@/components/SolanaIcon';
 import { toast } from 'sonner';
 import { useState } from 'react';
+
+const XIcon = ({ className = '' }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+    <path d="M4 4l11.733 16h4.267l-11.733 -16l-4.267 0" />
+    <path d="M4 20l6.768 -6.768m2.46 -2.46l6.772 -6.772" />
+  </svg>
+);
+
+const TelegramIcon = ({ className = '' }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+    <path d="M15 10l-4 4l6 6l4 -16l-18 7l4 2l2 6l3 -4" />
+  </svg>
+);
 
 interface TokenInfoPanelProps {
   token: Token;
@@ -38,6 +53,7 @@ const TokenInfoPanel = ({ token, onBuyClick, onSellClick }: TokenInfoPanelProps)
   const sellVolume = token.sellVolume24h ?? (token.volume - buyVolume);
   const buyers = Math.round(buys * 0.6);
   const sellers = Math.round(sells * 0.6);
+  const [auditExpanded, setAuditExpanded] = useState(false);
 
   const hasSocials = token.twitter || token.telegram || token.website;
 
@@ -149,7 +165,12 @@ const TokenInfoPanel = ({ token, onBuyClick, onSellClick }: TokenInfoPanelProps)
             )}
             {token.twitter && (
               <a href={token.twitter} target="_blank" rel="noopener noreferrer" className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md bg-[hsl(0,0%,16%)] backdrop-blur-sm text-foreground hover:bg-accent transition-colors text-xs font-medium border border-border">
-                <Twitter className="w-3.5 h-3.5" /> Twitter
+                <XIcon className="w-3.5 h-3.5" /> Twitter
+              </a>
+            )}
+            {token.telegram && (
+              <a href={token.telegram} target="_blank" rel="noopener noreferrer" className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md bg-[hsl(0,0%,16%)] backdrop-blur-sm text-foreground hover:bg-accent transition-colors text-xs font-medium border border-border">
+                <TelegramIcon className="w-3.5 h-3.5" /> Telegram
               </a>
             )}
             <button className="p-2 rounded-md bg-[hsl(0,0%,16%)] backdrop-blur-sm text-muted-foreground hover:bg-accent transition-colors border border-border shrink-0">
@@ -320,6 +341,66 @@ const TokenInfoPanel = ({ token, onBuyClick, onSellClick }: TokenInfoPanelProps)
             <div className="w-2 h-2 rounded-full bg-loss" /> Sell
           </button>
         </div>
+      </div>
+
+      {/* Audit Section */}
+      <div className="px-4 py-3 border-t border-border">
+        <button
+          onClick={() => setAuditExpanded(!auditExpanded)}
+          className="w-full flex items-center justify-between py-2 px-3 rounded-md bg-[hsl(0,0%,16%)] border border-border hover:bg-accent transition-colors"
+        >
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold text-foreground">Audit</span>
+            <span className="text-xs text-muted-foreground">No issues</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="#26a269" stroke="none" className="shrink-0">
+              <path d="M17 3.34a10 10 0 1 1 -14.995 8.984l-.005 -.324l.005 -.324a10 10 0 0 1 14.995 -8.336zm-1.293 5.953a1 1 0 0 0 -1.32 -.083l-.094 .083l-3.293 3.292l-1.293 -1.292l-.094 -.083a1 1 0 0 0 -1.403 1.403l.083 .094l2 2l.094 .083a1 1 0 0 0 1.226 0l.094 -.083l4 -4l.083 -.094a1 1 0 0 0 -.083 -1.32z" />
+            </svg>
+          </div>
+          {auditExpanded ? <ChevronUp className="w-3.5 h-3.5 text-muted-foreground" /> : <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />}
+        </button>
+
+        {auditExpanded && (
+          <div className="mt-1 rounded-md bg-[hsl(0,0%,16%)] border border-border overflow-hidden">
+            <div className="flex items-center justify-between px-3 py-2 border-b border-border">
+              <div className="flex items-center gap-1.5">
+                <Info className="w-3 h-3 text-muted-foreground" />
+                <span className="text-xs text-foreground">Mintable</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="#26a269" stroke="none" className="shrink-0">
+                  <path d="M17 3.34a10 10 0 1 1 -14.995 8.984l-.005 -.324l.005 -.324a10 10 0 0 1 14.995 -8.336zm-1.293 5.953a1 1 0 0 0 -1.32 -.083l-.094 .083l-3.293 3.292l-1.293 -1.292l-.094 -.083a1 1 0 0 0 -1.403 1.403l.083 .094l2 2l.094 .083a1 1 0 0 0 1.226 0l.094 -.083l4 -4l.083 -.094a1 1 0 0 0 -.083 -1.32z" />
+                </svg>
+                <span className="text-xs font-medium text-foreground">No</span>
+              </div>
+            </div>
+            <div className="flex items-center justify-between px-3 py-2">
+              <div className="flex items-center gap-1.5">
+                <Info className="w-3 h-3 text-muted-foreground" />
+                <span className="text-xs text-foreground">Freezable</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="#26a269" stroke="none" className="shrink-0">
+                  <path d="M17 3.34a10 10 0 1 1 -14.995 8.984l-.005 -.324l.005 -.324a10 10 0 0 1 14.995 -8.336zm-1.293 5.953a1 1 0 0 0 -1.32 -.083l-.094 .083l-3.293 3.292l-1.293 -1.292l-.094 -.083a1 1 0 0 0 -1.403 1.403l.083 .094l2 2l.094 .083a1 1 0 0 0 1.226 0l.094 -.083l4 -4l.083 -.094a1 1 0 0 0 -.083 -1.32z" />
+                </svg>
+                <span className="text-xs font-medium text-foreground">No</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <p className="text-[10px] text-muted-foreground mt-2">
+          <span className="text-yellow-500 font-medium">Warning!</span> Audits may not be 100% accurate! <button className="text-primary hover:underline">More</button>.
+        </p>
+      </div>
+
+      {/* Claim your token page */}
+      <div className="px-4 pb-4">
+        <button
+          onClick={() => toast.info('Claim token page coming soon')}
+          className="w-full py-2.5 text-xs font-medium text-primary border border-primary/30 rounded-md hover:bg-primary/10 transition-colors"
+        >
+          Claim your token page
+        </button>
       </div>
     </div>
   );
