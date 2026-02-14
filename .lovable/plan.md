@@ -1,85 +1,118 @@
 
+# Comprehensive iPad/Tablet UI/UX Overhaul
 
-# DexScreener Mobile Reference Implementation
-
-Pixel-perfect implementation of the mobile UI based on the three reference screenshots provided.
-
----
-
-## Changes Required (Reference vs Current)
-
-### 1. Index Page - Token List Mobile Layout (TokenTable.tsx) - CRITICAL
-
-**Reference shows**: Each token is a two-line card row, NOT a traditional table on mobile:
-- **Line 1**: Exchange icon (small, e.g. "swap" logo), Token logo (round), Ticker (bold white), Age badge (green leaf + "8h"), Lightning+boost number (green "500"), then right-aligned: Price, 1H %, 24H %
-- **Line 2**: Small exchange icon, Token name (muted gray), then right-aligned small pills: "LIQ $39K", "VOL $1.1M", "MCAP $212K"
-
-**Current**: Standard table rows with limited columns on mobile - missing age, boosts, exchange icons, and the LIQ/VOL/MCAP sub-row.
-
-**Fix**: On mobile, render a completely different layout - card-style rows with two lines per token matching the reference exactly. Keep the table layout for desktop.
-
-### 2. Index Page - Stats Boxes on Mobile (StatsBar.tsx) - HIGH
-
-**Reference shows**: Two side-by-side boxes "24H VOLUME $17.49B" and "24H TXNS 41,268,759" ARE visible on mobile, displayed prominently below the filter bar.
-
-**Current**: These stats are hidden on mobile (`!isMobile`).
-
-**Fix**: Show the stats boxes on mobile. Make them a full-width two-column grid below the search bar.
-
-### 3. Token Detail - Bottom Tab Bar (TokenDetail.tsx) - CRITICAL
-
-**Reference shows**: 4 tabs with DIFFERENT labels and icons:
-- **Info** (i icon) - Shows the TokenInfoPanel
-- **Chart+Txns** (monitor icon) - Shows chart AND transaction list combined vertically
-- **Chart** (chart icon) - Shows chart only
-- **Txns** (list icon) - Shows transaction list only
-
-**Current**: Tabs are Chart/Txns/Info/Trade - wrong structure entirely.
-
-**Fix**: Change mobile tabs to match reference: Info, Chart+Txns, Chart, Txns. The "Chart+Txns" tab shows both chart (top ~55%) and transaction list (bottom ~45%) in a vertical split. Remove the separate "Trade" tab. Default to "Info" tab (matching the reference where Info is first).
-
-### 4. Token Detail - Info Tab Content (TokenInfoPanel.tsx) - HIGH
-
-**Reference shows**: The Info panel on mobile includes a single "Trade O/SOL" button (with arrows icon) instead of separate Buy/Sell buttons. The Watchlist and Alerts buttons are shown above it.
-
-**Current**: Separate Buy and Sell buttons.
-
-**Fix**: On mobile, replace the Buy/Sell buttons with a single full-width "Trade {ticker}/SOL" button that navigates to the trading panel. Keep Buy/Sell on desktop.
-
-### 5. Token Detail - Transaction List Mobile Columns (TransactionList.tsx) - MEDIUM
-
-**Reference shows**: Transaction table on mobile has columns: TXN (with buy/sell color indicator as a circle "B"), USD, Price (with SOL icon), MAKER (with filter icon). The "Txns" tab header shows a dropdown arrow.
-
-**Current**: DATE, TYPE, USD, PRICE, MAKER, TXN columns.
-
-**Fix**: Match reference columns: Show a colored circle indicator (B/S) as first column, then USD, Price (with SOL icon in header), MAKER. Rename/restructure to match.
-
-### 6. Index Page - Filter Bar Mobile (TokenFilters.tsx) - MEDIUM
-
-**Reference shows**: "Trending 6H" as a single green pill with dropdown chevron, then "New" and "Top" as separate pills. No "Gainers" visible. The time filter is embedded IN the trending pill text (not as separate sub-buttons).
-
-**Current**: Trending pill with separate embedded time toggle buttons, plus Top, Gain, New buttons.
-
-**Fix**: On mobile, show "Trending {timeFilter}" as a single pill with a dropdown chevron (tapping opens time selection). Show "New" and "Top" pills. Keep current desktop layout.
+After auditing the current state at 768px and 834px viewports, multiple critical issues have been identified that make the tablet experience poor.
 
 ---
 
-## Technical Implementation
+## Critical Bugs Found
 
-### Files to modify:
+### BUG 1: Token Detail Page Completely Broken on Tablet (CRITICAL)
+The chart and info panel areas appear completely blank/empty on tablet. The right panel (260px) squeezes the main content area too much at 768px, leaving only ~500px for chart + transaction list. The chart's `ResponsiveContainer` may not render properly in the cramped space. The loading skeleton also doesn't account for tablet width properly.
 
-| File | Priority | Changes |
-|------|----------|---------|
-| `src/components/TokenTable.tsx` | Critical | Complete mobile card-row layout with 2-line tokens, age, boosts, LIQ/VOL/MCAP sub-row |
-| `src/pages/TokenDetail.tsx` | Critical | New tab structure: Info, Chart+Txns, Chart, Txns. Default to Info. Combined chart+txns view |
-| `src/components/StatsBar.tsx` | High | Show 24H VOLUME and 24H TXNS boxes on mobile |
-| `src/components/TokenInfoPanel.tsx` | High | Single "Trade {ticker}/SOL" button on mobile instead of Buy/Sell |
-| `src/components/TransactionList.tsx` | Medium | Match reference columns: colored indicator, USD, Price (SOL), MAKER |
-| `src/components/TokenFilters.tsx` | Medium | Compact "Trending 6H" single pill on mobile |
+**Fix**: On tablet, use a stacked layout similar to mobile but without the bottom tab bar. Show chart on top (~50% height), transaction list below (~25%), and info panel below that as a scrollable section. Alternatively, reduce the right panel further or switch to a collapsible sidebar.
+
+### BUG 2: Token Table Missing Too Many Columns on Tablet
+Currently, tablet hides AGE, TXNS, MAKERS, and LIQUIDITY -- showing only #, TOKEN, PRICE, VOLUME, 1H, 24H, MCAP. This is too aggressive for an 834px screen. AGE and TXNS are important data.
+
+**Fix**: Restore AGE and TXNS columns on tablet (they fit at 834px). Only hide MAKERS and LIQUIDITY.
+
+### BUG 3: Token Table Text Truncation on Tablet
+Token names are heavily truncated (e.g., "P...", "S...", "N...") due to `max-w-[120px]` on the name span. On tablet, there's more room.
+
+**Fix**: Increase `max-w` for token name on tablet to `max-w-[160px]`.
+
+### BUG 4: StatsBar Not Optimized for Tablet
+The stats bar works but the spacing between elements could be better utilized. The Market View button could show full text "Market View" instead of just the icon.
+
+### BUG 5: TokenFilters Missing Gainers Button on Tablet
+Currently, the `isTablet` flag hides the Customize button, but the Gainers button is shown. The time filter toggles in the Trending pill work but are slightly cramped.
+
+### BUG 6: ViralBar Cluster Pills Cramped on Tablet
+The viral cluster pills show token count and mcap on non-mobile, but at tablet sizes they can overflow.
+
+### BUG 7: MarketSentimentBar Not Tablet-Optimized
+Uses `isMobile` checks only. On tablet, the pills could use slightly larger text and better spacing.
+
+### BUG 8: TransactionList Not Tablet-Optimized
+Shows all desktop columns on tablet, which can be tight at 768px within the 500px remaining after the 260px panel.
+
+### BUG 9: TokenInfoPanel Too Narrow on Tablet
+At 260px width, the info panel's content (price boxes, LIQ/FDV/MCAP grid) is extremely cramped. Text overflows.
+
+### BUG 10: TokenGrid Not Tablet-Optimized
+Grid uses `md:grid-cols-3` which works okay at 768px but cards are small. Could use 2 columns for better readability on portrait iPad.
+
+---
+
+## Implementation Plan
+
+### 1. Fix Token Detail Tablet Layout (TokenDetail.tsx) - HIGHEST PRIORITY
+
+The core fix: On tablet, switch from desktop's side-by-side layout (chart + right panel) to a **stacked scrollable layout**:
+- Chart takes full width, ~45vh height
+- Transaction list takes full width, ~30vh height  
+- Info panel takes full width below, scrollable
+- No bottom tab bar (tablet has enough vertical space to stack everything)
+
+This eliminates the cramped 260px panel problem entirely.
+
+### 2. Restore Table Columns on Tablet (TokenTable.tsx)
+
+- Show AGE column on tablet (was hidden)
+- Show TXNS column on tablet (was hidden)  
+- Keep MAKERS and LIQUIDITY hidden on tablet
+- Show 3 change columns instead of 2: add 6H back (5M, 1H, 6H removed -> 1H, 6H, 24H)
+- Increase token name max-width to 160px on tablet
+
+### 3. Optimize TokenGrid for Tablet (TokenGrid.tsx)
+
+- Use 2 columns on portrait tablet (768px) instead of 3
+- Use 3 columns on landscape tablet (1024px+)
+
+### 4. Optimize TransactionList for Tablet (TransactionList.tsx)
+
+- In the stacked tablet layout, the transaction list gets full width, so desktop columns work fine
+- Add `isTablet` check to slightly compact column padding
+
+### 5. Optimize MarketSentimentBar for Tablet (MarketSentimentBar.tsx)
+
+- Add `isTablet` awareness
+- Use intermediate sizing between mobile compact and desktop full
+
+### 6. Optimize ViralBar for Tablet (ViralBar.tsx)
+
+- Show token count but hide mcap on tablet to prevent overflow
+- Ensure sort buttons show labels on tablet
+
+### 7. Optimize TrendingBar for Tablet (TrendingBar.tsx)
+
+- Show full "Trending" label on tablet (currently shows it since `!isMobile`)
+- Ensure mcap is shown on tablet
+
+### 8. Loading Skeleton Tablet Fix (Index.tsx)
+
+- Show appropriate number of skeleton columns matching tablet visible columns
+
+---
+
+## Technical Details
+
+### Files to modify (8 files):
+
+| File | Changes | Priority |
+|------|----------|----------|
+| `src/pages/TokenDetail.tsx` | Stacked layout for tablet instead of cramped side-by-side | Critical |
+| `src/components/TokenTable.tsx` | Restore AGE+TXNS columns, add 6H change, wider name | High |
+| `src/components/TokenGrid.tsx` | 2-col portrait tablet, 3-col landscape | Medium |
+| `src/components/TransactionList.tsx` | Tablet padding optimization | Medium |
+| `src/components/MarketSentimentBar.tsx` | Tablet-aware sizing | Medium |
+| `src/components/ViralBar.tsx` | Hide mcap on tablet pills | Low |
+| `src/components/TrendingBar.tsx` | Verify labels correct on tablet | Low |
+| `src/pages/Index.tsx` | Skeleton columns match tablet layout | Low |
 
 ### Key technical decisions:
-- Use `useIsMobile()` hook for all conditional rendering
-- Mobile token rows will be `div`-based cards instead of `<tr>` elements for proper two-line layout
-- Chart+Txns combined view uses flex column with chart at ~55vh and transactions filling remaining space
-- All changes are mobile-only; desktop layout remains completely unchanged
-
+- Tablet (768-1024px) uses `useIsTablet()` hook for conditional rendering
+- Token Detail on tablet uses a **full-width stacked scroll layout** (no side panel, no bottom tabs)
+- This is the optimal approach: iPad portrait has plenty of vertical space and full horizontal width makes chart and info panel readable
+- Desktop layout (1024px+) remains completely unchanged
