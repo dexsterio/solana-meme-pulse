@@ -204,6 +204,35 @@ const TokenDetail = () => {
             </div>
           )}
         </div>
+      ) : isTablet ? (
+        /* Tablet layout - stacked scrollable */
+        <div className="flex-1 overflow-y-auto min-h-0">
+          <div className="p-2">
+            <div className="h-[45vh] min-h-[280px]">
+              <PriceChart token={token} />
+            </div>
+          </div>
+          <div className="p-2 pt-0">
+            <div className="h-[30vh] min-h-[200px]">
+              <TransactionList tokenId={token.id} />
+            </div>
+          </div>
+          <div className="p-2 pt-0">
+            {panelMode === 'info' ? (
+              <TokenInfoPanel
+                token={token}
+                onBuyClick={() => setPanelMode('buy')}
+                onSellClick={() => setPanelMode('sell')}
+              />
+            ) : (
+              <TradingPanel
+                token={token}
+                initialMode={panelMode}
+                onBack={() => setPanelMode('info')}
+              />
+            )}
+          </div>
+        </div>
       ) : (
         /* Desktop layout */
         <div className="flex-1 flex min-h-0">
@@ -215,7 +244,7 @@ const TokenDetail = () => {
               <TransactionList tokenId={token.id} />
             </div>
           </div>
-          <div className={`${isTablet ? 'w-[260px]' : 'w-[320px]'} shrink-0 p-2 pl-1`}>
+          <div className="w-[320px] shrink-0 p-2 pl-1">
             {panelMode === 'info' ? (
               <TokenInfoPanel
                 token={token}

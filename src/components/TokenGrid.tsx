@@ -36,7 +36,7 @@ const TokenGrid = ({ tokens }: TokenGridProps) => {
   }
 
   return (
-    <div className="grid grid-cols-1 min-[375px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 md:gap-4 p-2 md:p-4 max-w-[1920px] mx-auto">
+    <div className="grid grid-cols-1 min-[375px]:grid-cols-2 md:grid-cols-2 min-[900px]:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 md:gap-3 lg:gap-4 p-2 md:p-3 lg:p-4 max-w-[1920px] mx-auto">
       {tokens.map((token) => {
         const exchange = getExchangeLogo(token.exchangeName);
         return (

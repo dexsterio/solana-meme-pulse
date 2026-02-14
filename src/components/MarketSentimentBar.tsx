@@ -1,7 +1,7 @@
 import { CryptoGlobalData } from '@/services/coingeckoApi';
 import { formatNumber } from '@/data/mockTokens';
 import { TrendingUp, TrendingDown, Minus, Activity, Fuel, BarChart3, Bitcoin, Gem, ChevronRight } from 'lucide-react';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { useIsMobile, useIsTablet } from '@/hooks/use-mobile';
 
 interface MarketSentimentBarProps {
   data: CryptoGlobalData | undefined;
@@ -87,6 +87,7 @@ const FearGreedGauge = ({ value, classification, compact }: { value: number; cla
 
 const MarketSentimentBar = ({ data, isLoading }: MarketSentimentBarProps) => {
   const isMobile = useIsMobile();
+  const isTablet = useIsTablet();
 
   if (isLoading || !data) {
     return (
@@ -136,7 +137,7 @@ const MarketSentimentBar = ({ data, isLoading }: MarketSentimentBarProps) => {
       </div>
 
       {/* Fear & Greed Gauge */}
-      <FearGreedGauge value={data.fearGreed.value} classification={data.fearGreed.classification} compact={isMobile} />
+      <FearGreedGauge value={data.fearGreed.value} classification={data.fearGreed.classification} compact={isMobile || isTablet} />
     </div>
   );
 };
