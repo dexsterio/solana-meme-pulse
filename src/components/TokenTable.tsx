@@ -137,8 +137,7 @@ const MobileTokenCard = ({ token, ogTokenId, topTokenId, onClick }: { token: Tok
       </div>
 
       {/* Line 2: Exchange icon (small), Token name, LIQ/VOL/MCAP pills */}
-      <div className="flex items-center gap-1.5 mt-0.5 min-w-0">
-        <ExchangeIcon token={token} size="xs" />
+      <div className="flex items-center gap-1.5 mt-0.5 min-w-0 pl-[22px]">
         <span className="text-[11px] text-muted-foreground truncate max-w-[100px]">{token.name}</span>
         <div className="flex-1" />
         <span className="text-[10px] text-muted-foreground">LIQ {formatNumber(token.liquidity).replace('$', '$')}</span>
