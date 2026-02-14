@@ -1,3 +1,19 @@
+/**
+ * ============================================================================
+ * TOKEN DATA TYPES & MOCK HELPERS
+ * ============================================================================
+ * This file defines the Token interface used across the entire app, plus
+ * mock data generators and formatting utilities.
+ *
+ * TODO(backend): Replace generateMockTransactions() with a real API call
+ * to your transaction feed endpoint, e.g.:
+ *   GET /api/tokens/:address/transactions?limit=30
+ * Expected response: Array of Transaction objects (see interface below).
+ *
+ * The Token interface is the canonical shape — your server responses
+ * should be mapped to this interface in the respective service files.
+ * ============================================================================
+ */
 export interface Token {
   id: string;
   rank: number;

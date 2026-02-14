@@ -1,3 +1,17 @@
+/**
+ * ============================================================================
+ * TOKEN DATA HOOK
+ * ============================================================================
+ * MIGRATION: This hook orchestrates data fetching with a fallback strategy:
+ *   Primary: DexScreener (free, no proxy needed)
+ *   Fallback: DexTools (via your proxy at ENDPOINTS.DEXTOOLS_PROXY)
+ *
+ * The 'new' category is handled by PumpPortal WebSocket (see usePumpPortalNewTokens).
+ *
+ * Data flow:
+ *   useTokens(category) → fetchByCategory → DexScreener || DexTools → Token[]
+ * ============================================================================
+ */
 import { useQuery } from '@tanstack/react-query';
 import {
   fetchTrendingTokens,

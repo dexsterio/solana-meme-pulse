@@ -1,3 +1,12 @@
+/**
+ * TODO(backend): Several data points in this panel are derived/estimated
+ * from the Token object. For full accuracy, implement:
+ *
+ *   - Buy/sell counts & volumes → real data from your server or DexScreener
+ *   - Makers/buyers/sellers breakdown → GET /api/tokens/:address/makers
+ *   - Watchlist & Alerts → requires user accounts + persistence
+ *   - Audit section (if added) → GET /api/tokens/:address/audit
+ */
 import { Token, formatPrice, formatNumber, formatCompact } from '@/data/mockTokens';
 import pumpfunLogo from '@/assets/pumpfun-logo.png';
 import xLogo from '@/assets/x-logo.png';

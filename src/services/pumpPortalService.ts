@@ -1,3 +1,15 @@
+/**
+ * ============================================================================
+ * PUMPPORTAL WEBSOCKET SERVICE
+ * ============================================================================
+ * MIGRATION: No migration needed.
+ * This service connects directly to PumpPortal's public WebSocket API.
+ * It streams new Solana token launches in real-time with no backend dependency.
+ *
+ * TODO(backend): If you want server-side token filtering or persistence,
+ * you could route the WebSocket through your own server instead.
+ * ============================================================================
+ */
 import { Token } from '@/data/mockTokens';
 
 const WS_URL = 'wss://pumpportal.fun/api/data';

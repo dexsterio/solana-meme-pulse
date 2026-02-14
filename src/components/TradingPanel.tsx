@@ -1,3 +1,19 @@
+/**
+ * TODO(backend): Connect wallet integration and order execution to your
+ * trading backend. Key areas to implement:
+ *
+ *   1. Wallet connection (Phantom, Solflare, etc.) — replace the disabled
+ *      "Connect Wallet" button with actual wallet adapter logic.
+ *
+ *   2. Order execution — POST /api/trade with { tokenAddress, side, amount, orderType }
+ *      The "Buy" and "Sell" buttons currently do nothing.
+ *
+ *   3. Token info data (Top 10 holders, dev holdings, snipers, insiders,
+ *      bundlers, LP burned) — all currently hardcoded mock values.
+ *      Replace with: GET /api/tokens/:address/security-audit
+ *
+ *   4. Portfolio display — fetch user's token balance after wallet connection.
+ */
 import { useState } from 'react';
 import { Token, formatCompact, formatNumber } from '@/data/mockTokens';
 import {

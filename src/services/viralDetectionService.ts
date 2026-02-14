@@ -1,3 +1,12 @@
+/**
+ * ============================================================================
+ * VIRAL DETECTION SERVICE
+ * ============================================================================
+ * MIGRATION: No migration needed.
+ * This is pure client-side logic — it clusters new tokens by name similarity
+ * to detect "viral" trends. No API calls, no backend dependency.
+ * ============================================================================
+ */
 import { Token } from '@/data/mockTokens';
 import { onNewToken, getTokens } from '@/services/pumpPortalService';
 

@@ -1,3 +1,11 @@
+/**
+ * TODO(backend): Replace the mock price data generation below with real
+ * OHLCV candle data from your server, e.g.:
+ *   GET /api/tokens/:address/ohlcv?timeframe=15m&limit=100
+ * Expected response: Array of { time, open, high, low, close, volume }
+ *
+ * Currently uses a deterministic seed-based random walk to simulate price history.
+ */
 import { useState, useMemo } from 'react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { Token } from '@/data/mockTokens';

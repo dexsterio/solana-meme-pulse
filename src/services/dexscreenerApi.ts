@@ -1,3 +1,12 @@
+/**
+ * ============================================================================
+ * DEXSCREENER API SERVICE
+ * ============================================================================
+ * MIGRATION: No migration needed.
+ * This service calls DexScreener's free public API directly (no proxy, no key).
+ * It works standalone without any backend dependency.
+ * ============================================================================
+ */
 import { Token } from '@/data/mockTokens';
 
 const BASE = 'https://api.dexscreener.com';
