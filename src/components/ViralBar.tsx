@@ -12,6 +12,7 @@ interface ViralBarProps {
   onClear: () => void;
   viralSortBy?: ViralSortBy;
   onViralSortChange?: (sort: ViralSortBy) => void;
+  isViralCategory?: boolean;
 }
 
 const sortOptions: { value: ViralSortBy; label: string; icon: React.ReactNode }[] = [
@@ -20,56 +21,61 @@ const sortOptions: { value: ViralSortBy; label: string; icon: React.ReactNode }[
   { value: 'volume', label: 'Highest Volume', icon: <BarChart3 className="w-3.5 h-3.5" /> },
 ];
 
-const ViralBar = ({ clusters, selectedCluster, onSelect, onClear, viralSortBy = 'created', onViralSortChange }: ViralBarProps) => {
+const ViralBar = ({ clusters, selectedCluster, onSelect, onClear, viralSortBy = 'created', onViralSortChange, isViralCategory = false }: ViralBarProps) => {
   const isMobile = useIsMobile();
   const isTablet = useIsTablet();
   if (clusters.length === 0) return null;
 
   const selected = clusters.find((c) => c.name === selectedCluster);
 
+  // In viral category mode, only show when a cluster is selected (header with back + sort)
+  if (isViralCategory && !selected) return null;
+
   return (
     <div className="border-b border-border/40 bg-card/60">
-      {/* Cluster pills row */}
-      <div className="flex items-center gap-2 md:gap-3 px-2 md:px-4 py-2 md:py-2.5 overflow-x-auto scrollbar-hide">
-        <div className="flex items-center gap-1 md:gap-1.5 text-[11px] text-muted-foreground uppercase tracking-wider shrink-0 pr-1">
-          <FlameFilledIcon className="w-4 h-4" />
-          <span className="font-semibold">{isMobile ? 'Viral' : 'Viral Memes'}</span>
-        </div>
-        <div className="w-px h-5 bg-border/50 shrink-0" />
-        <div className="flex items-center gap-1.5 md:gap-2">
-          {clusters.map((cluster) => (
-            <button
-              key={cluster.name}
-              onClick={() =>
-                selectedCluster === cluster.name ? onClear() : onSelect(cluster.name)
-              }
-              className={`flex items-center gap-1.5 md:gap-2 px-2 md:px-3 py-1.5 rounded-lg text-[11px] md:text-[12px] font-medium whitespace-nowrap transition-all duration-150 shrink-0 border ${
-                selectedCluster === cluster.name
-                  ? 'bg-orange-500/20 text-orange-300 border-orange-500/40 shadow-[0_0_12px_-3px] shadow-orange-500/20'
-                  : 'bg-[hsl(0,0%,14%)] hover:bg-accent text-foreground border-border/30 hover:border-border/60'
-              }`}
-            >
-              <span className="relative flex h-2 w-2 shrink-0">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-60" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-400" />
-              </span>
-              <span className="font-bold">{cluster.displayName}</span>
-              {!isMobile && (
-                <>
-                  <span className="text-muted-foreground/80 text-[11px] border-l border-border/40 pl-2">
-                    {cluster.count} tokens
-                  </span>
-                  {!isTablet && (
-                    <span className="text-muted-foreground/50 text-[11px]">
-                      {formatNumber(cluster.topToken.mcap)}
+      {/* Cluster pills row - hidden in viral category mode */}
+      {!isViralCategory && (
+        <div className="flex items-center gap-2 md:gap-3 px-2 md:px-4 py-2 md:py-2.5 overflow-x-auto scrollbar-hide">
+          <div className="flex items-center gap-1 md:gap-1.5 text-[11px] text-muted-foreground uppercase tracking-wider shrink-0 pr-1">
+            <FlameFilledIcon className="w-4 h-4" />
+            <span className="font-semibold">{isMobile ? 'Viral' : 'Viral Memes'}</span>
+          </div>
+          <div className="w-px h-5 bg-border/50 shrink-0" />
+          <div className="flex items-center gap-1.5 md:gap-2">
+            {clusters.map((cluster) => (
+              <button
+                key={cluster.name}
+                onClick={() =>
+                  selectedCluster === cluster.name ? onClear() : onSelect(cluster.name)
+                }
+                className={`flex items-center gap-1.5 md:gap-2 px-2 md:px-3 py-1.5 rounded-lg text-[11px] md:text-[12px] font-medium whitespace-nowrap transition-all duration-150 shrink-0 border ${
+                  selectedCluster === cluster.name
+                    ? 'bg-orange-500/20 text-orange-300 border-orange-500/40 shadow-[0_0_12px_-3px] shadow-orange-500/20'
+                    : 'bg-[hsl(0,0%,14%)] hover:bg-accent text-foreground border-border/30 hover:border-border/60'
+                }`}
+              >
+                <span className="relative flex h-2 w-2 shrink-0">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-60" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-400" />
+                </span>
+                <span className="font-bold">{cluster.displayName}</span>
+                {!isMobile && (
+                  <>
+                    <span className="text-muted-foreground/80 text-[11px] border-l border-border/40 pl-2">
+                      {cluster.count} tokens
                     </span>
-                  )}
-                </>
-              )}
-            </button>
-          ))}
+                    {!isTablet && (
+                      <span className="text-muted-foreground/50 text-[11px]">
+                        {formatNumber(cluster.topToken.mcap)}
+                      </span>
+                    )}
+                  </>
+                )}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Selected cluster info */}
       {selected && (
