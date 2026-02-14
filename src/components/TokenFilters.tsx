@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { Filter, LayoutList, LayoutGrid, Clock, Trophy, TrendingUp, Sparkles, Settings, ChevronDown } from 'lucide-react';
+import { Filter, LayoutList, LayoutGrid, Clock, Trophy, TrendingUp, Sparkles, Settings, ChevronDown, Flame } from 'lucide-react';
 import { FlameFilledIcon } from '@/components/icons/TablerIcons';
 import { toast } from 'sonner';
 import { useIsMobile, useIsTablet } from '@/hooks/use-mobile';
 
 export type TimeFilter = '5m' | '1h' | '6h' | '24h';
-export type Category = 'trending' | 'top' | 'gainers' | 'new';
+export type Category = 'trending' | 'top' | 'gainers' | 'new' | 'viral';
 export type RankBy = 'trending' | 'volume' | 'priceChange' | 'txns' | 'mcap';
 export type ViewMode = 'list' | 'grid';
 
@@ -104,6 +104,15 @@ const TokenFilters = ({
               <Trophy className="w-3.5 h-3.5" />
               Top
             </button>
+            <button
+              onClick={() => setCategory('viral')}
+              className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-[12px] transition-colors ${
+                category === 'viral' ? 'bg-orange-500/15 text-orange-400 border border-orange-500/30' : 'bg-[hsl(0,0%,16%)] text-muted-foreground border border-border'
+              }`}
+            >
+              <Flame className="w-3.5 h-3.5" />
+              Viral
+            </button>
           </>
         ) : (
           <>
@@ -159,6 +168,15 @@ const TokenFilters = ({
             >
               <Sparkles className="w-3.5 h-3.5" />
               New Pairs
+            </button>
+            <button
+              onClick={() => setCategory('viral')}
+              className={`flex items-center gap-1 px-3 py-1.5 rounded text-[13px] transition-colors ${
+                category === 'viral' ? 'bg-orange-500/15 text-orange-400' : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <Flame className="w-3.5 h-3.5" />
+              Viral
             </button>
           </>
         )}
