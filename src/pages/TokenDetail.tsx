@@ -13,7 +13,7 @@ import { ArrowLeft, BarChart3, List, Info, Monitor } from 'lucide-react';
 import SolanaIcon from '@/components/SolanaIcon';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTokens } from '@/hooks/useTokens';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { useIsMobile, useIsTablet } from '@/hooks/use-mobile';
 
 type MobileTab = 'info' | 'chart-txns' | 'chart' | 'txns';
 
@@ -24,6 +24,7 @@ const TokenDetail = () => {
   const [mobileTab, setMobileTab] = useState<MobileTab>('info');
   const [showTradingPanel, setShowTradingPanel] = useState(false);
   const isMobile = useIsMobile();
+  const isTablet = useIsTablet();
 
   const { data: trendingTokens = [] } = useTokens('trending');
 
@@ -214,7 +215,7 @@ const TokenDetail = () => {
               <TransactionList tokenId={token.id} />
             </div>
           </div>
-          <div className="w-[320px] shrink-0 p-2 pl-1">
+          <div className={`${isTablet ? 'w-[260px]' : 'w-[320px]'} shrink-0 p-2 pl-1`}>
             {panelMode === 'info' ? (
               <TokenInfoPanel
                 token={token}

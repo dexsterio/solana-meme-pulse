@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { Token, formatPrice, formatNumber } from '@/data/mockTokens';
 import { Zap } from 'lucide-react';
 import { CrownFilledIcon, CaretUpFilledIcon } from '@/components/icons/TablerIcons';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { useIsMobile, useIsTablet } from '@/hooks/use-mobile';
 
 import pumpfunLogo from '@/assets/pumpfun-logo.png';
 import bonkLogo from '@/assets/bonk-logo.png';
@@ -151,7 +151,7 @@ const MobileTokenCard = ({ token, ogTokenId, topTokenId, onClick }: { token: Tok
 const TokenTable = ({ tokens, isCryptoMarket = false, ogTokenId, topTokenId, showCreatedColumn }: TokenTableProps) => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
-
+  const isTablet = useIsTablet();
   if (tokens.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-40 gap-2">
@@ -187,28 +187,42 @@ const TokenTable = ({ tokens, isCryptoMarket = false, ogTokenId, topTokenId, sho
             <th className="w-10 px-3 py-2 text-left font-medium">#</th>
             <th className="px-3 py-2 text-left font-medium">TOKEN</th>
             <th className="px-3 py-2 text-right font-medium">PRICE</th>
-            {!isCryptoMarket && <th className="px-3 py-2 text-right font-medium">AGE</th>}
-            {!isCryptoMarket && <th className="px-3 py-2 text-right font-medium">TXNS</th>}
+            {!isCryptoMarket && !isTablet && <th className="px-3 py-2 text-right font-medium">AGE</th>}
+            {!isCryptoMarket && !isTablet && <th className="px-3 py-2 text-right font-medium">TXNS</th>}
             <th className="px-3 py-2 text-right font-medium">VOLUME</th>
-            {!isCryptoMarket && <th className="px-3 py-2 text-right font-medium">MAKERS</th>}
+            {!isCryptoMarket && !isTablet && <th className="px-3 py-2 text-right font-medium">MAKERS</th>}
             {isCryptoMarket ? (
-              <>
-                <th className="px-3 py-2 text-right font-medium">1H</th>
-                <th className="px-3 py-2 text-right font-medium">24H</th>
-                <th className="px-3 py-2 text-right font-medium">7D</th>
-                <th className="px-3 py-2 text-right font-medium">30D</th>
-              </>
+              isTablet ? (
+                <>
+                  <th className="px-3 py-2 text-right font-medium">1H</th>
+                  <th className="px-3 py-2 text-right font-medium">24H</th>
+                </>
+              ) : (
+                <>
+                  <th className="px-3 py-2 text-right font-medium">1H</th>
+                  <th className="px-3 py-2 text-right font-medium">24H</th>
+                  <th className="px-3 py-2 text-right font-medium">7D</th>
+                  <th className="px-3 py-2 text-right font-medium">30D</th>
+                </>
+              )
             ) : (
-              <>
-                <th className="px-3 py-2 text-right font-medium">5M</th>
-                <th className="px-3 py-2 text-right font-medium">1H</th>
-                <th className="px-3 py-2 text-right font-medium">6H</th>
-                <th className="px-3 py-2 text-right font-medium">24H</th>
-              </>
+              isTablet ? (
+                <>
+                  <th className="px-3 py-2 text-right font-medium">1H</th>
+                  <th className="px-3 py-2 text-right font-medium">24H</th>
+                </>
+              ) : (
+                <>
+                  <th className="px-3 py-2 text-right font-medium">5M</th>
+                  <th className="px-3 py-2 text-right font-medium">1H</th>
+                  <th className="px-3 py-2 text-right font-medium">6H</th>
+                  <th className="px-3 py-2 text-right font-medium">24H</th>
+                </>
+              )
             )}
-            {!isCryptoMarket && <th className="px-3 py-2 text-right font-medium">LIQUIDITY</th>}
+            {!isCryptoMarket && !isTablet && <th className="px-3 py-2 text-right font-medium">LIQUIDITY</th>}
             <th className="px-3 py-2 text-right font-medium">MCAP</th>
-            {showCreatedColumn && <th className="w-[120px] px-3 py-2 text-right font-medium">STATUS</th>}
+            {!isTablet && showCreatedColumn && <th className="w-[120px] px-3 py-2 text-right font-medium">STATUS</th>}
           </tr>
         </thead>
         <tbody>
@@ -259,28 +273,42 @@ const TokenTable = ({ tokens, isCryptoMarket = false, ogTokenId, topTokenId, sho
                 </div>
               </td>
               <td className="px-3 py-2 text-right text-foreground">{formatPrice(token.price)}</td>
-              {!isCryptoMarket && <td className="px-3 py-2 text-right text-muted-foreground">{token.age}</td>}
-              {!isCryptoMarket && <td className="px-3 py-2 text-right text-foreground">{token.txns.toLocaleString()}</td>}
+              {!isCryptoMarket && !isTablet && <td className="px-3 py-2 text-right text-muted-foreground">{token.age}</td>}
+              {!isCryptoMarket && !isTablet && <td className="px-3 py-2 text-right text-foreground">{token.txns.toLocaleString()}</td>}
               <td className="px-3 py-2 text-right text-foreground">{formatNumber(token.volume)}</td>
-              {!isCryptoMarket && <td className="px-3 py-2 text-right text-muted-foreground">{token.makers.toLocaleString()}</td>}
+              {!isCryptoMarket && !isTablet && <td className="px-3 py-2 text-right text-muted-foreground">{token.makers.toLocaleString()}</td>}
               {isCryptoMarket ? (
-                <>
-                  <ChangeCell value={token.change1h} />
-                  <ChangeCell value={token.change24h} />
-                  <ChangeCell value={token.change7d} />
-                  <ChangeCell value={token.change30d} />
-                </>
+                isTablet ? (
+                  <>
+                    <ChangeCell value={token.change1h} />
+                    <ChangeCell value={token.change24h} />
+                  </>
+                ) : (
+                  <>
+                    <ChangeCell value={token.change1h} />
+                    <ChangeCell value={token.change24h} />
+                    <ChangeCell value={token.change7d} />
+                    <ChangeCell value={token.change30d} />
+                  </>
+                )
               ) : (
-                <>
-                  <ChangeCell value={token.change5m} />
-                  <ChangeCell value={token.change1h} />
-                  <ChangeCell value={token.change6h} />
-                  <ChangeCell value={token.change24h} />
-                </>
+                isTablet ? (
+                  <>
+                    <ChangeCell value={token.change1h} />
+                    <ChangeCell value={token.change24h} />
+                  </>
+                ) : (
+                  <>
+                    <ChangeCell value={token.change5m} />
+                    <ChangeCell value={token.change1h} />
+                    <ChangeCell value={token.change6h} />
+                    <ChangeCell value={token.change24h} />
+                  </>
+                )
               )}
-              {!isCryptoMarket && <td className="px-3 py-2 text-right text-foreground">{formatNumber(token.liquidity)}</td>}
+              {!isCryptoMarket && !isTablet && <td className="px-3 py-2 text-right text-foreground">{formatNumber(token.liquidity)}</td>}
               <td className="px-3 py-2 text-right text-foreground">{formatNumber(token.mcap)}</td>
-              {showCreatedColumn && (
+              {!isTablet && showCreatedColumn && (
                 <td className="px-3 py-2 text-right">
                   {ogTokenId === token.id ? (
                     <span className="inline-flex items-center gap-1 text-[10px] text-yellow-400 font-bold">
