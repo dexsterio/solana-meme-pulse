@@ -25,9 +25,9 @@ const Index = () => {
 
   useEffect(() => { document.title = 'SolScope — Solana Token Screener'; }, []);
 
-  const { data: apiTokens = [], isLoading: apiLoading, isError: apiError, error: apiErrorObj } = useTokens(category);
+  const { data: apiTokens = [], isLoading: apiLoading, isError: apiError, error: apiErrorObj } = useTokens(category === 'viral' ? 'trending' : category);
   const { tokens: newPairTokens, isConnected: wsConnected } = usePumpPortalNewTokens();
-  const { clusters, selectedCluster, setSelectedCluster, clearSelection, selectedTokens, viralSortBy, setViralSortBy } = useViralClusters();
+  const { clusters, selectedCluster, setSelectedCluster, clearSelection, selectedTokens, allViralTokens, viralSortBy, setViralSortBy } = useViralClusters();
 
   const { data: cryptoTokens = [], isLoading: cryptoLoading, isError: cryptoError } = useQuery({
     queryKey: ['cryptoMarket'],
@@ -45,6 +45,9 @@ const Index = () => {
 
   // Determine data source
   const isNewCategory = !isCryptoMarket && category === 'new';
+  const isViralCategory = !isCryptoMarket && category === 'viral';
+  const isViralView = selectedCluster !== null;
+
   const tokens = isCryptoMarket
     ? cryptoTokens
     : isNewCategory
@@ -54,14 +57,15 @@ const Index = () => {
     ? cryptoLoading
     : isNewCategory
       ? (!wsConnected && newPairTokens.length === 0)
-      : apiLoading;
-  const isError = isCryptoMarket ? cryptoError : isNewCategory ? false : apiError;
-  const error = isCryptoMarket ? null : isNewCategory ? null : apiErrorObj;
-
-  const isViralView = selectedCluster !== null;
+      : isViralCategory
+        ? false
+        : apiLoading;
+  const isError = isCryptoMarket ? cryptoError : isNewCategory ? false : isViralCategory ? false : apiError;
+  const error = isCryptoMarket ? null : isNewCategory ? null : isViralCategory ? null : apiErrorObj;
 
   const sortedTokens = useMemo(() => {
     if (isViralView) return selectedTokens;
+    if (isViralCategory) return allViralTokens;
 
     let list = [...tokens];
 
@@ -101,7 +105,7 @@ const Index = () => {
     }
 
     return list;
-  }, [tokens, rankBy, searchQuery, isViralView, selectedTokens, filterValues]);
+  }, [tokens, rankBy, searchQuery, isViralView, isViralCategory, selectedTokens, allViralTokens, filterValues]);
 
   return (
     <div className="flex flex-col h-screen bg-background">
@@ -119,7 +123,7 @@ const Index = () => {
           timeFilter={timeFilter}
           setTimeFilter={setTimeFilter}
           category={category}
-          setCategory={setCategory}
+          setCategory={(c) => { setCategory(c); if (c !== 'viral') clearSelection(); }}
           rankBy={rankBy}
           setRankBy={setRankBy}
           viewMode={viewMode}
@@ -150,6 +154,17 @@ const Index = () => {
                <p className="text-muted-foreground text-sm">Listening for new tokens...</p>
              </div>
              <p className="text-muted-foreground/60 text-xs">Only tokens with logos are shown</p>
+          </div>
+        ) : isViralCategory && !isViralView && allViralTokens.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-40 gap-2">
+            <div className="flex items-center gap-2">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-orange-400"></span>
+              </span>
+              <p className="text-muted-foreground text-sm">Scanning for viral memes...</p>
+            </div>
+            <p className="text-muted-foreground/60 text-xs">Viral clusters appear when 3+ tokens share the same name within 60 minutes</p>
           </div>
         ) : isLoading && tokens.length === 0 ? (
           <div className="space-y-0">

@@ -25,11 +25,25 @@ export function useViralClusters() {
     ? getClusterTokens(selectedCluster)
     : [];
 
+  // All viral tokens from all clusters (deduplicated)
+  const allViralTokens = useMemo(() => {
+    const seen = new Set<string>();
+    const result: Token[] = [];
+    for (const cluster of clusters) {
+      for (const token of cluster.tokens) {
+        if (!seen.has(token.id)) {
+          seen.add(token.id);
+          result.push(token);
+        }
+      }
+    }
+    return result.sort((a, b) => b.mcap - a.mcap);
+  }, [clusters]);
+
   const selectedTokens = useMemo(() => {
     const list = [...rawTokens];
     switch (viralSortBy) {
       case 'created':
-        // already sorted by creation time from service (ogToken first)
         break;
       case 'mcap':
         list.sort((a, b) => b.mcap - a.mcap);
@@ -49,6 +63,7 @@ export function useViralClusters() {
     setSelectedCluster,
     clearSelection,
     selectedTokens,
+    allViralTokens,
     viralSortBy,
     setViralSortBy,
   };
