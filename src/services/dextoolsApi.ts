@@ -1,17 +1,30 @@
+/**
+ * ============================================================================
+ * DEXTOOLS API SERVICE
+ * ============================================================================
+ * MIGRATION: This service calls your backend proxy at ENDPOINTS.DEXTOOLS_PROXY.
+ * No Supabase headers are sent — your server handles auth to DexTools.
+ *
+ * The proxy endpoint must accept: GET /dextools-proxy?path=<dextools_v2_path>
+ * and return the DexTools JSON response.
+ *
+ * See server/README.md and server/endpoints/dextools-proxy.ts for details.
+ * ============================================================================
+ */
 import { Token } from '@/data/mockTokens';
+import { ENDPOINTS } from '@/config/api';
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-const EDGE_FN_URL = `${SUPABASE_URL}/functions/v1/dextools-proxy`;
-
-// No client-side throttle needed — server-side cache handles rate protection
+// MIGRATION: No Supabase URL/key needed — requests go to your own server
+// Server-side cache handles rate protection, no client-side throttle needed
 
 async function apiFetch(endpoint: string): Promise<any> {
-  const url = `${EDGE_FN_URL}?path=${encodeURIComponent(endpoint)}`;
+  // MIGRATION: Uses centralized ENDPOINTS config instead of Supabase URL
+  const url = `${ENDPOINTS.DEXTOOLS_PROXY}?path=${encodeURIComponent(endpoint)}`;
   const res = await fetch(url, {
     headers: {
-      'apikey': SUPABASE_KEY,
       'Content-Type': 'application/json',
+      // MIGRATION: No 'apikey' or 'Authorization' headers needed
+      // Your server authenticates to DexTools using DEXTOOLS_API_KEY server-side
     },
   });
   if (!res.ok) {

@@ -1,3 +1,13 @@
+/**
+ * TODO(backend): Replace generateMockTransactions() with a real transaction feed
+ * from your server, e.g.:
+ *   GET /api/tokens/:address/transactions?limit=30
+ * Expected response: Array of Transaction objects (see src/data/mockTokens.ts)
+ *
+ * The "Top Traders" and "Holders" tabs also need real endpoints:
+ *   GET /api/tokens/:address/top-traders
+ *   GET /api/tokens/:address/holders
+ */
 import { useState, useMemo } from 'react';
 import { generateMockTransactions, formatPrice, formatCompact } from '@/data/mockTokens';
 import { ExternalLink, Users, BarChart3 } from 'lucide-react';

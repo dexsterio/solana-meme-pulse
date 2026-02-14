@@ -1,4 +1,19 @@
+/**
+ * ============================================================================
+ * COINGECKO API SERVICE
+ * ============================================================================
+ * MIGRATION: This service calls your backend at ENDPOINTS.COINGECKO_PROXY
+ * and ENDPOINTS.CRYPTO_GLOBAL. No Supabase auth headers are sent.
+ *
+ * Required server endpoints:
+ *   GET /coingecko-proxy?page=1&per_page=100  → CoinGecko markets data
+ *   GET /crypto-global                        → Fear & Greed, BTC dom, gas
+ *
+ * See server/README.md for response schemas.
+ * ============================================================================
+ */
 import { Token } from '@/data/mockTokens';
+import { ENDPOINTS } from '@/config/api';
 
 interface CoinGeckoToken {
   id: string;
@@ -56,11 +71,12 @@ export async function fetchCryptoMarket(pages = 1): Promise<Token[]> {
   const allTokens: Token[] = [];
 
   for (let page = 1; page <= pages; page++) {
-    const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/coingecko-proxy?page=${page}&per_page=100`;
+    // MIGRATION: Uses centralized ENDPOINTS config instead of Supabase URL
+    const url = `${ENDPOINTS.COINGECKO_PROXY}?page=${page}&per_page=100`;
     const response = await fetch(url, {
       headers: {
-        'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         'Content-Type': 'application/json',
+        // MIGRATION: No 'Authorization' header needed — your server handles auth
       },
     });
 
@@ -80,11 +96,12 @@ export async function fetchCryptoMarket(pages = 1): Promise<Token[]> {
 }
 
 export async function fetchCryptoGlobal(): Promise<CryptoGlobalData> {
-  const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/crypto-global`;
+  // MIGRATION: Uses centralized ENDPOINTS config instead of Supabase URL
+  const url = ENDPOINTS.CRYPTO_GLOBAL;
   const response = await fetch(url, {
     headers: {
-      'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
       'Content-Type': 'application/json',
+      // MIGRATION: No 'Authorization' header needed — your server handles this
     },
   });
 
