@@ -187,8 +187,8 @@ const TokenTable = ({ tokens, isCryptoMarket = false, ogTokenId, topTokenId, sho
             <th className="w-10 px-3 py-2 text-left font-medium">#</th>
             <th className="px-3 py-2 text-left font-medium">TOKEN</th>
             <th className="px-3 py-2 text-right font-medium">PRICE</th>
-            {!isCryptoMarket && !isTablet && <th className="px-3 py-2 text-right font-medium">AGE</th>}
-            {!isCryptoMarket && !isTablet && <th className="px-3 py-2 text-right font-medium">TXNS</th>}
+            {!isCryptoMarket && <th className="px-3 py-2 text-right font-medium">AGE</th>}
+            {!isCryptoMarket && <th className="px-3 py-2 text-right font-medium">TXNS</th>}
             <th className="px-3 py-2 text-right font-medium">VOLUME</th>
             {!isCryptoMarket && !isTablet && <th className="px-3 py-2 text-right font-medium">MAKERS</th>}
             {isCryptoMarket ? (
@@ -209,6 +209,7 @@ const TokenTable = ({ tokens, isCryptoMarket = false, ogTokenId, topTokenId, sho
               isTablet ? (
                 <>
                   <th className="px-3 py-2 text-right font-medium">1H</th>
+                  <th className="px-3 py-2 text-right font-medium">6H</th>
                   <th className="px-3 py-2 text-right font-medium">24H</th>
                 </>
               ) : (
@@ -243,7 +244,7 @@ const TokenTable = ({ tokens, isCryptoMarket = false, ogTokenId, topTokenId, sho
                   <TokenLogo token={token} />
                   <div className="flex items-center gap-1.5 min-w-0">
                     <span className="font-semibold text-foreground shrink-0 text-[13px]">{token.ticker}</span>
-                    <span className="text-muted-foreground text-[12px] truncate max-w-[120px]" title={token.name}>{token.name}</span>
+                    <span className={`text-muted-foreground text-[12px] truncate ${isTablet ? 'max-w-[160px]' : 'max-w-[120px]'}`} title={token.name}>{token.name}</span>
                     {ogTokenId === token.id && <OgBadge />}
                     {topTokenId === token.id && topTokenId !== ogTokenId && <TopBadge />}
                     {!isCryptoMarket && (
@@ -273,8 +274,8 @@ const TokenTable = ({ tokens, isCryptoMarket = false, ogTokenId, topTokenId, sho
                 </div>
               </td>
               <td className="px-3 py-2 text-right text-foreground">{formatPrice(token.price)}</td>
-              {!isCryptoMarket && !isTablet && <td className="px-3 py-2 text-right text-muted-foreground">{token.age}</td>}
-              {!isCryptoMarket && !isTablet && <td className="px-3 py-2 text-right text-foreground">{token.txns.toLocaleString()}</td>}
+              {!isCryptoMarket && <td className="px-3 py-2 text-right text-muted-foreground">{token.age}</td>}
+              {!isCryptoMarket && <td className="px-3 py-2 text-right text-foreground">{token.txns.toLocaleString()}</td>}
               <td className="px-3 py-2 text-right text-foreground">{formatNumber(token.volume)}</td>
               {!isCryptoMarket && !isTablet && <td className="px-3 py-2 text-right text-muted-foreground">{token.makers.toLocaleString()}</td>}
               {isCryptoMarket ? (
@@ -295,6 +296,7 @@ const TokenTable = ({ tokens, isCryptoMarket = false, ogTokenId, topTokenId, sho
                 isTablet ? (
                   <>
                     <ChangeCell value={token.change1h} />
+                    <ChangeCell value={token.change6h} />
                     <ChangeCell value={token.change24h} />
                   </>
                 ) : (

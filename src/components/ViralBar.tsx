@@ -3,7 +3,7 @@ import { formatNumber } from '@/data/mockTokens';
 import { X, Clock, BarChart3 } from 'lucide-react';
 import { FlameFilledIcon, CrownFilledIcon, CaretUpFilledIcon } from '@/components/icons/TablerIcons';
 import { ViralSortBy } from '@/hooks/useViralClusters';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { useIsMobile, useIsTablet } from '@/hooks/use-mobile';
 
 interface ViralBarProps {
   clusters: ViralCluster[];
@@ -22,6 +22,7 @@ const sortOptions: { value: ViralSortBy; label: string; icon: React.ReactNode }[
 
 const ViralBar = ({ clusters, selectedCluster, onSelect, onClear, viralSortBy = 'created', onViralSortChange }: ViralBarProps) => {
   const isMobile = useIsMobile();
+  const isTablet = useIsTablet();
   if (clusters.length === 0) return null;
 
   const selected = clusters.find((c) => c.name === selectedCluster);
@@ -58,9 +59,11 @@ const ViralBar = ({ clusters, selectedCluster, onSelect, onClear, viralSortBy = 
                   <span className="text-muted-foreground/80 text-[11px] border-l border-border/40 pl-2">
                     {cluster.count} tokens
                   </span>
-                  <span className="text-muted-foreground/50 text-[11px]">
-                    {formatNumber(cluster.topToken.mcap)}
-                  </span>
+                  {!isTablet && (
+                    <span className="text-muted-foreground/50 text-[11px]">
+                      {formatNumber(cluster.topToken.mcap)}
+                    </span>
+                  )}
                 </>
               )}
             </button>
