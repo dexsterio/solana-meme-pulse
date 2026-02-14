@@ -51,59 +51,116 @@ const TokenFilters = ({
   return (
     <div className="px-2 md:px-3 py-1.5 border-b border-border">
       <div className="flex items-center gap-1.5 min-w-0 whitespace-nowrap overflow-x-auto scrollbar-hide">
-        {/* Trending pill with embedded time toggles */}
-        <div className="flex items-center rounded-full overflow-hidden border border-orange-500/30">
-          <button
-            onClick={() => setCategory('trending')}
-            className={`flex items-center gap-1 px-2 md:px-3 py-1.5 text-[12px] md:text-[13px] transition-colors ${
-            category === 'trending' ?
-            'bg-orange-500/15 text-orange-400' :
-            'bg-[hsl(0,0%,16%)] text-muted-foreground hover:text-foreground'}`}
-          >
-            <FlameFilledIcon className="w-3.5 h-3.5" />
-            {isMobile ? 'Hot' : 'Trending'}
-          </button>
-          <div className="flex items-center bg-[hsl(0,0%,14%)] border-l border-border">
-            {timeOptions.map((t) =>
+        {/* Trending pill - mobile: single pill with time embedded; desktop: pill + time toggles */}
+        {isMobile ? (
+          <>
+            {/* Mobile: "Trending 6H" single pill with dropdown for time */}
+            <div className="relative">
+              <button
+                onClick={() => setCategory('trending')}
+                className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-[12px] transition-colors ${
+                  category === 'trending'
+                    ? 'bg-profit/15 text-profit border border-profit/30'
+                    : 'bg-[hsl(0,0%,16%)] text-muted-foreground border border-border'
+                }`}
+              >
+                <FlameFilledIcon className="w-3.5 h-3.5" />
+                Trending {timeFilter.toUpperCase()}
+                <ChevronDown className="w-3 h-3" />
+              </button>
+              {/* Time selector dropdown - shown inline when trending is active */}
+              {category === 'trending' && (
+                <div className="absolute top-full left-0 mt-1 flex items-center bg-card rounded-md border border-border shadow-lg z-20 overflow-hidden">
+                  {timeOptions.map((t) => (
+                    <button
+                      key={t}
+                      onClick={() => setTimeFilter(t)}
+                      className={`px-3 py-1.5 text-[11px] transition-colors ${
+                        timeFilter === t ? 'text-foreground bg-accent' : 'text-muted-foreground hover:text-foreground'
+                      }`}
+                    >
+                      {t.toUpperCase()}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
             <button
-              key={t}
-              onClick={() => setTimeFilter(t)}
-              className={`px-1.5 md:px-2 py-1.5 text-[11px] md:text-[12px] transition-colors ${
-              timeFilter === t ?
-              'text-foreground bg-accent' :
-              'text-muted-foreground hover:text-foreground'}`}
+              onClick={() => setCategory('new')}
+              className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-[12px] transition-colors ${
+                category === 'new' ? 'bg-accent text-foreground' : 'bg-[hsl(0,0%,16%)] text-muted-foreground border border-border'
+              }`}
             >
-              {t.toUpperCase()}
+              <Sparkles className="w-3.5 h-3.5" />
+              New
             </button>
-            )}
-          </div>
-        </div>
-
-        {/* Category buttons */}
-        <button
-          onClick={() => setCategory('top')}
-          className={`flex items-center gap-1 px-2 md:px-3 py-1.5 rounded text-[12px] md:text-[13px] transition-colors ${
-          category === 'top' ? 'bg-accent text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
-        >
-          <Trophy className="w-3.5 h-3.5" />
-          {isMobile ? 'Top' : 'Top'}
-        </button>
-        <button
-          onClick={() => setCategory('gainers')}
-          className={`flex items-center gap-1 px-2 md:px-3 py-1.5 rounded text-[12px] md:text-[13px] transition-colors ${
-          category === 'gainers' ? 'bg-accent text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
-        >
-          <TrendingUp className="w-3.5 h-3.5" />
-          {isMobile ? 'Gain' : 'Gainers'}
-        </button>
-        <button
-          onClick={() => setCategory('new')}
-          className={`flex items-center gap-1 px-2 md:px-3 py-1.5 rounded text-[12px] md:text-[13px] transition-colors ${
-          category === 'new' ? 'bg-accent text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
-        >
-          <Sparkles className="w-3.5 h-3.5" />
-          {isMobile ? 'New' : 'New Pairs'}
-        </button>
+            <button
+              onClick={() => setCategory('top')}
+              className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-[12px] transition-colors ${
+                category === 'top' ? 'bg-accent text-foreground' : 'bg-[hsl(0,0%,16%)] text-muted-foreground border border-border'
+              }`}
+            >
+              <Trophy className="w-3.5 h-3.5" />
+              Top
+            </button>
+          </>
+        ) : (
+          <>
+            <div className="flex items-center rounded-full overflow-hidden border border-orange-500/30">
+              <button
+                onClick={() => setCategory('trending')}
+                className={`flex items-center gap-1 px-3 py-1.5 text-[13px] transition-colors ${
+                  category === 'trending'
+                    ? 'bg-orange-500/15 text-orange-400'
+                    : 'bg-[hsl(0,0%,16%)] text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                <FlameFilledIcon className="w-3.5 h-3.5" />
+                Trending
+              </button>
+              <div className="flex items-center bg-[hsl(0,0%,14%)] border-l border-border">
+                {timeOptions.map((t) => (
+                  <button
+                    key={t}
+                    onClick={() => setTimeFilter(t)}
+                    className={`px-2 py-1.5 text-[12px] transition-colors ${
+                      timeFilter === t ? 'text-foreground bg-accent' : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    {t.toUpperCase()}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <button
+              onClick={() => setCategory('top')}
+              className={`flex items-center gap-1 px-3 py-1.5 rounded text-[13px] transition-colors ${
+                category === 'top' ? 'bg-accent text-foreground' : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <Trophy className="w-3.5 h-3.5" />
+              Top
+            </button>
+            <button
+              onClick={() => setCategory('gainers')}
+              className={`flex items-center gap-1 px-3 py-1.5 rounded text-[13px] transition-colors ${
+                category === 'gainers' ? 'bg-accent text-foreground' : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <TrendingUp className="w-3.5 h-3.5" />
+              Gainers
+            </button>
+            <button
+              onClick={() => setCategory('new')}
+              className={`flex items-center gap-1 px-3 py-1.5 rounded text-[13px] transition-colors ${
+                category === 'new' ? 'bg-accent text-foreground' : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              New Pairs
+            </button>
+          </>
+        )}
 
         <div className="flex-1" />
 

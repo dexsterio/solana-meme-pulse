@@ -43,20 +43,29 @@ const StatsBar = ({ tokens = [], onSearch, searchQuery = '', onSearchChange, isC
         )}
       </div>
 
-      {!isMobile && (
+      {isMobile ? (
+        <>
+          <div className="flex items-center gap-1.5 px-2.5 py-1.5 border border-border rounded bg-[hsl(0,0%,16%)] shrink-0">
+            <span className="text-[11px] text-muted-foreground">24H VOL</span>
+            <span className="text-[12px] text-profit font-bold">{formatNumber(totalVolume)}</span>
+          </div>
+          <div className="flex items-center gap-1.5 px-2.5 py-1.5 border border-border rounded bg-[hsl(0,0%,16%)] shrink-0">
+            <span className="text-[11px] text-muted-foreground">24H TXNS</span>
+            <span className="text-[12px] text-foreground font-bold">{totalTxns.toLocaleString()}</span>
+          </div>
+        </>
+      ) : (
         <>
           <div className="flex items-center gap-2 px-4 py-1.5 border border-border rounded bg-[hsl(0,0%,16%)]">
             <span className="text-[13px] text-muted-foreground">24H VOLUME:</span>
             <span className="text-[15px] text-profit font-bold">{formatNumber(totalVolume)}</span>
           </div>
-
           <div className="flex items-center gap-2 px-4 py-1.5 border border-border rounded bg-[hsl(0,0%,16%)]">
             <span className="text-[13px] text-muted-foreground">24H TXNS:</span>
             <span className="text-[15px] text-foreground font-bold">{totalTxns.toLocaleString()}</span>
           </div>
         </>
       )}
-
       <button
         onClick={onCryptoMarketToggle}
         className={`flex items-center gap-1.5 px-3 md:px-4 py-1.5 border rounded text-[13px] font-medium transition-colors shrink-0 ${
