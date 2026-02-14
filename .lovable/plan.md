@@ -1,153 +1,85 @@
 
 
-# Comprehensive Mobile Responsive UI Overhaul - Phase 2
+# DexScreener Mobile Reference Implementation
 
-After a thorough audit of the current mobile state (390x844px viewport), numerous critical issues have been identified that prevent mobile users from accessing the same functionality as desktop users.
-
----
-
-## Critical Bugs Found
-
-### BUG 1: Token Info Panel Cannot Scroll on Mobile (CRITICAL)
-The Info tab on the Token Detail page shows the TokenInfoPanel content but **it does not scroll**. Everything below the Makers row (Watchlist, Alerts, Buy/Sell buttons, Audit section, Claim button) is completely inaccessible. The `flex-1 min-h-0 p-2 overflow-y-auto` on the wrapper is not propagating scroll to the inner panel.
-
-**Fix**: The TokenInfoPanel itself has `overflow-y-auto` but it's nested inside a `flex-1 min-h-0` container. The inner panel needs `h-full` removed or the outer wrapper needs to properly constrain height so overflow kicks in. The `pb-14` on the parent accounts for the bottom tab bar but the inner flex doesn't properly constrain.
-
-### BUG 2: Token Table Missing Token Name on Mobile
-On mobile, only the ticker is shown (e.g., "dash", "LIZARD") but the full name is hidden. Desktop users see both ticker and name. Mobile users should see the name too since it's essential for identifying tokens.
-
-**Fix**: Show a truncated name below the ticker on mobile (stacked layout) instead of hiding it completely.
-
-### BUG 3: Token Table Missing Volume Column on Mobile
-Volume is one of the most important data points for traders but it's completely hidden on mobile. Desktop users see Volume, Age, Txns, Makers, Liquidity -- mobile users see NONE of these.
-
-**Fix**: Add Volume column back on mobile with compact formatting.
-
-### BUG 4: No Trading Panel Access on Mobile
-When on the Info tab, clicking Buy/Sell switches to TradingPanel, but there's no way to get back to chart or txns from the trading panel without the "Token Info" back button buried at the bottom. The bottom tabs only switch between Chart/Txns/Info.
-
-**Fix**: Add a "Trading" tab to the mobile bottom bar, or make the Buy/Sell buttons stay visible as a floating element on the Chart tab.
-
-### BUG 5: Grid View Cards Missing Exchange Logo on Mobile
-Grid view cards show exchange logos but on very small screens they can be cut off. The grid view doesn't show the token name on the smallest screens.
-
-### BUG 6: Filter Bar Icons Have No Labels on Mobile
-The category buttons (Trending, Top, Gainers, New) show only icons on mobile with no labels. Users have no way to know what each icon means since there are no tooltips on touch devices.
-
-**Fix**: Show abbreviated labels (Trend, Top, Gain, New) next to icons.
-
-### BUG 7: Market View Button Shows No Label on Mobile
-The globe icon button for Market View toggle has no label or indicator of what it does on mobile.
-
-**Fix**: Add abbreviated label "Market" next to icon.
-
-### BUG 8: Viral Bar "Viral Memes" Label Hidden on Mobile
-Only the flame icon shows, but new users won't understand what the section is.
-
-**Fix**: Show "Viral" text next to flame icon.
-
-### BUG 9: Trending Bar Items Cramped on Mobile
-Trending bar items have reduced padding and no mcap info on mobile. The trending label only shows a flame icon.
-
-**Fix**: Show "Hot" label next to flame.
-
-### BUG 10: Token Detail Header Missing Price Display on Mobile
-The header shows token name and icon but not the current price or change. Desktop users see the price in the chart tooltip, but mobile users have to go to Info tab to see the price.
-
-**Fix**: Add compact price + 24h change display in the header bar.
-
-### BUG 11: Transaction List Missing Key Columns on Mobile
-Amount, SOL, and Price columns are hidden on mobile. Users can only see Date, Type, USD, Maker, and TXN. The Price column is particularly important.
-
-### BUG 12: Bottom Tab Bar Overlaps Content
-The fixed bottom tab bar (`pb-14`) may not account for safe-area-inset properly on all devices.
-
-### BUG 13: MarketSentimentBar Unusable on Mobile
-The Fear & Greed gauge is huge (100px SVG) and the bar overflows. All pills are full-size and not optimized for mobile.
-
-### BUG 14: Loading Skeleton Not Mobile-Optimized
-The loading skeleton on the Index page shows 10+ skeleton columns that overflow horizontally on mobile.
-
-### BUG 15: Filter Expanded Panel Not Fully Mobile-Optimized
-The filter inputs show in a row and can overflow on mobile. They need proper grid wrapping.
+Pixel-perfect implementation of the mobile UI based on the three reference screenshots provided.
 
 ---
 
-## Implementation Plan
+## Changes Required (Reference vs Current)
 
-### 1. Fix Token Detail Mobile Layout (TokenDetail.tsx) - HIGHEST PRIORITY
+### 1. Index Page - Token List Mobile Layout (TokenTable.tsx) - CRITICAL
 
-- Add a 4th tab "Trade" to the bottom mobile tab bar for direct trading panel access
-- Show compact price + 24h change in the header bar on mobile
-- Fix scrolling issue: ensure the Info tab content properly scrolls by adding `overflow-y-auto` to the right container and ensuring height constraints work
+**Reference shows**: Each token is a two-line card row, NOT a traditional table on mobile:
+- **Line 1**: Exchange icon (small, e.g. "swap" logo), Token logo (round), Ticker (bold white), Age badge (green leaf + "8h"), Lightning+boost number (green "500"), then right-aligned: Price, 1H %, 24H %
+- **Line 2**: Small exchange icon, Token name (muted gray), then right-aligned small pills: "LIQ $39K", "VOL $1.1M", "MCAP $212K"
 
-### 2. Fix Token Table Mobile (TokenTable.tsx)
+**Current**: Standard table rows with limited columns on mobile - missing age, boosts, exchange icons, and the LIQ/VOL/MCAP sub-row.
 
-- Show token name below ticker in a stacked layout on mobile (two lines instead of one)
-- Re-add Volume column on mobile with compact display
-- Fix loading skeleton to show only 4-5 relevant columns on mobile
+**Fix**: On mobile, render a completely different layout - card-style rows with two lines per token matching the reference exactly. Keep the table layout for desktop.
 
-### 3. Fix Filter Labels on Mobile (TokenFilters.tsx)
+### 2. Index Page - Stats Boxes on Mobile (StatsBar.tsx) - HIGH
 
-- Show short labels: flame+"Hot", trophy+"Top", chart+"Gain", sparkles+"New"
-- Show "Market" label next to globe icon on StatsBar
-- Improve filter expanded panel to use 2-column grid on mobile
+**Reference shows**: Two side-by-side boxes "24H VOLUME $17.49B" and "24H TXNS 41,268,759" ARE visible on mobile, displayed prominently below the filter bar.
 
-### 4. Fix Viral Bar Mobile (ViralBar.tsx)
+**Current**: These stats are hidden on mobile (`!isMobile`).
 
-- Show "Viral" text next to flame icon instead of hiding it
+**Fix**: Show the stats boxes on mobile. Make them a full-width two-column grid below the search bar.
 
-### 5. Fix Trending Bar Mobile (TrendingBar.tsx)
+### 3. Token Detail - Bottom Tab Bar (TokenDetail.tsx) - CRITICAL
 
-- Show "Hot" or trending emoji next to flame icon
+**Reference shows**: 4 tabs with DIFFERENT labels and icons:
+- **Info** (i icon) - Shows the TokenInfoPanel
+- **Chart+Txns** (monitor icon) - Shows chart AND transaction list combined vertically
+- **Chart** (chart icon) - Shows chart only
+- **Txns** (list icon) - Shows transaction list only
 
-### 6. Fix Market Sentiment Bar (MarketSentimentBar.tsx)
+**Current**: Tabs are Chart/Txns/Info/Trade - wrong structure entirely.
 
-- Reduce Fear & Greed gauge to smaller size on mobile
-- Stack the pills in a scrollable row with smaller padding
+**Fix**: Change mobile tabs to match reference: Info, Chart+Txns, Chart, Txns. The "Chart+Txns" tab shows both chart (top ~55%) and transaction list (bottom ~45%) in a vertical split. Remove the separate "Trade" tab. Default to "Info" tab (matching the reference where Info is first).
 
-### 7. Fix Transaction List Mobile (TransactionList.tsx)
+### 4. Token Detail - Info Tab Content (TokenInfoPanel.tsx) - HIGH
 
-- Add Price column back on mobile (important for traders)
-- Compact the date format further
+**Reference shows**: The Info panel on mobile includes a single "Trade O/SOL" button (with arrows icon) instead of separate Buy/Sell buttons. The Watchlist and Alerts buttons are shown above it.
 
-### 8. Fix Token Info Panel Mobile (TokenInfoPanel.tsx)
+**Current**: Separate Buy and Sell buttons.
 
-- Ensure the panel scrolls properly when embedded in mobile layout
-- Make social buttons wrap if there are 3+ socials on very narrow screens
+**Fix**: On mobile, replace the Buy/Sell buttons with a single full-width "Trade {ticker}/SOL" button that navigates to the trading panel. Keep Buy/Sell on desktop.
 
-### 9. Fix Token Grid Mobile (TokenGrid.tsx)
+### 5. Token Detail - Transaction List Mobile Columns (TransactionList.tsx) - MEDIUM
 
-- Ensure all data is visible on small cards
-- Compact the time-frame changes section padding
+**Reference shows**: Transaction table on mobile has columns: TXN (with buy/sell color indicator as a circle "B"), USD, Price (with SOL icon), MAKER (with filter icon). The "Txns" tab header shows a dropdown arrow.
 
-### 10. Fix Loading Skeleton Mobile (Index.tsx)
+**Current**: DATE, TYPE, USD, PRICE, MAKER, TXN columns.
 
-- Show only 4 skeleton columns on mobile (matching visible table columns)
+**Fix**: Match reference columns: Show a colored circle indicator (B/S) as first column, then USD, Price (with SOL icon in header), MAKER. Rename/restructure to match.
 
-### 11. CSS Fixes (index.css)
+### 6. Index Page - Filter Bar Mobile (TokenFilters.tsx) - MEDIUM
 
-- Increase bottom tab bar safe area padding
-- Ensure min-height 44px for all bottom tab buttons
-- Fix any remaining overflow issues
+**Reference shows**: "Trending 6H" as a single green pill with dropdown chevron, then "New" and "Top" as separate pills. No "Gainers" visible. The time filter is embedded IN the trending pill text (not as separate sub-buttons).
+
+**Current**: Trending pill with separate embedded time toggle buttons, plus Top, Gain, New buttons.
+
+**Fix**: On mobile, show "Trending {timeFilter}" as a single pill with a dropdown chevron (tapping opens time selection). Show "New" and "Top" pills. Keep current desktop layout.
 
 ---
 
-## Technical Details
+## Technical Implementation
 
-### Files to modify (11 files):
+### Files to modify:
 
-| File | Changes | Priority |
-|------|---------|----------|
-| `src/pages/TokenDetail.tsx` | Add Trade tab, price in header, fix scroll | Critical |
-| `src/components/TokenTable.tsx` | Stacked name, add Volume col | Critical |
-| `src/components/TokenFilters.tsx` | Add short labels on mobile | High |
-| `src/components/StatsBar.tsx` | Add "Market" label | High |
-| `src/components/ViralBar.tsx` | Show "Viral" text | Medium |
-| `src/components/TrendingBar.tsx` | Show label text | Medium |
-| `src/components/MarketSentimentBar.tsx` | Smaller gauge on mobile | Medium |
-| `src/components/TransactionList.tsx` | Add Price col back | Medium |
-| `src/components/TokenInfoPanel.tsx` | Fix scroll, social wrap | Critical |
-| `src/pages/Index.tsx` | Fix loading skeleton | Low |
-| `src/index.css` | Safe area, tap targets | Medium |
+| File | Priority | Changes |
+|------|----------|---------|
+| `src/components/TokenTable.tsx` | Critical | Complete mobile card-row layout with 2-line tokens, age, boosts, LIQ/VOL/MCAP sub-row |
+| `src/pages/TokenDetail.tsx` | Critical | New tab structure: Info, Chart+Txns, Chart, Txns. Default to Info. Combined chart+txns view |
+| `src/components/StatsBar.tsx` | High | Show 24H VOLUME and 24H TXNS boxes on mobile |
+| `src/components/TokenInfoPanel.tsx` | High | Single "Trade {ticker}/SOL" button on mobile instead of Buy/Sell |
+| `src/components/TransactionList.tsx` | Medium | Match reference columns: colored indicator, USD, Price (SOL), MAKER |
+| `src/components/TokenFilters.tsx` | Medium | Compact "Trending 6H" single pill on mobile |
+
+### Key technical decisions:
+- Use `useIsMobile()` hook for all conditional rendering
+- Mobile token rows will be `div`-based cards instead of `<tr>` elements for proper two-line layout
+- Chart+Txns combined view uses flex column with chart at ~55vh and transactions filling remaining space
+- All changes are mobile-only; desktop layout remains completely unchanged
 
