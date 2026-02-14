@@ -7,6 +7,7 @@ import TokenGrid from '@/components/TokenGrid';
 import TrendingBar from '@/components/TrendingBar';
 import MarketSentimentBar from '@/components/MarketSentimentBar';
 import ViralBar from '@/components/ViralBar';
+import ViralClusterList from '@/components/ViralClusterList';
 import { useTokens } from '@/hooks/useTokens';
 import { usePumpPortalNewTokens } from '@/hooks/usePumpPortalNewTokens';
 import { useViralClusters } from '@/hooks/useViralClusters';
@@ -133,7 +134,17 @@ const Index = () => {
         />
       )}
       {isCryptoMarket && <MarketSentimentBar data={globalData} isLoading={globalLoading} />}
-      {!isCryptoMarket && (
+      {!isCryptoMarket && !isViralCategory && (
+         <ViralBar
+           clusters={clusters}
+           selectedCluster={selectedCluster}
+           onSelect={(name) => { setCategory('viral'); setSelectedCluster(name); }}
+           onClear={clearSelection}
+           viralSortBy={viralSortBy}
+           onViralSortChange={setViralSortBy}
+         />
+      )}
+      {!isCryptoMarket && isViralCategory && isViralView && (
          <ViralBar
            clusters={clusters}
            selectedCluster={selectedCluster}
@@ -141,6 +152,7 @@ const Index = () => {
            onClear={clearSelection}
            viralSortBy={viralSortBy}
            onViralSortChange={setViralSortBy}
+           isViralCategory
          />
       )}
       <div className="flex-1 overflow-auto">
@@ -155,17 +167,21 @@ const Index = () => {
              </div>
              <p className="text-muted-foreground/60 text-xs">Only tokens with logos are shown</p>
           </div>
-        ) : isViralCategory && !isViralView && allViralTokens.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-40 gap-2">
-            <div className="flex items-center gap-2">
-              <span className="relative flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-orange-400"></span>
-              </span>
-              <p className="text-muted-foreground text-sm">Scanning for viral memes...</p>
+        ) : isViralCategory && !isViralView ? (
+          clusters.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-40 gap-2">
+              <div className="flex items-center gap-2">
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-orange-400"></span>
+                </span>
+                <p className="text-muted-foreground text-sm">Scanning for viral memes...</p>
+              </div>
+              <p className="text-muted-foreground/60 text-xs">Viral clusters appear when 3+ tokens share the same name within 60 minutes</p>
             </div>
-            <p className="text-muted-foreground/60 text-xs">Viral clusters appear when 3+ tokens share the same name within 60 minutes</p>
-          </div>
+          ) : (
+            <ViralClusterList clusters={clusters} onSelect={setSelectedCluster} />
+          )
         ) : isLoading && tokens.length === 0 ? (
           <div className="space-y-0">
             {Array.from({ length: 15 }).map((_, i) => (
