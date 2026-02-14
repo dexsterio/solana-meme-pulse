@@ -1,73 +1,135 @@
 
-# Fix Viral Button Logic: Show Cluster Categories First
+# Migration-Ready Codebase: Remove Supabase Dependencies & Add Developer Comments
 
-## Problem
-Currently, clicking "Viral" dumps ALL viral tokens into a flat list. The user expects to see **clusters as categories** first (e.g., "Epstein Files", "Doge Moon"), and only after clicking a specific cluster should they see all tokens belonging to that cluster.
+## Overview
 
-## Solution
-
-### New Component: `ViralClusterList.tsx`
-Create a dedicated view that renders when `category === 'viral'` and no cluster is selected. This replaces the flat token list with a **list of clickable cluster cards**, each showing:
-- Cluster name (bold, large)
-- Token count (e.g., "7 tokens")
-- Top token market cap
-- OG token ticker + TOP token ticker as quick info
-- Time since first seen (e.g., "Started 23m ago")
-- Pulsing orange dot indicator (viral)
-
-Clicking a cluster card calls `setSelectedCluster(name)`, which then shows the token list (existing behavior with OG/TOP badges).
-
-### Changes to `Index.tsx`
-- When `isViralCategory && !isViralView`: render `<ViralClusterList>` instead of `<TokenTable>` or the empty state
-- When `isViralCategory && isViralView`: keep current behavior (show tokens in selected cluster with OG/TOP badges)
-- Hide the `ViralBar` cluster pills when in viral category (redundant since the main view IS the cluster list)
-
-### Changes to `ViralBar.tsx`
-- Only show when a cluster IS selected (as a header with Back button + sort controls)
-- Remove the cluster pills row when in viral category mode (the cluster list replaces it)
-
-### Responsive Design
-- **Mobile**: Single-column cluster cards, compact layout
-- **Tablet**: 2-column grid of cluster cards
-- **Desktop**: 3-column grid of cluster cards
+This plan will systematically go through every file that depends on Supabase/Lovable Cloud and either replace those dependencies with configurable API endpoints or add clear migration comments. The goal is to make it trivial for your developer to point the app at your own server.
 
 ---
 
-## Technical Details
+## Current Supabase Dependencies (What Needs to Change)
 
-### New file: `src/components/ViralClusterList.tsx`
-A grid of cluster cards. Each card contains:
-- Orange flame icon + cluster display name
-- Token count badge
-- Top token mcap + OG token name
-- Time ago since first seen
-- Click handler to select the cluster
+The app uses Supabase in exactly **4 places**:
 
-### Modified files:
+| Dependency | File(s) | Purpose |
+|---|---|---|
+| **Edge Function: `dextools-proxy`** | `src/services/dextoolsApi.ts` | Proxies DexTools API calls with caching |
+| **Edge Function: `coingecko-proxy`** | `src/services/coingeckoApi.ts` | Proxies CoinGecko API calls with caching |
+| **Edge Function: `crypto-global`** | `src/services/coingeckoApi.ts` | Fetches Fear & Greed, BTC dominance, gas |
+| **Database table: `api_cache`** | Used inside edge functions | Caches API responses to avoid rate limits |
 
-| File | Changes |
-|------|---------|
-| `src/components/ViralClusterList.tsx` | **New** - Grid of clickable cluster category cards |
-| `src/pages/Index.tsx` | Render `ViralClusterList` when viral category active and no cluster selected; hide ViralBar pills in viral category |
-| `src/components/ViralBar.tsx` | Accept `isViralCategory` prop; hide cluster pills row when in viral category (only show selected cluster header) |
+Everything else (DexScreener, PumpPortal WebSocket, viral detection) is **already independent** and talks directly to external APIs or runs client-side.
 
-### Flow
+---
+
+## Implementation Plan
+
+### 1. Create `src/config/api.ts` -- Central API Configuration
+
+A single config file where your developer sets the base URL of your own backend server. All service files will import from here instead of reading `VITE_SUPABASE_URL`.
 
 ```text
-User clicks "Viral" button
-       |
-       v
-  ViralClusterList shows all clusters as cards
-  (e.g., "Epstein Files - 7 tokens", "Doge Moon - 4 tokens")
-       |
-  User clicks a cluster card
-       |
-       v
-  ViralBar shows: [Back] [Cluster Name] [Sort controls]
-  TokenTable shows: all tokens in that cluster with OG/TOP badges
-       |
-  User clicks "Back"
-       |
-       v
-  Returns to ViralClusterList
+// src/config/api.ts
+//
+// MIGRATION: Point API_BASE_URL to your own server.
+// Your server needs to implement 3 endpoints:
+//   POST /api/dextools-proxy?path=...   (proxies DexTools v2 API)
+//   GET  /api/coingecko-proxy?page=...  (proxies CoinGecko markets)
+//   GET  /api/crypto-global             (returns fear/greed, BTC dom, gas)
+//
+// Example: const API_BASE_URL = 'https://api.yourserver.com';
 ```
+
+### 2. Modify `src/services/dextoolsApi.ts`
+
+- Replace `VITE_SUPABASE_URL` + `/functions/v1/dextools-proxy` with `API_BASE_URL` + `/api/dextools-proxy`
+- Remove the `apikey` header (your server handles auth)
+- Add detailed comments explaining what each endpoint expects and returns
+- Document the expected response format for each DexTools proxy call
+
+### 3. Modify `src/services/coingeckoApi.ts`
+
+- Replace `VITE_SUPABASE_URL` + `/functions/v1/coingecko-proxy` with `API_BASE_URL` + `/api/coingecko-proxy`
+- Replace `VITE_SUPABASE_URL` + `/functions/v1/crypto-global` with `API_BASE_URL` + `/api/crypto-global`
+- Remove `Authorization: Bearer ...` header
+- Add comments documenting the expected response JSON schema for each endpoint
+
+### 4. Convert Edge Functions to Standalone Server Docs
+
+Create `server/README.md` with complete documentation on how to implement the 3 proxy endpoints on your own server, including:
+- Exact request/response formats
+- Caching strategy (TTLs, stale-on-error)
+- Rate limit handling with 429 markers
+- Required API keys (DEXTOOLS_API_KEY)
+- SQL schema for the `api_cache` table (portable, works on any Postgres)
+
+### 5. Create `server/endpoints/` Reference Implementations
+
+Move the edge function logic into standalone Node.js/Express-compatible files (as reference):
+- `server/endpoints/dextools-proxy.ts` -- reference implementation
+- `server/endpoints/coingecko-proxy.ts` -- reference implementation  
+- `server/endpoints/crypto-global.ts` -- reference implementation
+- `server/endpoints/schema.sql` -- The `api_cache` table DDL for any Postgres database
+
+These are NOT runnable files in the Vite app -- they are documentation/reference for your developer.
+
+### 6. Add Comments Throughout Services
+
+Add `// MIGRATION:` and `// TODO(backend):` comments to every file that has backend-related logic:
+
+- **`src/services/pumpPortalService.ts`** -- Already standalone (WebSocket to pumpportal.fun). Add comment: "No migration needed -- connects directly to PumpPortal WebSocket."
+- **`src/services/dexscreenerApi.ts`** -- Already standalone (direct HTTP to DexScreener). Add comment: "No migration needed -- free public API, no proxy required."
+- **`src/services/viralDetectionService.ts`** -- Already standalone (client-side logic). Add comment: "No migration needed -- pure client-side clustering."
+- **`src/data/mockTokens.ts`** -- Add comments explaining the Token interface and that `generateMockTransactions` should be replaced with real transaction data from your backend.
+- **`src/components/PriceChart.tsx`** -- Add comment: "TODO(backend): Replace mock price data with real OHLCV candle data from your server."
+- **`src/components/TransactionList.tsx`** -- Add comment: "TODO(backend): Replace generateMockTransactions() with real transaction feed from your server."
+- **`src/components/TradingPanel.tsx`** -- Add comment: "TODO(backend): Connect wallet integration and order execution to your trading backend."
+- **`src/components/TokenInfoPanel.tsx`** -- Add comments on which data points (holders, top traders, audit info) need real backend endpoints.
+
+### 7. Remove/Decouple Supabase Client
+
+- **`src/integrations/supabase/client.ts`** -- Add comment at top: "MIGRATION: This file can be deleted entirely. No frontend code should import from here after migration."
+- **`src/integrations/supabase/types.ts`** -- Same comment.
+- The only import of the Supabase client is inside edge functions (server-side). The frontend never imports it directly.
+
+### 8. Update `.env` with Migration Notes
+
+Add a new env var `VITE_API_BASE_URL` that defaults to the current Supabase URL but can be changed to any server URL. Add comments explaining each variable.
+
+---
+
+## Files to Create/Modify
+
+| File | Action | Description |
+|---|---|---|
+| `src/config/api.ts` | **Create** | Central API config with `API_BASE_URL` |
+| `src/services/dextoolsApi.ts` | **Modify** | Use `API_BASE_URL`, remove Supabase headers, add migration comments |
+| `src/services/coingeckoApi.ts` | **Modify** | Use `API_BASE_URL`, remove Supabase auth, add migration comments |
+| `src/services/dexscreenerApi.ts` | **Modify** | Add "no migration needed" comments |
+| `src/services/pumpPortalService.ts` | **Modify** | Add "no migration needed" comments |
+| `src/services/viralDetectionService.ts` | **Modify** | Add "no migration needed" comments |
+| `src/data/mockTokens.ts` | **Modify** | Add comments on Token interface and mock data replacement |
+| `src/components/PriceChart.tsx` | **Modify** | Add TODO comments for real OHLCV data |
+| `src/components/TransactionList.tsx` | **Modify** | Add TODO comments for real transaction feed |
+| `src/components/TradingPanel.tsx` | **Modify** | Add TODO comments for wallet + trading backend |
+| `src/components/TokenInfoPanel.tsx` | **Modify** | Add TODO comments for real holder/audit data |
+| `src/hooks/useTokens.ts` | **Modify** | Add comments explaining data flow |
+| `server/README.md` | **Create** | Complete backend migration guide |
+| `server/endpoints/dextools-proxy.ts` | **Create** | Reference Express endpoint (from edge function) |
+| `server/endpoints/coingecko-proxy.ts` | **Create** | Reference Express endpoint (from edge function) |
+| `server/endpoints/crypto-global.ts` | **Create** | Reference Express endpoint (from edge function) |
+| `server/endpoints/schema.sql` | **Create** | Postgres `api_cache` table DDL |
+
+---
+
+## What Your Developer Gets
+
+After this change, your developer will:
+
+1. **See `VITE_API_BASE_URL`** in `.env` -- change it to your server URL
+2. **Read `server/README.md`** for a complete guide on what endpoints to implement
+3. **Copy reference implementations** from `server/endpoints/` to bootstrap their Express/Fastify/whatever server
+4. **Search for `TODO(backend):`** across the codebase to find every placeholder that needs real data
+5. **Search for `MIGRATION:`** to find every Supabase-specific line that was changed
+
+The app will continue to work with the current Supabase setup until your developer switches `VITE_API_BASE_URL` to the new server.
