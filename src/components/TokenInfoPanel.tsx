@@ -1,24 +1,12 @@
 import { Token, formatPrice, formatNumber, formatCompact } from '@/data/mockTokens';
 import pumpfunLogo from '@/assets/pumpfun-logo.png';
+import xLogo from '@/assets/x-logo.png';
+import telegramLogo from '@/assets/telegram-logo.png';
 import { Globe, Star, Bell, Zap, Copy, ChevronDown, ChevronUp } from 'lucide-react';
 import SolanaIcon from '@/components/SolanaIcon';
 import { toast } from 'sonner';
 import { useState } from 'react';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
-
-const XIcon = ({ className = '' }: {className?: string;}) =>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-    <path d="M4 4l11.733 16h4.267l-11.733 -16l-4.267 0" />
-    <path d="M4 20l6.768 -6.768m2.46 -2.46l6.772 -6.772" />
-  </svg>;
-
-
-const TelegramIcon = ({ className = '' }: {className?: string;}) =>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-    <path d="M15 10l-4 4l6 6l4 -16l-18 7l4 2l2 6l3 -4" />
-  </svg>;
 
 
 interface TokenInfoPanelProps {
@@ -172,12 +160,12 @@ const TokenInfoPanel = ({ token, onBuyClick, onSellClick, onTradeClick }: TokenI
           }
             {token.twitter &&
           <a href={token.twitter} target="_blank" rel="noopener noreferrer" className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md bg-[hsl(0,0%,16%)] backdrop-blur-sm text-foreground hover:bg-accent transition-colors text-xs font-medium border border-border">
-                <XIcon className="w-3.5 h-3.5" /> Twitter
+                <img src={xLogo} alt="X" className="w-3.5 h-3.5 invert" /> Twitter
               </a>
           }
             {token.telegram &&
           <a href={token.telegram} target="_blank" rel="noopener noreferrer" className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md bg-[hsl(0,0%,16%)] backdrop-blur-sm text-foreground hover:bg-accent transition-colors text-xs font-medium border border-border">
-                <TelegramIcon className="w-3.5 h-3.5" /> Telegram
+                <img src={telegramLogo} alt="Telegram" className="w-3.5 h-3.5" /> Telegram
               </a>
           }
             
