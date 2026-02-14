@@ -45,6 +45,17 @@ const TokenLogo = ({ token }: { token: Token }) => {
   );
 };
 
+const ExchangeIcon = ({ token, size = 'sm' }: { token: Token; size?: 'sm' | 'xs' }) => {
+  const cls = size === 'sm' ? 'w-4 h-4' : 'w-3 h-3';
+  const name = token.exchangeName?.toLowerCase() || '';
+  if (name.includes('pump')) return <img src={pumpfunLogo} alt="pump.fun" className={`${cls} shrink-0`} />;
+  if (name.includes('bonk')) return <img src={bonkLogo} alt="bonk" className={`${cls} shrink-0`} />;
+  if (name.includes('raydium')) return <img src={raydiumLogo} alt="Raydium" className={`${cls} shrink-0`} />;
+  if (name.includes('meteora')) return <img src={meteoraLogo} alt="Meteora" className={`${cls} shrink-0`} />;
+  if (name.includes('orca')) return <img src={orcaLogo} alt="Orca" className={`${cls} shrink-0`} />;
+  return null;
+};
+
 const ChangeCell = ({ value }: { value: number }) => (
   <td className={`px-2 md:px-3 py-2 text-right text-[12px] md:text-[13px] font-bold tracking-tight ${value >= 0 ? 'text-profit' : 'text-loss'}`}>
     {value >= 0 ? '+' : ''}
@@ -53,6 +64,16 @@ const ChangeCell = ({ value }: { value: number }) => (
       : `${value.toFixed(2)}%`
     }
   </td>
+);
+
+const ChangeSpan = ({ value }: { value: number }) => (
+  <span className={`text-[11px] font-bold ${value >= 0 ? 'text-profit' : 'text-loss'}`}>
+    {value >= 0 ? '+' : ''}
+    {Math.abs(value) >= 100
+      ? `${Math.round(value)}%`
+      : `${value.toFixed(1)}%`
+    }
+  </span>
 );
 
 const OgBadge = () => (
@@ -67,6 +88,67 @@ const TopBadge = () => (
   </span>
 );
 
+const LeafIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--profit))" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+    <path d="M4.711 17.875c-.534 -1.339 -1.35 -4.178 .129 -6.47c1.415 -2.193 3.769 -3.608 5.099 -4.278l-5.229 10.748l.001 0" />
+    <path d="M19.715 12.508c-.54 3.409 -2.094 6.156 -4.155 7.348c-4.069 2.353 -8.144 .45 -9.297 -.188c.877 -1.436 4.433 -7.22 6.882 -10.591c2.714 -3.737 5.864 -5.978 6.565 -6.077c0 .201 .03 .55 .071 1.03c.144 1.709 .443 5.264 -.066 8.478" />
+  </svg>
+);
+
+/* Mobile card row - two lines per token matching DexScreener reference */
+const MobileTokenCard = ({ token, ogTokenId, topTokenId, onClick }: { token: Token; ogTokenId?: string | null; topTokenId?: string | null; onClick: () => void }) => {
+  const isYoung = token.age?.endsWith('h') || token.age?.endsWith('m') || token.age?.endsWith('s');
+
+  return (
+    <div
+      onClick={onClick}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => { if (e.key === 'Enter') onClick(); }}
+      className="flex flex-col px-2.5 py-2 border-b border-border/30 hover:bg-accent/40 cursor-pointer transition-colors active:bg-accent/60"
+    >
+      {/* Line 1: Exchange icon, Logo, Ticker, Age, Boosts, Price, 1H%, 24H% */}
+      <div className="flex items-center gap-1.5 min-w-0">
+        <ExchangeIcon token={token} size="xs" />
+        <TokenLogo token={token} />
+        <span className="font-bold text-foreground text-[13px] shrink-0">{token.ticker}</span>
+        {ogTokenId === token.id && <OgBadge />}
+        {topTokenId === token.id && topTokenId !== ogTokenId && <TopBadge />}
+        {token.age && isYoung && (
+          <span className="flex items-center gap-0.5 text-[10px] text-profit font-bold shrink-0">
+            <LeafIcon />
+            {token.age}
+          </span>
+        )}
+        {token.age && !isYoung && (
+          <span className="text-[10px] text-muted-foreground shrink-0">{token.age}</span>
+        )}
+        {token.boosts && token.boosts > 0 && (
+          <span className="flex items-center gap-0.5 text-[10px] text-profit font-medium shrink-0">
+            <Zap className="w-2.5 h-2.5" />
+            {token.boosts}
+          </span>
+        )}
+        <div className="flex-1" />
+        <span className="text-[12px] text-foreground font-medium shrink-0">{formatPrice(token.price)}</span>
+        <ChangeSpan value={token.change1h} />
+        <ChangeSpan value={token.change24h} />
+      </div>
+
+      {/* Line 2: Exchange icon (small), Token name, LIQ/VOL/MCAP pills */}
+      <div className="flex items-center gap-1.5 mt-0.5 min-w-0">
+        <ExchangeIcon token={token} size="xs" />
+        <span className="text-[11px] text-muted-foreground truncate max-w-[100px]">{token.name}</span>
+        <div className="flex-1" />
+        <span className="text-[10px] text-muted-foreground">LIQ {formatNumber(token.liquidity).replace('$', '$')}</span>
+        <span className="text-[10px] text-muted-foreground">VOL {formatNumber(token.volume).replace('$', '$')}</span>
+        <span className="text-[10px] text-muted-foreground">MCAP {formatNumber(token.mcap).replace('$', '$')}</span>
+      </div>
+    </div>
+  );
+};
+
 const TokenTable = ({ tokens, isCryptoMarket = false, ogTokenId, topTokenId, showCreatedColumn }: TokenTableProps) => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
@@ -80,21 +162,37 @@ const TokenTable = ({ tokens, isCryptoMarket = false, ogTokenId, topTokenId, sho
     );
   }
 
+  // Mobile: card-style rows
+  if (isMobile) {
+    return (
+      <div className="overflow-y-auto">
+        {tokens.map((token) => (
+          <MobileTokenCard
+            key={token.id}
+            token={token}
+            ogTokenId={ogTokenId}
+            topTokenId={topTokenId}
+            onClick={() => navigate(`/token/${token.id}`)}
+          />
+        ))}
+      </div>
+    );
+  }
+
+  // Desktop: standard table
   return (
     <div className="overflow-x-auto">
-      <table className={`w-full ${isMobile ? 'table-auto' : 'table-fixed'}`}>
+      <table className="w-full table-fixed">
         <thead className="sticky top-0 bg-background z-10">
           <tr className="text-muted-foreground/80 text-[11px] uppercase tracking-wider border-b border-border">
-            <th className="w-8 md:w-10 px-2 md:px-3 py-2 text-left font-medium">#</th>
-            <th className="px-2 md:px-3 py-2 text-left font-medium">TOKEN</th>
-            <th className="px-2 md:px-3 py-2 text-right font-medium">PRICE</th>
-            {!isMobile && !isCryptoMarket && <th className="px-3 py-2 text-right font-medium">AGE</th>}
-            {!isMobile && !isCryptoMarket && <th className="px-3 py-2 text-right font-medium">TXNS</th>}
-            <th className="px-2 md:px-3 py-2 text-right font-medium">{isMobile ? 'VOL' : 'VOLUME'}</th>
-            {!isMobile && !isCryptoMarket && <th className="px-3 py-2 text-right font-medium">MAKERS</th>}
-            {isMobile ? (
-              <th className="px-2 py-2 text-right font-medium">24H</th>
-            ) : isCryptoMarket ? (
+            <th className="w-10 px-3 py-2 text-left font-medium">#</th>
+            <th className="px-3 py-2 text-left font-medium">TOKEN</th>
+            <th className="px-3 py-2 text-right font-medium">PRICE</th>
+            {!isCryptoMarket && <th className="px-3 py-2 text-right font-medium">AGE</th>}
+            {!isCryptoMarket && <th className="px-3 py-2 text-right font-medium">TXNS</th>}
+            <th className="px-3 py-2 text-right font-medium">VOLUME</th>
+            {!isCryptoMarket && <th className="px-3 py-2 text-right font-medium">MAKERS</th>}
+            {isCryptoMarket ? (
               <>
                 <th className="px-3 py-2 text-right font-medium">1H</th>
                 <th className="px-3 py-2 text-right font-medium">24H</th>
@@ -109,9 +207,9 @@ const TokenTable = ({ tokens, isCryptoMarket = false, ogTokenId, topTokenId, sho
                 <th className="px-3 py-2 text-right font-medium">24H</th>
               </>
             )}
-            {!isMobile && !isCryptoMarket && <th className="px-3 py-2 text-right font-medium">LIQUIDITY</th>}
-            <th className="px-2 md:px-3 py-2 text-right font-medium">MCAP</th>
-            {!isMobile && showCreatedColumn && <th className="w-[120px] px-3 py-2 text-right font-medium">STATUS</th>}
+            {!isCryptoMarket && <th className="px-3 py-2 text-right font-medium">LIQUIDITY</th>}
+            <th className="px-3 py-2 text-right font-medium">MCAP</th>
+            {showCreatedColumn && <th className="w-[120px] px-3 py-2 text-right font-medium">STATUS</th>}
           </tr>
         </thead>
         <tbody>
@@ -122,64 +220,51 @@ const TokenTable = ({ tokens, isCryptoMarket = false, ogTokenId, topTokenId, sho
               onKeyDown={(e) => { if (e.key === 'Enter') navigate(`/token/${token.id}`); }}
               tabIndex={0}
               role="button"
-              className="border-b border-border/30 hover:bg-accent/40 cursor-pointer transition-colors text-[12px] md:text-[13px] focus-visible:bg-accent/40 outline-none"
+              className="border-b border-border/30 hover:bg-accent/40 cursor-pointer transition-colors text-[13px] focus-visible:bg-accent/40 outline-none"
             >
-              {/* Rank */}
-              <td className={`px-2 md:px-3 py-2 font-bold ${token.rank <= 5 ? 'text-[#e5a50a]' : 'text-muted-foreground/70'}`}>
+              <td className={`px-3 py-2 font-bold ${token.rank <= 5 ? 'text-[#e5a50a]' : 'text-muted-foreground/70'}`}>
                 #{token.rank}
               </td>
-
-              {/* Token name */}
-              <td className="px-2 md:px-3 py-2 min-w-0">
-                <div className="flex items-center gap-1.5 md:gap-2 min-w-0">
+              <td className="px-3 py-2 min-w-0">
+                <div className="flex items-center gap-2 min-w-0">
                   <TokenLogo token={token} />
-                  <div className="flex flex-col min-w-0 overflow-hidden">
-                    <div className="flex items-center gap-1 md:gap-1.5 min-w-0">
-                      <span className="font-semibold text-foreground shrink-0 text-[12px] md:text-[13px]">{token.ticker}</span>
-                      {!isMobile && (
-                        <span className="text-muted-foreground text-[12px] truncate max-w-[120px]" title={token.name}>{token.name}</span>
-                      )}
-                      {ogTokenId === token.id && <OgBadge />}
-                      {topTokenId === token.id && topTokenId !== ogTokenId && <TopBadge />}
-                      {!isMobile && !isCryptoMarket && (
-                        <>
-                          {(token.exchangeName === 'pump.fun' || token.exchangeName === 'pumpfun' || token.exchangeName?.toLowerCase().includes('pump')) ? (
-                            <img src={pumpfunLogo} alt="pump.fun" className="w-4 h-4 shrink-0" />
-                          ) : (token.exchangeName === 'letsbonk.fun' || token.exchangeName === 'bonk') ? (
-                            <img src={bonkLogo} alt="letsbonk.fun" className="w-4 h-4 shrink-0" />
-                          ) : (token.exchangeName?.toLowerCase().includes('raydium')) ? (
-                            <img src={raydiumLogo} alt="Raydium" className="w-4 h-4 shrink-0" />
-                          ) : (token.exchangeName?.toLowerCase().includes('meteora')) ? (
-                            <img src={meteoraLogo} alt="Meteora" className="w-4 h-4 shrink-0" />
-                          ) : (token.exchangeName?.toLowerCase().includes('orca')) ? (
-                            <img src={orcaLogo} alt="Orca" className="w-4 h-4 shrink-0" />
-                          ) : token.exchangeName ? (
-                            <span className="text-[10px] px-1 py-0.5 rounded bg-[hsl(0,0%,16%)] text-muted-foreground shrink-0">{token.exchangeName}</span>
-                          ) : null}
-                          {token.boosts && (
-                            <span className="flex items-center gap-0.5 text-[11px] text-profit font-medium shrink-0">
-                              <Zap className="w-3 h-3" />
-                              {token.boosts}
-                            </span>
-                          )}
-                        </>
-                      )}
-                    </div>
-                    {isMobile && (
-                      <span className="text-muted-foreground text-[10px] truncate max-w-[100px]" title={token.name}>{token.name}</span>
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <span className="font-semibold text-foreground shrink-0 text-[13px]">{token.ticker}</span>
+                    <span className="text-muted-foreground text-[12px] truncate max-w-[120px]" title={token.name}>{token.name}</span>
+                    {ogTokenId === token.id && <OgBadge />}
+                    {topTokenId === token.id && topTokenId !== ogTokenId && <TopBadge />}
+                    {!isCryptoMarket && (
+                      <>
+                        {(token.exchangeName === 'pump.fun' || token.exchangeName === 'pumpfun' || token.exchangeName?.toLowerCase().includes('pump')) ? (
+                          <img src={pumpfunLogo} alt="pump.fun" className="w-4 h-4 shrink-0" />
+                        ) : (token.exchangeName === 'letsbonk.fun' || token.exchangeName === 'bonk') ? (
+                          <img src={bonkLogo} alt="letsbonk.fun" className="w-4 h-4 shrink-0" />
+                        ) : (token.exchangeName?.toLowerCase().includes('raydium')) ? (
+                          <img src={raydiumLogo} alt="Raydium" className="w-4 h-4 shrink-0" />
+                        ) : (token.exchangeName?.toLowerCase().includes('meteora')) ? (
+                          <img src={meteoraLogo} alt="Meteora" className="w-4 h-4 shrink-0" />
+                        ) : (token.exchangeName?.toLowerCase().includes('orca')) ? (
+                          <img src={orcaLogo} alt="Orca" className="w-4 h-4 shrink-0" />
+                        ) : token.exchangeName ? (
+                          <span className="text-[10px] px-1 py-0.5 rounded bg-[hsl(0,0%,16%)] text-muted-foreground shrink-0">{token.exchangeName}</span>
+                        ) : null}
+                        {token.boosts && (
+                          <span className="flex items-center gap-0.5 text-[11px] text-profit font-medium shrink-0">
+                            <Zap className="w-3 h-3" />
+                            {token.boosts}
+                          </span>
+                        )}
+                      </>
                     )}
                   </div>
                 </div>
               </td>
-
-              <td className="px-2 md:px-3 py-2 text-right text-foreground">{formatPrice(token.price)}</td>
-              {!isMobile && !isCryptoMarket && <td className="px-3 py-2 text-right text-muted-foreground">{token.age}</td>}
-              {!isMobile && !isCryptoMarket && <td className="px-3 py-2 text-right text-foreground">{token.txns.toLocaleString()}</td>}
-              <td className="px-2 md:px-3 py-2 text-right text-foreground">{formatNumber(token.volume)}</td>
-              {!isMobile && !isCryptoMarket && <td className="px-3 py-2 text-right text-muted-foreground">{token.makers.toLocaleString()}</td>}
-              {isMobile ? (
-                <ChangeCell value={token.change24h} />
-              ) : isCryptoMarket ? (
+              <td className="px-3 py-2 text-right text-foreground">{formatPrice(token.price)}</td>
+              {!isCryptoMarket && <td className="px-3 py-2 text-right text-muted-foreground">{token.age}</td>}
+              {!isCryptoMarket && <td className="px-3 py-2 text-right text-foreground">{token.txns.toLocaleString()}</td>}
+              <td className="px-3 py-2 text-right text-foreground">{formatNumber(token.volume)}</td>
+              {!isCryptoMarket && <td className="px-3 py-2 text-right text-muted-foreground">{token.makers.toLocaleString()}</td>}
+              {isCryptoMarket ? (
                 <>
                   <ChangeCell value={token.change1h} />
                   <ChangeCell value={token.change24h} />
@@ -194,9 +279,9 @@ const TokenTable = ({ tokens, isCryptoMarket = false, ogTokenId, topTokenId, sho
                   <ChangeCell value={token.change24h} />
                 </>
               )}
-              {!isMobile && !isCryptoMarket && <td className="px-3 py-2 text-right text-foreground">{formatNumber(token.liquidity)}</td>}
-              <td className="px-2 md:px-3 py-2 text-right text-foreground">{formatNumber(token.mcap)}</td>
-              {!isMobile && showCreatedColumn && (
+              {!isCryptoMarket && <td className="px-3 py-2 text-right text-foreground">{formatNumber(token.liquidity)}</td>}
+              <td className="px-3 py-2 text-right text-foreground">{formatNumber(token.mcap)}</td>
+              {showCreatedColumn && (
                 <td className="px-3 py-2 text-right">
                   {ogTokenId === token.id ? (
                     <span className="inline-flex items-center gap-1 text-[10px] text-yellow-400 font-bold">

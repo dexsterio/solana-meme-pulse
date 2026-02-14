@@ -9,19 +9,20 @@ import TransactionList from '@/components/TransactionList';
 import TokenInfoPanel from '@/components/TokenInfoPanel';
 import TradingPanel from '@/components/TradingPanel';
 import TrendingBar from '@/components/TrendingBar';
-import { ArrowLeft, BarChart3, List, Info, ArrowRightLeft } from 'lucide-react';
+import { ArrowLeft, BarChart3, List, Info, Monitor } from 'lucide-react';
 import SolanaIcon from '@/components/SolanaIcon';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTokens } from '@/hooks/useTokens';
 import { useIsMobile } from '@/hooks/use-mobile';
 
-type MobileTab = 'chart' | 'txns' | 'info' | 'trade';
+type MobileTab = 'info' | 'chart-txns' | 'chart' | 'txns';
 
 const TokenDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [panelMode, setPanelMode] = useState<'info' | 'buy' | 'sell'>('info');
-  const [mobileTab, setMobileTab] = useState<MobileTab>('chart');
+  const [mobileTab, setMobileTab] = useState<MobileTab>('info');
+  const [showTradingPanel, setShowTradingPanel] = useState(false);
   const isMobile = useIsMobile();
 
   const { data: trendingTokens = [] } = useTokens('trending');
@@ -88,10 +89,10 @@ const TokenDetail = () => {
   }
 
   const mobileTabs: { key: MobileTab; label: string; icon: React.ReactNode }[] = [
+    { key: 'info', label: 'Info', icon: <Info className="w-4 h-4" /> },
+    { key: 'chart-txns', label: 'Chart+Txns', icon: <Monitor className="w-4 h-4" /> },
     { key: 'chart', label: 'Chart', icon: <BarChart3 className="w-4 h-4" /> },
     { key: 'txns', label: 'Txns', icon: <List className="w-4 h-4" /> },
-    { key: 'info', label: 'Info', icon: <Info className="w-4 h-4" /> },
-    { key: 'trade', label: 'Trade', icon: <ArrowRightLeft className="w-4 h-4" /> },
   ];
 
   return (
@@ -124,7 +125,6 @@ const TokenDetail = () => {
             <span className="text-muted-foreground text-xs md:text-sm truncate">{token.name}</span>
             <SolanaIcon size={14} className="shrink-0" />
           </div>
-          {/* Mobile: show price + 24h change in header */}
           {isMobile && (
             <div className="flex items-center gap-2 mt-0.5">
               <span className="text-foreground text-xs font-bold">{formatPrice(token.price)}</span>
@@ -139,52 +139,69 @@ const TokenDetail = () => {
       {/* Mobile layout */}
       {isMobile ? (
         <div className="flex-1 flex flex-col min-h-0 pb-[calc(3.5rem+env(safe-area-inset-bottom,0px))]">
-          {mobileTab === 'chart' && (
-            <div className="flex-1 min-h-0 p-2">
-              <PriceChart token={token} />
-            </div>
-          )}
-          {mobileTab === 'txns' && (
-            <div className="flex-1 min-h-0 p-2">
-              <TransactionList tokenId={token.id} />
-            </div>
-          )}
-          {mobileTab === 'info' && (
-            <div className="flex-1 min-h-0 p-2 overflow-y-auto">
-              <TokenInfoPanel
-                token={token}
-                onBuyClick={() => { setPanelMode('buy'); setMobileTab('trade'); }}
-                onSellClick={() => { setPanelMode('sell'); setMobileTab('trade'); }}
-              />
-            </div>
-          )}
-          {mobileTab === 'trade' && (
+          {/* Mobile trading panel overlay */}
+          {showTradingPanel ? (
             <div className="flex-1 min-h-0 p-2 overflow-y-auto">
               <TradingPanel
                 token={token}
                 initialMode={panelMode === 'info' ? 'buy' : panelMode}
-                onBack={() => { setPanelMode('info'); setMobileTab('info'); }}
+                onBack={() => setShowTradingPanel(false)}
               />
             </div>
+          ) : (
+            <>
+              {mobileTab === 'info' && (
+                <div className="flex-1 min-h-0 p-2 overflow-y-auto">
+                  <TokenInfoPanel
+                    token={token}
+                    onBuyClick={() => { setPanelMode('buy'); setShowTradingPanel(true); }}
+                    onSellClick={() => { setPanelMode('sell'); setShowTradingPanel(true); }}
+                    onTradeClick={() => setShowTradingPanel(true)}
+                  />
+                </div>
+              )}
+              {mobileTab === 'chart-txns' && (
+                <div className="flex-1 flex flex-col min-h-0">
+                  <div className="h-[55%] min-h-0 p-2">
+                    <PriceChart token={token} />
+                  </div>
+                  <div className="h-[45%] min-h-0 p-2 pt-0">
+                    <TransactionList tokenId={token.id} />
+                  </div>
+                </div>
+              )}
+              {mobileTab === 'chart' && (
+                <div className="flex-1 min-h-0 p-2">
+                  <PriceChart token={token} />
+                </div>
+              )}
+              {mobileTab === 'txns' && (
+                <div className="flex-1 min-h-0 p-2">
+                  <TransactionList tokenId={token.id} />
+                </div>
+              )}
+            </>
           )}
 
           {/* Bottom tab bar */}
-          <div className="fixed bottom-0 left-0 right-0 flex items-center bg-card border-t border-border z-50 safe-area-bottom">
-            {mobileTabs.map((tab) => (
-              <button
-                key={tab.key}
-                onClick={() => setMobileTab(tab.key)}
-                className={`flex-1 flex flex-col items-center gap-0.5 py-2.5 text-[11px] font-medium transition-colors min-h-[44px] ${
-                  mobileTab === tab.key
-                    ? 'text-primary'
-                    : 'text-muted-foreground'
-                }`}
-              >
-                {tab.icon}
-                {tab.label}
-              </button>
-            ))}
-          </div>
+          {!showTradingPanel && (
+            <div className="fixed bottom-0 left-0 right-0 flex items-center bg-card border-t border-border z-50 safe-area-bottom">
+              {mobileTabs.map((tab) => (
+                <button
+                  key={tab.key}
+                  onClick={() => setMobileTab(tab.key)}
+                  className={`flex-1 flex flex-col items-center gap-0.5 py-2.5 text-[10px] font-medium transition-colors min-h-[44px] ${
+                    mobileTab === tab.key
+                      ? 'text-primary'
+                      : 'text-muted-foreground'
+                  }`}
+                >
+                  {tab.icon}
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       ) : (
         /* Desktop layout */
