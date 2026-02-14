@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Filter, LayoutList, LayoutGrid, Clock, Trophy, TrendingUp, Sparkles, Settings, ChevronDown } from 'lucide-react';
 import { FlameFilledIcon } from '@/components/icons/TablerIcons';
 import { toast } from 'sonner';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { useIsMobile, useIsTablet } from '@/hooks/use-mobile';
 
 export type TimeFilter = '5m' | '1h' | '6h' | '24h';
 export type Category = 'trending' | 'top' | 'gainers' | 'new';
@@ -40,6 +40,7 @@ const TokenFilters = ({
   const [showFilters, setShowFilters] = useState(false);
   const filters = filterValues || { minVolume: '', minLiquidity: '', minMcap: '', maxAge: '' };
   const isMobile = useIsMobile();
+  const isTablet = useIsTablet();
 
   const timeOptions: TimeFilter[] = ['5m', '1h', '6h', '24h'];
 
@@ -197,8 +198,8 @@ const TokenFilters = ({
           Filters
         </button>
 
-        {/* Customize - hidden on mobile */}
-        {!isMobile && (
+        {/* Customize - hidden on mobile and tablet */}
+        {!isMobile && !isTablet && (
           <button
             onClick={() => toast.info('Column customization coming soon')}
             className="flex items-center gap-1 px-3 py-1.5 text-[13px] rounded bg-[hsl(0,0%,16%)] text-muted-foreground hover:text-foreground border border-border"
